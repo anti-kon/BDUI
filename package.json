@@ -1,0 +1,26 @@
+{
+  "name": "bdui",
+  "private": true,
+  "version": "0.4.0",
+  "packageManager": "npm@10",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "clean": "rimraf --glob \"packages/**/dist\" \"sandbox/**/.bdui-build.*\"",
+    "gen": "node packages/schema/scripts/generate.cjs && node packages/dsl/scripts/generate-glue.cjs",
+    "build:full": "npm run -w packages/defs build && npm run gen && npm run -w packages/schema build && npm run gen && npm run -w packages/dsl build && npm run -w packages/transpiler build && npm run -w packages/cli build",
+    "build": "npm run build:full",
+    "bdui": "node packages/cli/dist/bin.js",
+    "bootstrap": "npm i && npm run build:full"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/node": "^22.7.5",
+    "rimraf": "^6.0.1",
+    "@bdui/cli": "file:packages/cli"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "contractId": "sandbox_counter",
+    "version": "0.4.0",
+    "schemaVersion": "1.0.0",
+    "generatedAt": "2025-10-03T17:32:42.042Z"
+  },
+  "theme": {
+    "followSystem": true,
+    "allowUserOverride": true,
+    "palette": {
+      "light": {
+        "bg": "#FFFFFF",
+        "fg": "#111111",
+        "primary": "#4F46E5"
+      },
+      "dark": {
+        "bg": "#111111",
+        "fg": "#FFFFFF",
+        "primary": "#4F46E5"
+      }
+    },
+    "tokens": {
+      "text.body": {
+        "color": "{fg}"
+      },
+      "button.primary.bg": {
+        "color": "{primary}"
+      }
+    }
+  },
+  "navigation": {
+    "initialRoute": "home",
+    "urlSync": true,
+    "routes": [
+      {
+        "id": "home",
+        "title": "Home",
+        "node": {
+          "type": "Column",
+          "modifiers": {
+            "gap": 16,
+            "padding": 24
+          },
+          "children": [
+            {
+              "type": "Text",
+              "text": "{{flow.counter ?? 0}}"
+            },
+            {
+              "type": "Row",
+              "modifiers": {
+                "gap": 8
+              },
+              "children": [
+                {
+                  "type": "Button",
+                  "title": "+1",
+                  "modifiers": {
+                    "variant": "primary",
+                    "size": "md"
+                  },
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "flow",
+                          "path": "counter"
+                        },
+                        "value": {
+                          "__bduiExpr": true,
+                          "code": "(flow.counter ?? 0) + 1"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Button",
+                  "title": "-1",
+                  "modifiers": {
+                    "variant": "secondary",
+                    "size": "md"
+                  },
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "flow",
+                          "path": "counter"
+                        },
+                        "value": {
+                          "__bduiExpr": true,
+                          "code": "(flow.counter ?? 0) - 1"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
