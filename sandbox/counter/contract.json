@@ -1,9 +1,9 @@
 {
   "meta": {
     "contractId": "sandbox_counter",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "schemaVersion": "1.0.0",
-    "generatedAt": "2025-10-03T17:32:42.042Z"
+    "generatedAt": "2025-10-17T12:52:47.607Z"
   },
   "theme": {
     "followSystem": true,
@@ -45,7 +45,7 @@
           "children": [
             {
               "type": "Text",
-              "text": "{{flow.counter ?? 0}}"
+              "text": "{{flow.counter}}"
             },
             {
               "type": "Row",
@@ -62,16 +62,13 @@
                   },
                   "onAction": [
                     {
-                      "type": "set",
+                      "type": "update",
                       "params": {
                         "target": {
                           "scope": "flow",
                           "path": "counter"
                         },
-                        "value": {
-                          "__bduiExpr": true,
-                          "code": "(flow.counter ?? 0) + 1"
-                        }
+                        "reducer": "(prev) => (prev ?? 0) + 1"
                       }
                     }
                   ]
@@ -85,16 +82,13 @@
                   },
                   "onAction": [
                     {
-                      "type": "set",
+                      "type": "update",
                       "params": {
                         "target": {
                           "scope": "flow",
                           "path": "counter"
                         },
-                        "value": {
-                          "__bduiExpr": true,
-                          "code": "(flow.counter ?? 0) - 1"
-                        }
+                        "reducer": "(prev) => (prev ?? 0) - 1"
                       }
                     }
                   ]
@@ -105,5 +99,11 @@
         }
       }
     ]
+  },
+  "initial": {
+    "flow": {
+      "counter": 0
+    },
+    "session": {}
   }
 }

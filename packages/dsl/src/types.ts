@@ -15,6 +15,7 @@ export type Action =
   | { type: 'popToRoot' }
   | { type: 'replace'; params: { to: string } }
   | { type: 'set'; params: { target: { scope: Scope; path: string }; value: unknown } }
+  | { type: 'update'; params: { target: { scope: Scope; path: string }; reducer: string } }
   | { type: 'sync'; params?: unknown }
   | { type: 'validate'; params: { schemaRef: string; target: { scope: Scope; path: string } } }
   | { type: 'fetch'; params: { sourceId: string } }
@@ -22,7 +23,7 @@ export type Action =
       type: 'callApi';
       params: {
         url: string;
-        method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
         body?: unknown;
         saveTo?: { scope: Scope; path: string };
       };
@@ -69,6 +70,11 @@ export type Theme = {
   tokens?: Record<string, unknown>;
 };
 
+export type InitialState = {
+  flow?: Record<string, unknown>;
+  session?: Record<string, unknown>;
+};
+
 export type RouteScreen = {
   id: string;
   title?: string;
@@ -88,4 +94,10 @@ export type Meta = {
   features?: Record<string, unknown>;
 };
 
-export type Contract = { meta: Meta; theme?: Theme; dataSources?: any[]; navigation: Navigation };
+export type Contract = {
+  meta: Meta;
+  theme?: Theme;
+  dataSources?: any[];
+  navigation: Navigation;
+  initial?: InitialState;
+};

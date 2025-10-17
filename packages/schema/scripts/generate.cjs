@@ -80,6 +80,14 @@ function makeContractSchema(manifests, perCompSchemas) {
         additionalProperties: true,
       },
       theme: { type: 'object' },
+      initial: {
+        type: 'object',
+        properties: {
+          flow: { type: 'object', additionalProperties: true },
+          session: { type: 'object', additionalProperties: true },
+        },
+        additionalProperties: false,
+      },
       dataSources: { type: 'array' },
       navigation: {
         type: 'object',
@@ -153,7 +161,6 @@ function makeContractSchema(manifests, perCompSchemas) {
 }
 
 async function run() {
-  // build manifests first expected by caller, but this script assumes dist exists
   const manifests = await loadManifests();
   const perCompSchemas = manifests.map((m) => propsSchemaFor(m.propsTypeName));
   const contractSchema = makeContractSchema(manifests, perCompSchemas);

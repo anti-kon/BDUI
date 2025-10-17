@@ -1,18 +1,26 @@
 import type { Action } from './types';
-
 type Scope = 'local' | 'session' | 'flow';
-type Target = string | { scope: Scope; path: string };
+type Target =
+  | string
+  | { scope: Scope; path: string }
+  | { scope: Scope; path: string; __var?: true };
 
 function parseTarget(t: Target): { scope: Scope; path: string } {
   if (typeof t === 'string') {
     const [scope, ...rest] = t.split('.');
     return { scope: scope as Scope, path: rest.join('.') };
   }
-  return t;
+  return { scope: (t as any).scope, path: (t as any).path };
+}
+
+function isVar(x: any): x is { scope: Scope; path: string } {
+  return x && typeof x === 'object' && typeof x.scope === 'string' && typeof x.path === 'string';
 }
 
 type ShortAction =
   | { set: [Target, any] }
+  | { setVar: [any, any] }
+  | { update: [any, (prev: any) => any] }
   | {
       navigate: [
         to: string,
@@ -45,6 +53,10 @@ function isFullAction(a: any): a is Action {
   return a && typeof a === 'object' && typeof a.type === 'string';
 }
 
+function fnToString(f: Function): string {
+  return String(f);
+}
+
 function normOne(a: any): Action {
   if (isFullAction(a)) return a;
 
@@ -52,6 +64,20 @@ function normOne(a: any): Action {
     if ('set' in a) {
       const [t, v] = a.set as [Target, any];
       return { type: 'set', params: { target: parseTarget(t), value: v } } as Action;
+    }
+    if ('setVar' in a) {
+      const [vref, v] = a.setVar as [any, any];
+      if (isVar(vref))
+        return { type: 'set', params: { target: parseTarget(vref as any), value: v } } as Action;
+    }
+    if ('update' in a) {
+      const [vref, reducer] = a.update as [any, Function];
+      const reducerCode = fnToString(reducer);
+      if (isVar(vref))
+        return {
+          type: 'update',
+          params: { target: parseTarget(vref as any), reducer: reducerCode },
+        } as Action;
     }
     if ('navigate' in a) {
       const [to, opts] = a.navigate as [string, any?];

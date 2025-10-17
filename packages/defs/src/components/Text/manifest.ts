@@ -3,7 +3,8 @@ import { children, Component, props } from '../../define.js';
 export type TextProps = {
   id?: string;
   modifiers?: Record<string, unknown>;
-  value?: string;
+  /** alias if you prefer <Text value="..."/> instead of children */
+  value?: string; // alias to JSON 'text'
 };
 
 export default Component({

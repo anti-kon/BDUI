@@ -1,8 +1,10 @@
 export * from './expr';
 export * from './generated/components';
+export * from './state';
 export * from './theme';
 export * from './types';
 
+import { __collectInitial } from './state';
 import type { Contract as ContractType, Meta, Navigation as NavigationType } from './types';
 
 type RouteProps = {
@@ -39,6 +41,7 @@ export function Contract({ meta, children }: ContractProps): ContractType {
     meta: normMeta,
     theme: themeNode ? themeNode.value : undefined,
     navigation: navNode.value,
+    initial: __collectInitial(),
   };
   return contract;
 }

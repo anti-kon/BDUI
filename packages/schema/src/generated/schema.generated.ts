@@ -26,6 +26,20 @@ export const contractSchema = {
     theme: {
       type: 'object',
     },
+    initial: {
+      type: 'object',
+      properties: {
+        flow: {
+          type: 'object',
+          additionalProperties: true,
+        },
+        session: {
+          type: 'object',
+          additionalProperties: true,
+        },
+      },
+      additionalProperties: false,
+    },
     dataSources: {
       type: 'array',
     },
@@ -113,6 +127,7 @@ export const contractSchema = {
               },
               text: {
                 type: 'string',
+                description: 'alias if you prefer <Text value="..."/> instead of children',
               },
               type: {
                 const: 'Text',

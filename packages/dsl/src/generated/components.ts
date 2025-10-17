@@ -6,11 +6,7 @@ import type { BDUIElement } from '../types';
 type ChildMode = 'none' | 'text' | 'nodes';
 type NodeCfg = { children: ChildMode; mapToProp?: string; aliases?: Record<string, string> };
 
-function node<T extends BDUIElement['type']>(
-  type: T,
-  props: any,
-  cfg: NodeCfg,
-): Extract<BDUIElement, { type: T }> {
+function node<T extends BDUIElement['type']>(type: T, props: any, cfg: NodeCfg): any {
   const { children, onAction, ...rest } = props ?? {};
   const cleaned: Record<string, any> = {};
 
@@ -35,7 +31,15 @@ function node<T extends BDUIElement['type']>(
 
   if (cfg.children === 'text') {
     if (children !== undefined) {
-      cleaned[cfg.mapToProp || 'text'] = toJsonValue(children);
+      const toText = (c: any): string => {
+        const v = toJsonValue(c);
+        return v == null ? '' : String(v);
+      };
+      const textValue = Array.isArray(children)
+        ? children.flat().map(toText).join('')
+        : toText(children);
+
+      cleaned[cfg.mapToProp || 'text'] = textValue;
     }
     return { type, ...cleaned } as any;
   }

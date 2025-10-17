@@ -1,0 +1,268 @@
+{
+  "meta": {
+    "contractId": "states",
+    "version": "0.1.0",
+    "schemaVersion": "1.0.0",
+    "generatedAt": "2025-10-17T13:12:46.608Z"
+  },
+  "theme": {
+    "followSystem": true,
+    "allowUserOverride": true,
+    "palette": {
+      "light": {
+        "bg": "#ffffff",
+        "fg": "#111111",
+        "primary": "#2563eb"
+      },
+      "dark": {
+        "bg": "#0b1220",
+        "fg": "#FFFFFF",
+        "primary": "#2563eb"
+      }
+    },
+    "tokens": {
+      "text.body": {
+        "color": "{fg}"
+      },
+      "button.primary.bg": {
+        "color": "{primary}"
+      }
+    }
+  },
+  "navigation": {
+    "initialRoute": "home",
+    "urlSync": true,
+    "routes": [
+      {
+        "id": "home",
+        "title": "State Demo",
+        "node": {
+          "type": "Column",
+          "modifiers": {
+            "gap": 16,
+            "padding": 24
+          },
+          "children": [
+            {
+              "type": "Text",
+              "text": "Counter: {{flow.counter}}"
+            },
+            {
+              "type": "Text",
+              "text": "User: {{flow.username}}"
+            },
+            {
+              "type": "Text",
+              "text": "Session visits: {{session.visits}}"
+            },
+            {
+              "type": "Text",
+              "text": "Local toggle: {{local.toggle}}"
+            },
+            {
+              "type": "Row",
+              "modifiers": {
+                "gap": 8
+              },
+              "children": [
+                {
+                  "type": "Button",
+                  "title": "+1",
+                  "onAction": [
+                    {
+                      "type": "update",
+                      "params": {
+                        "target": {
+                          "scope": "flow",
+                          "path": "counter"
+                        },
+                        "reducer": "(prev) => (prev ?? 0) + 1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Button",
+                  "title": "-1",
+                  "onAction": [
+                    {
+                      "type": "update",
+                      "params": {
+                        "target": {
+                          "scope": "flow",
+                          "path": "counter"
+                        },
+                        "reducer": "(prev) => (prev ?? 0) - 1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Button",
+                  "title": "Reset",
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "flow",
+                          "path": "counter"
+                        },
+                        "value": 0
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Row",
+              "modifiers": {
+                "gap": 8
+              },
+              "children": [
+                {
+                  "type": "Button",
+                  "title": "Set user: Alice",
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "flow",
+                          "path": "username"
+                        },
+                        "value": "Alice"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Button",
+                  "title": "Set user: Bob",
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "flow",
+                          "path": "username"
+                        },
+                        "value": "Bob"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Row",
+              "modifiers": {
+                "gap": 8
+              },
+              "children": [
+                {
+                  "type": "Button",
+                  "title": "Session visits +1",
+                  "onAction": [
+                    {
+                      "type": "update",
+                      "params": {
+                        "target": {
+                          "scope": "session",
+                          "path": "visits"
+                        },
+                        "reducer": "(prev) => (prev ?? 0) + 1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Button",
+                  "title": "Reset visits",
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "session",
+                          "path": "visits"
+                        },
+                        "value": 0
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Row",
+              "modifiers": {
+                "gap": 8
+              },
+              "children": [
+                {
+                  "type": "Button",
+                  "title": "Toggle local",
+                  "onAction": [
+                    {
+                      "type": "update",
+                      "params": {
+                        "target": {
+                          "scope": "local",
+                          "path": "toggle"
+                        },
+                        "reducer": "(prev) => !prev"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Button",
+                  "title": "Set local: true",
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "local",
+                          "path": "toggle"
+                        },
+                        "value": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Button",
+                  "title": "Set local: false",
+                  "onAction": [
+                    {
+                      "type": "set",
+                      "params": {
+                        "target": {
+                          "scope": "local",
+                          "path": "toggle"
+                        },
+                        "value": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "initial": {
+    "flow": {
+      "counter": 1,
+      "username": "Guest"
+    },
+    "session": {
+      "visits": 0
+    }
+  }
+}

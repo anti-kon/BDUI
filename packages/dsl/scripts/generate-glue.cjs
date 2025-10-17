@@ -35,7 +35,7 @@ function node<T extends BDUIElement['type']>(
   type: T,
   props: any,
   cfg: NodeCfg
-): Extract<BDUIElement, { type: T }> {
+): any {
   const { children, onAction, ...rest } = props ?? {};
   const cleaned: Record<string, any> = {};
 
@@ -60,7 +60,15 @@ function node<T extends BDUIElement['type']>(
 
   if (cfg.children === 'text') {
     if (children !== undefined) {
-      cleaned[cfg.mapToProp || 'text'] = toJsonValue(children);
+      const toText = (c: any): string => {
+        const v = toJsonValue(c);
+        return v == null ? '' : String(v);
+      };
+      const textValue = Array.isArray(children)
+        ? children.flat().map(toText).join('')
+        : toText(children);
+
+      cleaned[cfg.mapToProp || 'text'] = textValue;
     }
     return { type, ...cleaned } as any;
   }

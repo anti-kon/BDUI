@@ -1,7 +1,10 @@
-import { Column, Contract, E, Navigation, Route, Text, ThemeConfig as Theme } from '@bdui/dsl';
+import { Column, Contract, Navigation, Route, Text, ThemeConfig as Theme } from '@bdui/dsl';
+import { Flow, use } from '@bdui/dsl';
 
 import { CounterControls } from './CounterControls';
 import meta from './meta.json';
+
+export const counter = Flow<number>('counter', 0);
 
 export default (
   <Contract meta={meta}>
@@ -9,7 +12,7 @@ export default (
     <Navigation initialRoute="home" urlSync>
       <Route id="home" title="Home">
         <Column modifiers={{ gap: 16, padding: 24 }}>
-          <Text>{E('flow.counter ?? 0')}</Text>
+          <Text>{use(counter)}</Text>
           <CounterControls />
         </Column>
       </Route>
