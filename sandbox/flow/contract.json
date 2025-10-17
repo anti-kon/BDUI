@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "contractId": "sandbox_flow_demo",
+    "version": "0.5.0",
+    "schemaVersion": "1.0.0",
+    "generatedAt": "2025-10-17T13:23:03.229Z"
+  },
+  "theme": {
+    "followSystem": true,
+    "allowUserOverride": true,
+    "palette": {
+      "light": {
+        "bg": "#ffffff",
+        "fg": "#111111",
+        "primary": "#10b981"
+      },
+      "dark": {
+        "bg": "#101418",
+        "fg": "#FFFFFF",
+        "primary": "#10b981"
+      }
+    },
+    "tokens": {
+      "text.body": {
+        "color": "{fg}"
+      },
+      "button.primary.bg": {
+        "color": "{primary}"
+      }
+    }
+  },
+  "navigation": {
+    "initialRoute": "onboarding",
+    "urlSync": true,
+    "routes": [
+      {
+        "id": "onboarding",
+        "type": "flow",
+        "title": "Onboarding",
+        "startStep": "s1",
+        "persistence": {
+          "enabled": true,
+          "key": "onboarding"
+        },
+        "steps": [
+          {
+            "id": "s1",
+            "title": "Welcome",
+            "children": [
+              {
+                "type": "Column",
+                "modifiers": {
+                  "gap": 12,
+                  "padding": 24
+                },
+                "children": [
+                  {
+                    "type": "Text",
+                    "text": "Welcome, {{flow.name}}!"
+                  },
+                  {
+                    "type": "Text",
+                    "text": "Increase counter to 3 to continue."
+                  },
+                  {
+                    "type": "Row",
+                    "modifiers": {
+                      "gap": 8
+                    },
+                    "children": [
+                      {
+                        "type": "Button",
+                        "title": "+1",
+                        "onAction": [
+                          {
+                            "type": "update",
+                            "params": {
+                              "target": {
+                                "scope": "flow",
+                                "path": "counter"
+                              },
+                              "reducer": "(p) => (p ?? 0) + 1"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Button",
+                        "title": "Reset",
+                        "onAction": [
+                          {
+                            "type": "set",
+                            "params": {
+                              "target": {
+                                "scope": "flow",
+                                "path": "counter"
+                              },
+                              "value": 0
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "text": "Current: {{flow.counter}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "s2",
+            "title": "Done",
+            "children": [
+              {
+                "type": "Column",
+                "modifiers": {
+                  "gap": 12,
+                  "padding": 24
+                },
+                "children": [
+                  {
+                    "type": "Text",
+                    "text": "All set, {{flow.name}}."
+                  },
+                  {
+                    "type": "Text",
+                    "text": "Counter: {{flow.counter}}"
+                  }
+                ]
+              }
+            ],
+            "onEnter": [
+              {
+                "toast": ["Yay! You reached 3+ 🎉"]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "initial": {
+    "flow": {
+      "counter": 0,
+      "name": "Guest"
+    },
+    "session": {}
+  }
+}

@@ -48,7 +48,7 @@ function node<T extends BDUIElement['type']>(type: T, props: any, cfg: NodeCfg):
   if (cfg.children === 'nodes' && children !== undefined) {
     n.children = Array.isArray(children) ? children.flat() : [children];
   }
-  return n as Extract<BDUIElement, { type: T }>;
+  return n as any;
 }
 
 export function Text(props: any): any {

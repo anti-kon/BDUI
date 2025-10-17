@@ -56,26 +56,59 @@ export const contractSchema = {
         routes: {
           type: 'array',
           items: {
-            type: 'object',
-            required: ['id', 'node'],
-            properties: {
-              id: {
-                type: 'string',
-              },
-              title: {
-                type: 'string',
-              },
-              path: {
-                type: 'string',
-              },
-              cache: {
+            oneOf: [
+              {
                 type: 'object',
+                required: ['id', 'node'],
+                properties: {
+                  id: {
+                    type: 'string',
+                  },
+                  title: {
+                    type: 'string',
+                  },
+                  path: {
+                    type: 'string',
+                  },
+                  cache: {
+                    type: 'object',
+                  },
+                  node: {
+                    $ref: '#/$defs/Node',
+                  },
+                },
+                additionalProperties: false,
               },
-              node: {
-                $ref: '#/$defs/Node',
+              {
+                type: 'object',
+                required: ['id', 'type', 'startStep', 'steps'],
+                properties: {
+                  id: {
+                    type: 'string',
+                  },
+                  type: {
+                    const: 'flow',
+                  },
+                  title: {
+                    type: 'string',
+                  },
+                  startStep: {
+                    type: 'string',
+                  },
+                  persistence: {
+                    type: 'object',
+                    additionalProperties: true,
+                  },
+                  steps: {
+                    type: 'array',
+                    items: {
+                      $ref: '#/$defs/Step',
+                    },
+                  },
+                },
+                additionalProperties: false,
               },
-            },
-            additionalProperties: false,
+            ],
           },
         },
       },
@@ -240,6 +273,59 @@ export const contractSchema = {
           },
         },
       ],
+    },
+    Step: {
+      type: 'object',
+      required: ['id', 'children'],
+      properties: {
+        id: {
+          type: 'string',
+        },
+        title: {
+          type: 'string',
+        },
+        children: {
+          type: 'array',
+          items: {
+            $ref: '#/$defs/Node',
+          },
+        },
+        onEnter: {
+          type: 'array',
+          items: {
+            type: 'object',
+          },
+        },
+        onExit: {
+          type: 'array',
+          items: {
+            type: 'object',
+          },
+        },
+        onResume: {
+          type: 'array',
+          items: {
+            type: 'object',
+          },
+        },
+        transitions: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['to'],
+            properties: {
+              guard: {
+                type: 'string',
+              },
+              to: {
+                type: 'string',
+              },
+            },
+            additionalProperties: false,
+          },
+        },
+      },
+      additionalProperties: false,
     },
   },
   additionalProperties: false,

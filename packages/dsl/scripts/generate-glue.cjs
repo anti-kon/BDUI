@@ -77,7 +77,7 @@ function node<T extends BDUIElement['type']>(
   if (cfg.children === 'nodes' && children !== undefined) {
     n.children = Array.isArray(children) ? children.flat() : [children];
   }
-  return n as Extract<BDUIElement, { type: T }>;
+  return n as any;
 }
 `);
 
