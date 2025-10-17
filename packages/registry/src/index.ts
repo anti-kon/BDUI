@@ -13,7 +13,6 @@ async function main() {
   const app = Fastify({ logger: true });
   await app.register(cors, { origin: true });
   await app.register(etag);
-  // optional: serve static published contracts from ./public if needed
   await app.register(staticPlugin, {
     root: path.resolve(process.cwd(), 'public'),
     prefix: '/public/',

@@ -13,7 +13,7 @@ export type ChildrenModel =
     };
 
 export type EventsDecl = string[];
-export type Aliases = Record<string, string>; // aliasProp -> realProp
+export type Aliases = Record<string, string>;
 
 export type ComponentManifest = {
   type: string;
@@ -43,7 +43,6 @@ export function children() {
 export function Component(cfg: {
   name: string;
   props: PropsMeta;
-  /** if omitted — children().none() */
   children?: ChildrenModel;
   events?: EventsDecl;
   aliases?: Aliases;

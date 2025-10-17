@@ -173,7 +173,6 @@ function makeContractSchema(manifests, perCompSchemas) {
     additionalProperties: false,
   };
 
-  // collect defs
   const collected = {};
   for (const s of perCompSchemas) {
     const defs = s.definitions || s.$defs || s.components?.schemas || {};

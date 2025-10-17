@@ -49,7 +49,7 @@ type FlowRouteProps = {
   title?: string;
   startStep: string;
   persistence?: Record<string, unknown>;
-  children: any; // Steps
+  children: any;
 };
 export function FlowRoute({ id, title, startStep, persistence, children }: FlowRouteProps) {
   const flat = Array.isArray(children) ? children.flat() : [children];

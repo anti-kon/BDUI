@@ -11,8 +11,8 @@ export type Stored = {
   tags: string[];
 };
 
-const contracts = new Map<string, Stored>(); // key = id@version
-const byId = new Map<string, Stored[]>(); // id -> versions (desc)
+const contracts = new Map<string, Stored>();
+const byId = new Map<string, Stored[]>();
 
 function hash(obj: unknown) {
   const json = typeof obj === 'string' ? obj : JSON.stringify(obj);

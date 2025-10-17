@@ -7,7 +7,6 @@ import { getContract, putContract } from './store.js';
 export default async function routes(app: FastifyInstance) {
   app.get('/v1/health', async () => ({ ok: true }));
 
-  // Publish contract (CD/CI)
   app.post('/v1/contracts', async (req, rep) => {
     const body: any = req.body;
     const { contract, tags } = body || {};
@@ -22,7 +21,6 @@ export default async function routes(app: FastifyInstance) {
       .send({ id: saved.id, version: saved.version, etag: saved.etag, createdAt: saved.createdAt });
   });
 
-  // CDN-style read: latest
   app.get('/v1/contracts/:id', async (req, rep) => {
     const { id } = req.params as any;
     const s = getContract(id);
@@ -32,7 +30,6 @@ export default async function routes(app: FastifyInstance) {
     return s.contract;
   });
 
-  // CDN-style read: exact version
   app.get('/v1/contracts/:id/:version', async (req, rep) => {
     const { id, version } = req.params as any;
     const s = getContract(id, version);
@@ -42,7 +39,6 @@ export default async function routes(app: FastifyInstance) {
     return s.contract;
   });
 
-  // Resolve a route: returns node or flow step (server-side flow)
   app.post('/v1/resolve', async (req, rep) => {
     const { contractId, version, routeId, state, currentStepId } = (req.body || {}) as any;
     const s = getContract(contractId, version);

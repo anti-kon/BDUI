@@ -160,7 +160,6 @@ export const contractSchema = {
               },
               text: {
                 type: 'string',
-                description: 'alias if you prefer <Text value="..."/> instead of children',
               },
               type: {
                 const: 'Text',

@@ -5,8 +5,6 @@ type State = {
 };
 
 function safeEval(expr: string, ctx: State): any {
-  // Very simple evaluator; in prod replace with a real sandbox/interpreter
-  // Allows referencing flow/session/local
   const fn = new Function('flow', 'session', 'local', `return (${expr});`);
   return fn(ctx.flow ?? {}, ctx.session ?? {}, ctx.local ?? {});
 }
@@ -24,7 +22,6 @@ export function resolveRouteNode(
     return { type: 'screen', node: route.node };
   }
 
-  // flow route
   const steps = route.steps || [];
   const idToStep = new Map(steps.map((s: any) => [s.id, s]));
   const start = route.startStep;
@@ -33,7 +30,6 @@ export function resolveRouteNode(
   let step = idToStep.get(stepId);
   if (!step) throw new Error(`Step not found: ${stepId}`);
 
-  // compute next transition if any guard is true (server-side evaluation)
   const transitions = step.transitions || [];
   for (const t of transitions) {
     if (!t.guard) {
@@ -46,9 +42,7 @@ export function resolveRouteNode(
         stepId = t.to;
         break;
       }
-    } catch {
-      // ignore bad guard
-    }
+    } catch {}
   }
 
   step = idToStep.get(stepId) || step;

@@ -1,4 +1,3 @@
-// ESLint config for BDUI monorepo
 /** @type {import('@eslint/js').Linter.Config} */
 module.exports = {
   root: true,

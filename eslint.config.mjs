@@ -1,4 +1,3 @@
-// Flat ESLint config for BDUI monorepo (ESLint v9)
 import tseslint from 'typescript-eslint';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';

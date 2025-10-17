@@ -20,7 +20,7 @@ export type ResolveRequest = {
 export type AdvanceRequest = {
   contractId: string;
   version?: string;
-  routeId: string; // must be a flow route
+  routeId: string;
   currentStepId: string;
   state?: {
     flow?: Record<string, unknown>;
