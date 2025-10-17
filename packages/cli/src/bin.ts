@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
-import { buildContract } from '@bdui/transpiler';
-import fs from 'node:fs';
 import { execSync } from 'node:child_process';
+import fs from 'node:fs';
+
+import { buildContract } from '@bdui/transpiler';
+import { Command } from 'commander';
 
 const program = new Command();
 program.name('bdui').description('BDUI CLI').version('0.4.0');
 
-program.command('gen')
+program
+  .command('gen')
   .description('Generate schema and DSL glue from component manifests (@bdui/defs)')
   .action(async () => {
     try {
@@ -23,7 +25,8 @@ program.command('gen')
     }
   });
 
-program.command('build')
+program
+  .command('build')
   .argument('<entry>', 'Entry TSX file')
   .option('-o, --out <file>', 'Output JSON file')
   .option('--mode <mode>', 'dev | prod', 'dev')
@@ -37,7 +40,8 @@ program.command('build')
     }
   });
 
-program.command('validate')
+program
+  .command('validate')
   .argument('<jsonFile>', 'Contract JSON to validate')
   .action(async (jsonFile) => {
     const { validateContract } = await import('@bdui/schema');
@@ -45,7 +49,10 @@ program.command('validate')
     const data = JSON.parse(txt);
     const res = validateContract(data);
     if (res.ok) console.log('OK');
-    else { console.error('Invalid:', res.errors); process.exit(1); }
+    else {
+      console.error('Invalid:', res.errors);
+      process.exit(1);
+    }
   });
 
 program.parse();

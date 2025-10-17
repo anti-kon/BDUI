@@ -1,6 +1,7 @@
-import { Contract, ThemeConfig as Theme, Navigation, Route, Column, Text, E } from '@bdui/dsl';
-import meta from './meta.json';
+import { Column, Contract, E, Navigation, Route, Text, ThemeConfig as Theme } from '@bdui/dsl';
+
 import { CounterControls } from './CounterControls';
+import meta from './meta.json';
 
 export default (
   <Contract meta={meta}>

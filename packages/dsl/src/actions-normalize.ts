@@ -1,6 +1,6 @@
 import type { Action } from './types';
 
-type Scope = 'local'|'session'|'flow';
+type Scope = 'local' | 'session' | 'flow';
 type Target = string | { scope: Scope; path: string };
 
 function parseTarget(t: Target): { scope: Scope; path: string } {
@@ -13,13 +13,31 @@ function parseTarget(t: Target): { scope: Scope; path: string } {
 
 type ShortAction =
   | { set: [Target, any] }
-  | { navigate: [to: string, opts?: { mode?: 'push'|'replace'|'popToRoot'; params?: Record<string, unknown> }] }
+  | {
+      navigate: [
+        to: string,
+        opts?: { mode?: 'push' | 'replace' | 'popToRoot'; params?: Record<string, unknown> },
+      ];
+    }
   | { back: true }
   | { replace: string }
   | { popToRoot: true }
   | { fetch: string }
-  | { call: { url: string; method: 'GET'|'POST'|'PUT'|'PATCH'|'DELETE'; body?: any; saveTo?: { scope: Scope; path: string }; rollback?: ShortAction | Action } }
-  | { toast: [message: string, opts?: { level?: 'info'|'success'|'warning'|'error'; durationMs?: number }] }
+  | {
+      call: {
+        url: string;
+        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+        body?: any;
+        saveTo?: { scope: Scope; path: string };
+        rollback?: ShortAction | Action;
+      };
+    }
+  | {
+      toast: [
+        message: string,
+        opts?: { level?: 'info' | 'success' | 'warning' | 'error'; durationMs?: number },
+      ];
+    }
   | { sync: any }
   | { validate: [schemaRef: string, target: Target] };
 
@@ -45,15 +63,21 @@ function normOne(a: any): Action {
     if ('fetch' in a) return { type: 'fetch', params: { sourceId: a.fetch as string } } as Action;
     if ('call' in a) {
       const c = a.call as any;
-      const out: any = { type: 'callApi', params: {
-        url: c.url, method: c.method, body: c.body, saveTo: c.saveTo
-      }};
+      const out: any = {
+        type: 'callApi',
+        params: {
+          url: c.url,
+          method: c.method,
+          body: c.body,
+          saveTo: c.saveTo,
+        },
+      };
       if (c.rollback) out.rollbackAction = normOne(c.rollback);
       return out as Action;
     }
     if ('toast' in a) {
       const [message, opts] = a.toast as [string, any?];
-      return { type: 'toast', params: { message, ...(opts||{}) } } as Action;
+      return { type: 'toast', params: { message, ...(opts || {}) } } as Action;
     }
     if ('sync' in a) {
       return { type: 'sync', params: a.sync } as Action;

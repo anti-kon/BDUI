@@ -9,12 +9,14 @@ async function loadManifests() {
     defs.TextManifest,
     defs.ButtonManifest,
     defs.RowManifest,
-    defs.ColumnManifest
+    defs.ColumnManifest,
   ].filter(Boolean);
   return list;
 }
 
-function js(obj) { return JSON.stringify(obj); }
+function js(obj) {
+  return JSON.stringify(obj);
+}
 
 async function run() {
   const manifests = await loadManifests();
@@ -73,13 +75,13 @@ function node<T extends BDUIElement['type']>(
 
   for (const m of manifests) {
     const cfg = {
-      children: m.children.kind === 'none' ? 'none'
-              : m.children.kind === 'text' ? 'text'
-              : 'nodes',
-      mapToProp: m.children.kind === 'text' ? (m.children.mapToProp || 'text') : undefined,
-      aliases: m.aliases || undefined
+      children: m.children.kind === 'none' ? 'none' : m.children.kind === 'text' ? 'text' : 'nodes',
+      mapToProp: m.children.kind === 'text' ? m.children.mapToProp || 'text' : undefined,
+      aliases: m.aliases || undefined,
     };
-    lines.push(`export function ${m.type}(props: any): any { return node(${js(m.type)}, props, ${js(cfg)}); }`);
+    lines.push(
+      `export function ${m.type}(props: any): any { return node(${js(m.type)}, props, ${js(cfg)}); }`,
+    );
   }
 
   const outPath = path.resolve(__dirname, '../src/generated/components.ts');
@@ -88,4 +90,7 @@ function node<T extends BDUIElement['type']>(
   console.log('Generated DSL components at', outPath);
 }
 
-run().catch(e => { console.error('DSL glue generation failed:', e); process.exit(1); });
+run().catch((e) => {
+  console.error('DSL glue generation failed:', e);
+  process.exit(1);
+});

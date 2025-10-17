@@ -15,12 +15,27 @@
     "build:full": "npm run -w packages/defs build && npm run gen && npm run -w packages/schema build && npm run gen && npm run -w packages/dsl build && npm run -w packages/transpiler build && npm run -w packages/cli build",
     "build": "npm run build:full",
     "bdui": "node packages/cli/dist/bin.js",
-    "bootstrap": "npm i && npm run build:full"
+    "bootstrap": "npm i && npm run build:full",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
+    "@bdui/cli": "file:packages/cli",
+    "@eslint/js": "^9.37.0",
     "@types/node": "^22.7.5",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsonc": "^2.21.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
-    "@bdui/cli": "file:packages/cli"
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.46.1"
   }
 }

@@ -1,4 +1,4 @@
-import { Component, props, children } from '../../define.js';
+import { children, Component, props } from '../../define.js';
 
 export type TextProps = {
   id?: string;
@@ -11,5 +11,5 @@ export default Component({
   props: props<TextProps>('TextProps'),
   children: children().text({ mapToProp: 'text', required: false }),
   aliases: { value: 'text' },
-  events: []
+  events: [],
 });

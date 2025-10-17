@@ -8,9 +8,9 @@ function propsSchemaFor(typeName) {
     path: path.resolve(__dirname, '../../defs/src/**/*.ts'),
     tsconfig: path.resolve(__dirname, '../../defs/tsconfig.json'),
     type: typeName,
-    expose: "export",
+    expose: 'export',
     topRef: false,
-    jsDoc: "extended",
+    jsDoc: 'extended',
     additionalProperties: false,
   };
   const generator = createGenerator(config);
@@ -20,7 +20,9 @@ function propsSchemaFor(typeName) {
 async function loadManifests() {
   const defsPath = path.resolve(__dirname, '../../defs/dist/index.js');
   const defs = await import(pathToFileURL(defsPath).href);
-  return [defs.TextManifest, defs.ButtonManifest, defs.RowManifest, defs.ColumnManifest].filter(Boolean);
+  return [defs.TextManifest, defs.ButtonManifest, defs.RowManifest, defs.ColumnManifest].filter(
+    Boolean,
+  );
 }
 
 function schemaForComponent(m, propsSchema) {
@@ -37,7 +39,10 @@ function schemaForComponent(m, propsSchema) {
       if (properties[alias]) {
         properties[real] = properties[alias];
         delete properties[alias];
-        if (required.has(alias)) { required.delete(alias); required.add(real); }
+        if (required.has(alias)) {
+          required.delete(alias);
+          required.add(real);
+        }
       }
     }
   }
@@ -46,7 +51,7 @@ function schemaForComponent(m, propsSchema) {
     const key = m.children.mapToProp || 'text';
     if (!properties[key]) properties[key] = { type: 'string' };
   } else if (m.children?.kind === 'nodes') {
-    properties['children'] = { type: 'array', items: { $ref: "#/$defs/Node" } };
+    properties['children'] = { type: 'array', items: { $ref: '#/$defs/Node' } };
   }
 
   if (m.events?.includes('onAction')) {
@@ -57,65 +62,65 @@ function schemaForComponent(m, propsSchema) {
 }
 
 function makeContractSchema(manifests, perCompSchemas) {
-  const nodeTypes = manifests.map(m => m.type);
+  const nodeTypes = manifests.map((m) => m.type);
   const schema = {
-    $id: "https://bdui.dev/schema/contract.json",
-    type: "object",
-    required: ["meta","navigation"],
+    $id: 'https://bdui.dev/schema/contract.json',
+    type: 'object',
+    required: ['meta', 'navigation'],
     properties: {
       meta: {
-        type: "object",
-        required: ["contractId","version","schemaVersion","generatedAt"],
+        type: 'object',
+        required: ['contractId', 'version', 'schemaVersion', 'generatedAt'],
         properties: {
-          contractId: { type: "string" },
-          version: { type: "string" },
-          schemaVersion: { type: "string" },
-          signature: { type: "string" }
+          contractId: { type: 'string' },
+          version: { type: 'string' },
+          schemaVersion: { type: 'string' },
+          signature: { type: 'string' },
         },
-        additionalProperties: true
+        additionalProperties: true,
       },
-      theme: { type: "object" },
-      dataSources: { type: "array" },
+      theme: { type: 'object' },
+      dataSources: { type: 'array' },
       navigation: {
-        type: "object",
-        required: ["initialRoute","routes"],
+        type: 'object',
+        required: ['initialRoute', 'routes'],
         properties: {
-          initialRoute: { type: "string" },
-          urlSync: { type: "boolean" },
+          initialRoute: { type: 'string' },
+          urlSync: { type: 'boolean' },
           routes: {
-            type: "array",
+            type: 'array',
             items: {
-              type: "object",
-              required: ["id","node"],
+              type: 'object',
+              required: ['id', 'node'],
               properties: {
-                id: { type: "string" },
-                title: { type: "string" },
-                path: { type: "string" },
-                cache: { type: "object" },
-                node: { $ref: "#/$defs/Node" }
+                id: { type: 'string' },
+                title: { type: 'string' },
+                path: { type: 'string' },
+                cache: { type: 'object' },
+                node: { $ref: '#/$defs/Node' },
               },
-              additionalProperties: false
-            }
-          }
-        }
-      }
+              additionalProperties: false,
+            },
+          },
+        },
+      },
     },
     $defs: {
       Node: {
-        type: "object",
-        required: ["type"],
+        type: 'object',
+        required: ['type'],
         properties: {
           type: { enum: nodeTypes },
-          id: { type: "string" },
-          modifiers: { type: "object" },
-          children: { type: "array", items: { $ref: "#/$defs/Node" } },
-          onAction: { type: "array" }
+          id: { type: 'string' },
+          modifiers: { type: 'object' },
+          children: { type: 'array', items: { $ref: '#/$defs/Node' } },
+          onAction: { type: 'array' },
         },
         additionalProperties: true,
-        allOf: []
-      }
+        allOf: [],
+      },
     },
-    additionalProperties: false
+    additionalProperties: false,
   };
 
   // merge definitions from props schemas
@@ -133,14 +138,14 @@ function makeContractSchema(manifests, perCompSchemas) {
     const m = manifests[i];
     const ref = schemaForComponent(m, perCompSchemas[i]);
     const thenProps = {
-      type: "object",
+      type: 'object',
       properties: { ...ref.properties, type: { const: m.type } },
-      required: ["type", ...(ref.required || [])],
-      additionalProperties: true
+      required: ['type', ...(ref.required || [])],
+      additionalProperties: true,
     };
     schema.$defs.Node.allOf.push({
       if: { properties: { type: { const: m.type } } },
-      then: thenProps
+      then: thenProps,
     });
   }
 
@@ -150,7 +155,7 @@ function makeContractSchema(manifests, perCompSchemas) {
 async function run() {
   // build manifests first expected by caller, but this script assumes dist exists
   const manifests = await loadManifests();
-  const perCompSchemas = manifests.map(m => propsSchemaFor(m.propsTypeName));
+  const perCompSchemas = manifests.map((m) => propsSchemaFor(m.propsTypeName));
   const contractSchema = makeContractSchema(manifests, perCompSchemas);
 
   const outTs = `// AUTO-GENERATED. Do not edit.
@@ -162,4 +167,7 @@ export const contractSchema = ${JSON.stringify(contractSchema, null, 2)} as cons
   console.log('Generated schema at', outPath);
 }
 
-run().catch(e => { console.error('Schema generation failed:', e); process.exit(1); });
+run().catch((e) => {
+  console.error('Schema generation failed:', e);
+  process.exit(1);
+});

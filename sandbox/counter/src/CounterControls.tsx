@@ -1,4 +1,4 @@
-import { Row, Button, E } from '@bdui/dsl';
+import { Button, E, Row } from '@bdui/dsl';
 
 export const CounterControls = () => (
   <Row modifiers={{ gap: 8 }}>

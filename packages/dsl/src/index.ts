@@ -1,11 +1,17 @@
-export * from './types';
+export * from './expr';
 export * from './generated/components';
 export * from './theme';
-export * from './expr';
+export * from './types';
 
-import type { Contract as ContractType, Navigation as NavigationType, Meta } from './types';
+import type { Contract as ContractType, Meta, Navigation as NavigationType } from './types';
 
-type RouteProps = { id: string; title?: string; path?: string; cache?: Record<string, unknown>; children: any };
+type RouteProps = {
+  id: string;
+  title?: string;
+  path?: string;
+  cache?: Record<string, unknown>;
+  children: any;
+};
 export function Route({ id, title, path, cache, children }: RouteProps) {
   const node = Array.isArray(children) ? { type: 'Column', children } : children;
   return { __kind: 'Route', value: { id, title, path, cache, node } } as const;
@@ -32,7 +38,7 @@ export function Contract({ meta, children }: ContractProps): ContractType {
   const contract: ContractType = {
     meta: normMeta,
     theme: themeNode ? themeNode.value : undefined,
-    navigation: navNode.value
+    navigation: navNode.value,
   };
   return contract;
 }

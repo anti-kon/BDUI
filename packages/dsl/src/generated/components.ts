@@ -1,8 +1,7 @@
 // AUTO-GENERATED. Do not edit.
-import type { BDUIElement } from '../types';
 import { normalizeActions } from '../actions-normalize';
 import { toJsonValue } from '../expr';
-
+import type { BDUIElement } from '../types';
 
 type ChildMode = 'none' | 'text' | 'nodes';
 type NodeCfg = { children: ChildMode; mapToProp?: string; aliases?: Record<string, string> };
@@ -10,7 +9,7 @@ type NodeCfg = { children: ChildMode; mapToProp?: string; aliases?: Record<strin
 function node<T extends BDUIElement['type']>(
   type: T,
   props: any,
-  cfg: NodeCfg
+  cfg: NodeCfg,
 ): Extract<BDUIElement, { type: T }> {
   const { children, onAction, ...rest } = props ?? {};
   const cleaned: Record<string, any> = {};
@@ -48,7 +47,15 @@ function node<T extends BDUIElement['type']>(
   return n as Extract<BDUIElement, { type: T }>;
 }
 
-export function Text(props: any): any { return node("Text", props, {"children":"text","mapToProp":"text","aliases":{"value":"text"}}); }
-export function Button(props: any): any { return node("Button", props, {"children":"none"}); }
-export function Row(props: any): any { return node("Row", props, {"children":"nodes"}); }
-export function Column(props: any): any { return node("Column", props, {"children":"nodes"}); }
+export function Text(props: any): any {
+  return node('Text', props, { children: 'text', mapToProp: 'text', aliases: { value: 'text' } });
+}
+export function Button(props: any): any {
+  return node('Button', props, { children: 'none' });
+}
+export function Row(props: any): any {
+  return node('Row', props, { children: 'nodes' });
+}
+export function Column(props: any): any {
+  return node('Column', props, { children: 'nodes' });
+}

@@ -1,4 +1,5 @@
 import Ajv from 'ajv';
+
 import { contractSchema } from './generated/schema.generated.js';
 export { contractSchema } from './generated/schema.generated.js';
 

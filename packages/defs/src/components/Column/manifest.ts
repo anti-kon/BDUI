@@ -1,4 +1,4 @@
-import { Component, props, children } from '../../define.js';
+import { children, Component, props } from '../../define.js';
 
 export type ColumnProps = {
   id?: string;
@@ -9,5 +9,5 @@ export default Component({
   name: 'Column',
   props: props<ColumnProps>('ColumnProps'),
   children: children().nodes(),
-  events: []
+  events: [],
 });

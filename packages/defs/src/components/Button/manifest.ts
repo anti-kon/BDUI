@@ -12,5 +12,5 @@ export type ButtonProps = {
 export default Component({
   name: 'Button',
   props: props<ButtonProps>('ButtonProps'),
-  events: ['onAction'] // children omitted — defaults to none
+  events: ['onAction'],
 });
