@@ -1,17 +1,17 @@
 export {
-  definition as ButtonDefinition,
   manifest as ButtonManifest,
+  definition as ButtonDefinition,
 } from './components/Button/manifest.js';
 export {
-  definition as ColumnDefinition,
   manifest as ColumnManifest,
+  definition as ColumnDefinition,
 } from './components/Column/manifest.js';
-export * from './components/index.js';
-export { definition as RowDefinition, manifest as RowManifest } from './components/Row/manifest.js';
+export { manifest as RowManifest, definition as RowDefinition } from './components/Row/manifest.js';
 export {
-  definition as TextDefinition,
   manifest as TextManifest,
+  definition as TextDefinition,
 } from './components/Text/manifest.js';
-export * from './components/types.js';
+export * from './components/index.js';
 export * from './components/web/index.js';
+export * from './components/types.js';
 export * from './define.js';

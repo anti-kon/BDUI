@@ -158,9 +158,7 @@ export const contractSchema = {
                 type: 'object',
                 additionalProperties: {},
               },
-              text: {
-                type: 'string',
-              },
+              text: {},
               type: {
                 const: 'Text',
               },

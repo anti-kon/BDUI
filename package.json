@@ -19,7 +19,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "demo:web": "node scripts/prepare-web-demo.cjs && npx serve sandbox/web-demo"
   },
   "devDependencies": {
     "@bdui/cli": "file:packages/cli",

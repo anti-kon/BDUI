@@ -3,9 +3,21 @@
   "version": "0.5.0",
   "type": "module",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./components/web": "./dist/components/web/index.js",
+    "./components/web/jsx-runtime": "./dist/components/web/jsx-runtime.js"
   },
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "components/web": [
+        "dist/components/web/index.d.ts"
+      ],
+      "components/web/jsx-runtime": [
+        "dist/components/web/jsx-runtime.d.ts"
+      ]
+    }
+  },
   "main": "./dist/index.js",
   "files": [
     "dist",

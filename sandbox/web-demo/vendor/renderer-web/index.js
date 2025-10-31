@@ -1,21 +1,5 @@
-import type { ComponentNode, WebRendererContext } from '@bdui/defs';
 import { getWebComponentRenderer } from '@bdui/defs';
-
-type Scope = 'local' | 'session' | 'flow';
-
-type Contract = any;
-type Action = any;
-type Node = ComponentNode;
-
-type RuntimeState = {
-  flow: Record<string, any>;
-  session: Record<string, any>;
-  local: Record<string, any>;
-};
-
-type MountOptions = { urlSync?: boolean; storageKey?: string };
-
-function deepGet(obj: any, path: string) {
+function deepGet(obj, path) {
   const parts = path.split('.').filter(Boolean);
   let cur = obj;
   for (const p of parts) {
@@ -24,7 +8,7 @@ function deepGet(obj: any, path: string) {
   }
   return cur;
 }
-function deepSet(obj: any, path: string, value: any) {
+function deepSet(obj, path, value) {
   const parts = path.split('.').filter(Boolean);
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
@@ -34,11 +18,11 @@ function deepSet(obj: any, path: string, value: any) {
   }
   cur[parts[parts.length - 1]] = value;
 }
-function evalExpr(code: string, state: RuntimeState) {
+function evalExpr(code, state) {
   const body = `return (${code});`;
   return Function('flow', 'session', 'local', body)(state.flow, state.session, state.local);
 }
-function interpolate(text: string, state: RuntimeState) {
+function interpolate(text, state) {
   return text.replace(/\{\{([^}]+)\}\}/g, (_, expr) => {
     try {
       const v = evalExpr(expr, state);
@@ -48,9 +32,8 @@ function interpolate(text: string, state: RuntimeState) {
     }
   });
 }
-
-function cssForModifiers(mod: any): Partial<CSSStyleDeclaration> {
-  const s: any = {};
+function cssForModifiers(mod) {
+  const s = {};
   if (!mod) return s;
   if (mod.padding != null)
     s.padding = typeof mod.padding === 'number' ? mod.padding + 'px' : String(mod.padding);
@@ -59,18 +42,15 @@ function cssForModifiers(mod: any): Partial<CSSStyleDeclaration> {
   if (mod.justify) s.justifyContent = String(mod.justify);
   return s;
 }
-
-function formatValue(value: unknown): string {
+function formatValue(value) {
   return value == null ? '' : String(value);
 }
-
-export function mount(container: HTMLElement, contract: Contract, opts: MountOptions = {}) {
+export function mount(container, contract, opts = {}) {
   const urlSync = opts.urlSync ?? !!contract?.navigation?.urlSync;
   const storageKey =
     opts.storageKey ||
     `bdui_session_${contract?.meta?.appId || contract?.meta?.contractId || 'app'}`;
-
-  const state: RuntimeState = {
+  const state = {
     flow: structuredClone(contract?.initial?.flow || {}),
     session: (() => {
       try {
@@ -82,48 +62,43 @@ export function mount(container: HTMLElement, contract: Contract, opts: MountOpt
     })(),
     local: {},
   };
-
-  const historyStack: string[] = [];
+  const historyStack = [];
   let currentRoute = contract?.navigation?.initialRoute;
-
   if (urlSync && location.hash.slice(1)) currentRoute = location.hash.slice(1);
   function syncUrl() {
     if (urlSync) location.hash = currentRoute;
   }
-
   function saveSession() {
     try {
       localStorage.setItem(storageKey, JSON.stringify(state.session));
     } catch {}
   }
-
-  function runActions(actions?: Action[]) {
+  function runActions(actions) {
     if (!actions) return;
     for (const a of actions) runAction(a);
   }
-
-  function runAction(a: any) {
+  function runAction(a) {
     switch (a?.type) {
       case 'set': {
         const { target, value } = a.params || {};
-        const scope: Scope = target.scope;
-        deepSet((state as any)[scope], target.path, value);
+        const scope = target.scope;
+        deepSet(state[scope], target.path, value);
         if (scope === 'session') saveSession();
         rerender();
         break;
       }
       case 'update': {
         const { target, reducer } = a.params || {};
-        const scope: Scope = target.scope;
-        let prev = deepGet((state as any)[scope], target.path);
-        let fn: any;
+        const scope = target.scope;
+        let prev = deepGet(state[scope], target.path);
+        let fn;
         try {
           fn = eval(reducer);
         } catch {
-          fn = (x: any) => x;
+          fn = (x) => x;
         }
         const next = fn(prev);
-        deepSet((state as any)[scope], target.path, next);
+        deepSet(state[scope], target.path, next);
         if (scope === 'session') saveSession();
         rerender();
         break;
@@ -166,10 +141,9 @@ export function mount(container: HTMLElement, contract: Contract, opts: MountOpt
       }
     }
   }
-
-  function resolveFlowStep(route: any) {
+  function resolveFlowStep(route) {
     const steps = route.steps || [];
-    const idToStep = new Map(steps.map((s: any) => [s.id, s]));
+    const idToStep = new Map(steps.map((s) => [s.id, s]));
     const key = `__flow.${route.id}.current`;
     let stepId = deepGet(state.local, key) || route.startStep;
     let step = idToStep.get(stepId) || steps[0];
@@ -192,27 +166,22 @@ export function mount(container: HTMLElement, contract: Contract, opts: MountOpt
     }
     return step;
   }
-
-  function renderUnsupported(node: Node): HTMLElement {
+  function renderUnsupported(node) {
     const el = document.createElement('pre');
     el.textContent = '[Unsupported node] ' + JSON.stringify(node, null, 2);
     return el;
   }
-
-  let webContext: WebRendererContext;
-
-  function renderNode(node: Node): HTMLElement {
+  let webContext;
+  function renderNode(node) {
     const renderer = getWebComponentRenderer(node?.type);
     if (!renderer) {
       return renderUnsupported(node);
     }
-
     return renderer({
       node,
       context: webContext,
     });
   }
-
   webContext = {
     document,
     state,
@@ -224,10 +193,9 @@ export function mount(container: HTMLElement, contract: Contract, opts: MountOpt
     utils: {
       cssForModifiers,
     },
-  } satisfies WebRendererContext;
-
-  function renderRoute(): HTMLElement {
-    const route = (contract?.navigation?.routes || []).find((r: any) => r.id === currentRoute);
+  };
+  function renderRoute() {
+    const route = (contract?.navigation?.routes || []).find((r) => r.id === currentRoute);
     if (!route) {
       const el = document.createElement('div');
       el.textContent = `Route not found: ${currentRoute}`;
@@ -239,7 +207,7 @@ export function mount(container: HTMLElement, contract: Contract, opts: MountOpt
       const title = document.createElement('h2');
       title.textContent = step?.title || route.title || route.id;
       wrap.appendChild(title);
-      (step?.children || []).forEach((ch: Node) => wrap.appendChild(renderNode(ch)));
+      (step?.children || []).forEach((ch) => wrap.appendChild(renderNode(ch)));
       return wrap;
     } else {
       const wrap = document.createElement('div');
@@ -250,25 +218,21 @@ export function mount(container: HTMLElement, contract: Contract, opts: MountOpt
       return wrap;
     }
   }
-
   function rerender() {
     container.innerHTML = '';
     container.appendChild(renderRoute());
   }
-
   window.addEventListener('hashchange', () => {
     if (!urlSync) return;
     currentRoute = location.hash.slice(1) || contract?.navigation?.initialRoute;
     rerender();
   });
-
   rerender();
-
   return {
-    navigate(to: string) {
+    navigate(to) {
       runAction({ type: 'navigate', params: { to } });
     },
-    setState(scope: Scope, path: string, value: any) {
+    setState(scope, path, value) {
       runAction({ type: 'set', params: { target: { scope, path }, value } });
     },
     get state() {
