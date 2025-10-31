@@ -12,7 +12,7 @@
   "scripts": {
     "clean": "rimraf --glob \"packages/**/dist\" \"sandbox/**/.bdui-build.*\"",
     "gen": "node packages/schema/scripts/generate.cjs && node packages/dsl/scripts/generate-glue.cjs",
-    "build:full": "npm run -w packages/defs build && npm run gen && npm run -w packages/schema build && npm run gen && npm run -w packages/dsl build && npm run -w packages/transpiler build && npm run -w packages/cli build",
+    "build:full": "npm run -w packages/common build && npm run -w packages/defs build && npm run gen && npm run -w packages/schema build && npm run gen && npm run -w packages/dsl build && npm run -w packages/transpiler build && npm run -w packages/cli build",
     "build": "npm run build:full",
     "bdui": "node packages/cli/dist/bin.js",
     "bootstrap": "npm i && npm run build:full",

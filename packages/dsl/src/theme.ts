@@ -1,4 +1,4 @@
-import type { Theme } from './types';
+import type { Theme } from './types.js';
 
 type Palette = {
   light: { bg: string; fg: string; primary: string; [k: string]: any };

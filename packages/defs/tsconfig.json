@@ -5,7 +5,7 @@
     "outDir": "dist",
     "declaration": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@bdui/defs/components/web"
+    "jsxImportSource": "@bdui/defs/web-renderers"
   },
   "include": ["src"]
 }

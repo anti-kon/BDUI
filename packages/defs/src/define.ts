@@ -6,11 +6,16 @@ export type ChildrenModel =
   | { kind: 'nodes'; min?: number; max?: number }
   | {
       kind: 'slots';
-      slots: Record<
-        string,
-        'none' | 'text' | 'nodes' | { kind: 'text' | 'nodes'; required?: boolean }
-      >;
+      slots: SlotsDefinition;
     };
+
+export type SlotDeclaration =
+  | 'none'
+  | 'text'
+  | 'nodes'
+  | { kind: 'text' | 'nodes'; required?: boolean };
+
+export type SlotsDefinition = Record<string, SlotDeclaration>;
 
 export type EventsDecl = string[];
 export type Aliases = Record<string, string>;
@@ -34,7 +39,7 @@ export function children() {
     nodes(opts?: { min?: number; max?: number }): ChildrenModel {
       return { kind: 'nodes', ...opts };
     },
-    slots(slots: any): ChildrenModel {
+    slots(slots: SlotsDefinition): ChildrenModel {
       return { kind: 'slots', slots };
     },
   };

@@ -1,221 +1,94 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { pathToFileURL } = require('node:url');
-const { createGenerator } = require('ts-json-schema-generator');
 
-function propsSchemaFor(typeName) {
-  const config = {
-    path: path.resolve(__dirname, '../../defs/src/**/*.ts'),
-    tsconfig: path.resolve(__dirname, '../../defs/tsconfig.json'),
-    type: typeName,
-    expose: 'export',
-    topRef: false,
-    jsDoc: 'extended',
-    additionalProperties: false,
-  };
-  const generator = createGenerator(config);
-  return generator.createSchema(typeName);
-}
+const { loadManifests } = require('./lib/manifests.cjs');
+const { createPropsSchemaLoader, buildContractSchema } = require('./lib/schema-builder.cjs');
 
-async function loadManifests() {
-  const defsPath = path.resolve(__dirname, '../../defs/dist/index.js');
-  const defs = await import(pathToFileURL(defsPath).href);
-  return [defs.TextManifest, defs.ButtonManifest, defs.RowManifest, defs.ColumnManifest].filter(
-    Boolean,
-  );
-}
+const args = new Set(process.argv.slice(2));
+const watchMode = args.has('--watch');
+const inspectMode = args.has('--inspect');
 
-function schemaForComponent(m, propsSchema) {
-  const props =
-    propsSchema.definitions?.[m.propsTypeName] ||
-    propsSchema.components?.schemas?.[m.propsTypeName] ||
-    propsSchema;
+const defsSrcGlob = path.resolve(__dirname, '../../defs/src/**/*.ts');
+const defsTsconfig = path.resolve(__dirname, '../../defs/tsconfig.json');
+const defsBundle = path.resolve(__dirname, '../../defs/dist/index.js');
+const outPath = path.resolve(__dirname, '../src/generated/schema.generated.ts');
 
-  const properties = props.properties ? { ...props.properties } : {};
-  const required = new Set(props.required || []);
+const loadPropsSchema = createPropsSchemaLoader({
+  sourceGlob: defsSrcGlob,
+  tsconfigPath: defsTsconfig,
+});
 
-  if (m.aliases) {
-    for (const [alias, real] of Object.entries(m.aliases)) {
-      if (properties[alias]) {
-        properties[real] = properties[alias];
-        delete properties[alias];
-        if (required.has(alias)) {
-          required.delete(alias);
-          required.add(real);
-        }
-      }
-    }
-  }
+async function buildSchema() {
+  const manifests = await loadManifests(defsBundle);
+  const perComponentSchemas = manifests.map((manifest) => loadPropsSchema(manifest.propsTypeName));
+  const contractSchema = buildContractSchema(manifests, perComponentSchemas);
 
-  if (m.children?.kind === 'text') {
-    const key = m.children.mapToProp || 'text';
-    if (!properties[key]) properties[key] = { type: 'string' };
-  } else if (m.children?.kind === 'nodes') {
-    properties['children'] = { type: 'array', items: { $ref: '#/$defs/Node' } };
-  }
+  const lines = [
+    '// AUTO-GENERATED. Do not edit.',
+    `export const contractSchema = ${JSON.stringify(contractSchema, null, 2)} as const;`,
+    '',
+  ];
 
-  if (m.events?.includes('onAction')) {
-    properties['onAction'] = { type: 'array' };
-  }
-
-  return { properties, required: Array.from(required) };
-}
-
-function makeContractSchema(manifests, perCompSchemas) {
-  const nodeTypes = manifests.map((m) => m.type);
-  const schema = {
-    $id: 'https://bdui.dev/schema/contract.json',
-    type: 'object',
-    required: ['meta', 'navigation'],
-    properties: {
-      meta: {
-        type: 'object',
-        required: ['contractId', 'version', 'schemaVersion', 'generatedAt'],
-        properties: {
-          contractId: { type: 'string' },
-          version: { type: 'string' },
-          schemaVersion: { type: 'string' },
-          signature: { type: 'string' },
-        },
-        additionalProperties: true,
-      },
-      theme: { type: 'object' },
-      initial: {
-        type: 'object',
-        properties: {
-          flow: { type: 'object', additionalProperties: true },
-          session: { type: 'object', additionalProperties: true },
-        },
-        additionalProperties: false,
-      },
-      dataSources: { type: 'array' },
-      navigation: {
-        type: 'object',
-        required: ['initialRoute', 'routes'],
-        properties: {
-          initialRoute: { type: 'string' },
-          urlSync: { type: 'boolean' },
-          routes: {
-            type: 'array',
-            items: {
-              oneOf: [
-                {
-                  type: 'object',
-                  required: ['id', 'node'],
-                  properties: {
-                    id: { type: 'string' },
-                    title: { type: 'string' },
-                    path: { type: 'string' },
-                    cache: { type: 'object' },
-                    node: { $ref: '#/$defs/Node' },
-                  },
-                  additionalProperties: false,
-                },
-                {
-                  type: 'object',
-                  required: ['id', 'type', 'startStep', 'steps'],
-                  properties: {
-                    id: { type: 'string' },
-                    type: { const: 'flow' },
-                    title: { type: 'string' },
-                    startStep: { type: 'string' },
-                    persistence: { type: 'object', additionalProperties: true },
-                    steps: { type: 'array', items: { $ref: '#/$defs/Step' } },
-                  },
-                  additionalProperties: false,
-                },
-              ],
-            },
-          },
-        },
-      },
-    },
-    $defs: {
-      Node: {
-        type: 'object',
-        required: ['type'],
-        properties: {
-          type: { enum: nodeTypes },
-          id: { type: 'string' },
-          modifiers: { type: 'object' },
-          children: { type: 'array', items: { $ref: '#/$defs/Node' } },
-          onAction: { type: 'array' },
-        },
-        additionalProperties: true,
-        allOf: [],
-      },
-      Step: {
-        type: 'object',
-        required: ['id', 'children'],
-        properties: {
-          id: { type: 'string' },
-          title: { type: 'string' },
-          children: { type: 'array', items: { $ref: '#/$defs/Node' } },
-          onEnter: { type: 'array', items: { type: 'object' } },
-          onExit: { type: 'array', items: { type: 'object' } },
-          onResume: { type: 'array', items: { type: 'object' } },
-          transitions: {
-            type: 'array',
-            items: {
-              type: 'object',
-              required: ['to'],
-              properties: {
-                guard: { type: 'string' },
-                to: { type: 'string' },
-              },
-              additionalProperties: false,
-            },
-          },
-        },
-        additionalProperties: false,
-      },
-    },
-    additionalProperties: false,
-  };
-
-  const collected = {};
-  for (const s of perCompSchemas) {
-    const defs = s.definitions || s.$defs || s.components?.schemas || {};
-    Object.assign(collected, defs);
-  }
-  if (Object.keys(collected).length) {
-    schema.definitions = collected;
-    schema.$defs = Object.assign(schema.$defs || {}, collected);
-  }
-
-  for (let i = 0; i < manifests.length; i++) {
-    const m = manifests[i];
-    const ref = schemaForComponent(m, perCompSchemas[i]);
-    const thenProps = {
-      type: 'object',
-      properties: { ...ref.properties, type: { const: m.type } },
-      required: ['type', ...(ref.required || [])],
-      additionalProperties: true,
-    };
-    schema.$defs.Node.allOf.push({
-      if: { properties: { type: { const: m.type } } },
-      then: thenProps,
-    });
-  }
-
-  return schema;
-}
-
-async function run() {
-  const manifests = await loadManifests();
-  const perCompSchemas = manifests.map((m) => propsSchemaFor(m.propsTypeName));
-  const contractSchema = makeContractSchema(manifests, perCompSchemas);
-
-  const outTs = `// AUTO-GENERATED. Do not edit.
-export const contractSchema = ${JSON.stringify(contractSchema, null, 2)} as const;
-`;
-  const outPath = path.resolve(__dirname, '../src/generated/schema.generated.ts');
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, outTs, 'utf-8');
+  fs.writeFileSync(outPath, lines.join('\n'), 'utf-8');
+
+  if (inspectMode) {
+    const manifestSummary = manifests.map((manifest) => ({
+      type: manifest.type,
+      props: manifest.propsTypeName,
+      events: manifest.events ?? [],
+    }));
+    console.log('[schema] manifests:', manifestSummary);
+  }
+
   console.log('Generated schema at', outPath);
 }
 
-run().catch((e) => {
-  console.error('Schema generation failed:', e);
-  process.exit(1);
-});
+async function runOnce() {
+  try {
+    await buildSchema();
+  } catch (error) {
+    console.error('Schema generation failed:', error);
+    if (!watchMode) {
+      process.exit(1);
+    }
+  }
+}
+
+if (watchMode) {
+  const chokidar = require('chokidar');
+  const watcher = chokidar.watch([
+    path.resolve(__dirname, '../../defs/src'),
+    path.resolve(__dirname, '../'),
+  ]);
+
+  let scheduled = false;
+  let running = false;
+
+  const trigger = () => {
+    if (running) {
+      scheduled = true;
+      return;
+    }
+    running = true;
+    runOnce().finally(() => {
+      running = false;
+      if (scheduled) {
+        scheduled = false;
+        trigger();
+      }
+    });
+  };
+
+  watcher.on('ready', () => {
+    console.log('[schema] watching for changes...');
+    trigger();
+  });
+
+  watcher.on('all', (event, filePath) => {
+    console.log(`[schema] change detected (${event}): ${filePath}`);
+    trigger();
+  });
+} else {
+  runOnce();
+}

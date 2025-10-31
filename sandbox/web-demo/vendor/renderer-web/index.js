@@ -1,181 +1,78 @@
 import { getWebComponentRenderer } from '@bdui/defs';
-function deepGet(obj, path) {
-  const parts = path.split('.').filter(Boolean);
-  let cur = obj;
-  for (const p of parts) {
-    if (cur == null) return undefined;
-    cur = cur[p];
-  }
-  return cur;
-}
-function deepSet(obj, path, value) {
-  const parts = path.split('.').filter(Boolean);
-  let cur = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    const k = parts[i];
-    if (!cur[k] || typeof cur[k] !== 'object') cur[k] = {};
-    cur = cur[k];
-  }
-  cur[parts[parts.length - 1]] = value;
-}
-function evalExpr(code, state) {
-  const body = `return (${code});`;
-  return Function('flow', 'session', 'local', body)(state.flow, state.session, state.local);
-}
-function interpolate(text, state) {
-  return text.replace(/\{\{([^}]+)\}\}/g, (_, expr) => {
-    try {
-      const v = evalExpr(expr, state);
-      return v == null ? '' : String(v);
-    } catch {
-      return '';
+import { resolveFlowStep } from '@bdui/dsl';
+import { createActionRunner } from './actions.js';
+import { createNavigationController } from './navigation.js';
+import { createRuntimeStateController } from './state.js';
+function cssForModifiers(modifiers) {
+  if (!modifiers) return {};
+  const style = {};
+  const entries = Object.entries(modifiers);
+  for (const [key, value] of entries) {
+    if (value == null) continue;
+    switch (key) {
+      case 'padding':
+      case 'gap':
+      case 'width':
+      case 'height':
+        style[key] = typeof value === 'number' ? `${value}px` : String(value);
+        break;
+      case 'align':
+        style.alignItems = String(value);
+        break;
+      case 'justify':
+        style.justifyContent = String(value);
+        break;
+      default:
+        style[key] = String(value);
     }
-  });
-}
-function cssForModifiers(mod) {
-  const s = {};
-  if (!mod) return s;
-  if (mod.padding != null)
-    s.padding = typeof mod.padding === 'number' ? mod.padding + 'px' : String(mod.padding);
-  if (mod.gap != null) s.gap = typeof mod.gap === 'number' ? mod.gap + 'px' : String(mod.gap);
-  if (mod.align) s.alignItems = String(mod.align);
-  if (mod.justify) s.justifyContent = String(mod.justify);
-  return s;
+  }
+  return style;
 }
 function formatValue(value) {
   return value == null ? '' : String(value);
 }
+function renderUnsupportedNode(doc, node) {
+  const el = doc.createElement('pre');
+  el.textContent = '[Unsupported node] ' + JSON.stringify(node, null, 2);
+  return el;
+}
+function isFlowRoute(route) {
+  return route.type === 'flow';
+}
 export function mount(container, contract, opts = {}) {
+  const doc = container.ownerDocument;
+  const hasWindow = typeof window !== 'undefined';
   const urlSync = opts.urlSync ?? !!contract?.navigation?.urlSync;
   const storageKey =
     opts.storageKey ||
     `bdui_session_${contract?.meta?.appId || contract?.meta?.contractId || 'app'}`;
-  const state = {
-    flow: structuredClone(contract?.initial?.flow || {}),
-    session: (() => {
-      try {
-        const raw = localStorage.getItem(storageKey);
-        return raw ? JSON.parse(raw) : contract?.initial?.session || {};
-      } catch {
-        return contract?.initial?.session || {};
-      }
-    })(),
-    local: {},
+  const stateController = createRuntimeStateController(contract, storageKey);
+  const navigation = createNavigationController(contract.navigation);
+  const syncUrl = () => {
+    if (!hasWindow || !urlSync) return;
+    const targetHash = `#${navigation.currentRoute}`;
+    if (window.location.hash !== targetHash) {
+      window.location.hash = navigation.currentRoute;
+    }
   };
-  const historyStack = [];
-  let currentRoute = contract?.navigation?.initialRoute;
-  if (urlSync && location.hash.slice(1)) currentRoute = location.hash.slice(1);
-  function syncUrl() {
-    if (urlSync) location.hash = currentRoute;
-  }
-  function saveSession() {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(state.session));
-    } catch {}
-  }
-  function runActions(actions) {
-    if (!actions) return;
-    for (const a of actions) runAction(a);
-  }
-  function runAction(a) {
-    switch (a?.type) {
-      case 'set': {
-        const { target, value } = a.params || {};
-        const scope = target.scope;
-        deepSet(state[scope], target.path, value);
-        if (scope === 'session') saveSession();
-        rerender();
-        break;
+  const actionRunner = createActionRunner({
+    state: stateController,
+    navigation,
+    rerender,
+    onRouteChange: syncUrl,
+    showToast: (message) => {
+      if (hasWindow && typeof window.alert === 'function') {
+        window.alert(message);
+      } else {
+        console.log('[toast]', message);
       }
-      case 'update': {
-        const { target, reducer } = a.params || {};
-        const scope = target.scope;
-        let prev = deepGet(state[scope], target.path);
-        let fn;
-        try {
-          fn = eval(reducer);
-        } catch {
-          fn = (x) => x;
-        }
-        const next = fn(prev);
-        deepSet(state[scope], target.path, next);
-        if (scope === 'session') saveSession();
-        rerender();
-        break;
-      }
-      case 'navigate': {
-        const to = a.params?.to;
-        const mode = a.params?.mode || 'push';
-        if (mode === 'push') historyStack.push(currentRoute);
-        currentRoute = to;
-        syncUrl();
-        rerender();
-        break;
-      }
-      case 'back': {
-        const prev = historyStack.pop();
-        if (prev) currentRoute = prev;
-        syncUrl();
-        rerender();
-        break;
-      }
-      case 'replace': {
-        currentRoute = a.params?.to;
-        syncUrl();
-        rerender();
-        break;
-      }
-      case 'popToRoot': {
-        currentRoute = contract?.navigation?.initialRoute;
-        historyStack.length = 0;
-        syncUrl();
-        rerender();
-        break;
-      }
-      case 'toast': {
-        alert(a.params?.message || '');
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-  }
-  function resolveFlowStep(route) {
-    const steps = route.steps || [];
-    const idToStep = new Map(steps.map((s) => [s.id, s]));
-    const key = `__flow.${route.id}.current`;
-    let stepId = deepGet(state.local, key) || route.startStep;
-    let step = idToStep.get(stepId) || steps[0];
-    const transitions = step?.transitions || [];
-    for (const t of transitions) {
-      if (!t.guard) {
-        stepId = t.to;
-        break;
-      }
-      try {
-        if (evalExpr(t.guard, state)) {
-          stepId = t.to;
-          break;
-        }
-      } catch {}
-    }
-    if (stepId !== step?.id) {
-      step = idToStep.get(stepId) || step;
-      deepSet(state.local, key, stepId);
-    }
-    return step;
-  }
-  function renderUnsupported(node) {
-    const el = document.createElement('pre');
-    el.textContent = '[Unsupported node] ' + JSON.stringify(node, null, 2);
-    return el;
-  }
+    },
+  });
   let webContext;
   function renderNode(node) {
     const renderer = getWebComponentRenderer(node?.type);
     if (!renderer) {
-      return renderUnsupported(node);
+      return renderUnsupportedNode(doc, node);
     }
     return renderer({
       node,
@@ -183,60 +80,84 @@ export function mount(container, contract, opts = {}) {
     });
   }
   webContext = {
-    document,
-    state,
-    runActions,
+    document: doc,
+    state: stateController.state,
+    runActions: (actions) => actionRunner.runActions(actions),
     renderChild: (child) => renderNode(child),
     renderChildren: (children) => (children ?? []).map((child) => renderNode(child)),
-    interpolate: (template) => interpolate(template, state),
+    interpolate: (template) => stateController.interpolate(template),
     format: formatValue,
     utils: {
       cssForModifiers,
     },
   };
+  function renderFlowRoute(route) {
+    const stepKey = `__flow.${route.id}.current`;
+    const currentStepId = stateController.get('local', stepKey);
+    const resolution = resolveFlowStep(route, stateController.state, currentStepId);
+    if (resolution.stepId !== currentStepId) {
+      stateController.set('local', stepKey, resolution.stepId);
+    }
+    const wrapper = doc.createElement('div');
+    const title = doc.createElement('h2');
+    title.textContent = resolution.step.title || route.title || route.id;
+    wrapper.appendChild(title);
+    for (const child of resolution.step.children || []) {
+      wrapper.appendChild(renderNode(child));
+    }
+    return wrapper;
+  }
+  function renderScreenRoute(route) {
+    const wrapper = doc.createElement('div');
+    const title = doc.createElement('h2');
+    title.textContent = route.title || route.id;
+    wrapper.appendChild(title);
+    if (route.node) {
+      wrapper.appendChild(renderNode(route.node));
+    }
+    return wrapper;
+  }
   function renderRoute() {
-    const route = (contract?.navigation?.routes || []).find((r) => r.id === currentRoute);
-    if (!route) {
-      const el = document.createElement('div');
-      el.textContent = `Route not found: ${currentRoute}`;
+    const currentRoute = navigation.resolve(navigation.currentRoute);
+    if (!currentRoute) {
+      const el = doc.createElement('div');
+      el.textContent = `Route not found: ${navigation.currentRoute}`;
       return el;
     }
-    if (route.type === 'flow') {
-      const step = resolveFlowStep(route);
-      const wrap = document.createElement('div');
-      const title = document.createElement('h2');
-      title.textContent = step?.title || route.title || route.id;
-      wrap.appendChild(title);
-      (step?.children || []).forEach((ch) => wrap.appendChild(renderNode(ch)));
-      return wrap;
-    } else {
-      const wrap = document.createElement('div');
-      const title = document.createElement('h2');
-      title.textContent = route.title || route.id;
-      wrap.appendChild(title);
-      if (route.node) wrap.appendChild(renderNode(route.node));
-      return wrap;
-    }
+    return isFlowRoute(currentRoute)
+      ? renderFlowRoute(currentRoute)
+      : renderScreenRoute(currentRoute);
   }
   function rerender() {
-    container.innerHTML = '';
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
     container.appendChild(renderRoute());
   }
-  window.addEventListener('hashchange', () => {
-    if (!urlSync) return;
-    currentRoute = location.hash.slice(1) || contract?.navigation?.initialRoute;
-    rerender();
-  });
+  if (hasWindow && urlSync) {
+    const initialHash = window.location.hash.slice(1);
+    if (initialHash) {
+      navigation.sync(initialHash);
+    }
+    const onHashChange = () => {
+      const nextRoute = window.location.hash.slice(1) || contract?.navigation?.initialRoute;
+      if (navigation.sync(nextRoute)) {
+        rerender();
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+  }
   rerender();
+  syncUrl();
   return {
     navigate(to) {
-      runAction({ type: 'navigate', params: { to } });
+      actionRunner.runActions([{ type: 'navigate', params: { to } }]);
     },
     setState(scope, path, value) {
-      runAction({ type: 'set', params: { target: { scope, path }, value } });
+      actionRunner.runActions([{ type: 'set', params: { target: { scope, path }, value } }]);
     },
     get state() {
-      return state;
+      return stateController.state;
     },
     rerender,
   };

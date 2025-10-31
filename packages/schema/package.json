@@ -16,10 +16,12 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@bdui/common": "file:../common",
     "ajv": "^8.17.1"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
-    "ts-json-schema-generator": "^1.5.1"
+    "ts-json-schema-generator": "^1.5.1",
+    "chokidar": "^4.0.1"
   }
 }

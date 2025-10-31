@@ -1,4 +1,4 @@
-import type { BDUIElement } from './types';
+import type { BDUIElement } from './types.js';
 export const Fragment = (props: { children?: any }) => props.children ?? [];
 function cleanProps(obj: any) {
   if (!obj || typeof obj !== 'object') return obj;

@@ -1,5 +1,5 @@
 {
-  "extends": null,
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",

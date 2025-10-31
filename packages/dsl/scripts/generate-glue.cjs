@@ -5,96 +5,65 @@ const { pathToFileURL } = require('node:url');
 async function loadManifests() {
   const defsPath = path.resolve(__dirname, '../../defs/dist/index.js');
   const defs = await import(pathToFileURL(defsPath).href);
-  const list = [
-    defs.TextManifest,
-    defs.ButtonManifest,
-    defs.RowManifest,
-    defs.ColumnManifest,
-  ].filter(Boolean);
-  return list;
+  return [defs.TextManifest, defs.ButtonManifest, defs.RowManifest, defs.ColumnManifest].filter(
+    Boolean,
+  );
 }
 
-function js(obj) {
-  return JSON.stringify(obj);
+function childModeFor(manifest) {
+  switch (manifest.children?.kind) {
+    case 'none':
+      return 'none';
+    case 'text':
+      return 'text';
+    case 'nodes':
+    case 'slots':
+      return 'nodes';
+    default:
+      return 'none';
+  }
+}
+
+function buildConfig(manifest) {
+  const config = {
+    children: childModeFor(manifest),
+  };
+
+  if (manifest.children?.kind === 'text') {
+    config.mapToProp = manifest.children.mapToProp || 'text';
+  }
+
+  if (manifest.aliases && Object.keys(manifest.aliases).length > 0) {
+    config.aliases = manifest.aliases;
+  }
+
+  return config;
+}
+
+function render(manifests) {
+  const lines = [
+    '// AUTO-GENERATED. Do not edit.',
+    "import { createNode } from '../glue/runtime.js';",
+    '',
+  ];
+
+  for (const manifest of manifests) {
+    const cfg = JSON.stringify(buildConfig(manifest));
+    lines.push(`export function ${manifest.type}(props: any): any {`);
+    lines.push(`  return createNode(${JSON.stringify(manifest.type)}, props, ${cfg});`);
+    lines.push('}');
+  }
+
+  lines.push('');
+  return lines.join('\n');
 }
 
 async function run() {
   const manifests = await loadManifests();
-
-  const lines = [];
-  lines.push(`// AUTO-GENERATED. Do not edit.`);
-  lines.push(`import type { BDUIElement } from '../types';`);
-  lines.push(`import { normalizeActions } from '../actions-normalize';`);
-  lines.push(`import { toJsonValue } from '../expr';`);
-  lines.push('');
-  lines.push(`
-type ChildMode = 'none' | 'text' | 'nodes';
-type NodeCfg = { children: ChildMode; mapToProp?: string; aliases?: Record<string, string> };
-
-function node<T extends BDUIElement['type']>(
-  type: T,
-  props: any,
-  cfg: NodeCfg
-): any {
-  const { children, onAction, ...rest } = props ?? {};
-  const cleaned: Record<string, any> = {};
-
-  if (cfg.aliases) {
-    for (const k in cfg.aliases) {
-      if (Object.prototype.hasOwnProperty.call(rest, k) && rest[k] !== undefined) {
-        const real = cfg.aliases[k]!;
-        rest[real] = rest[k];
-        delete rest[k];
-      }
-    }
-  }
-
-  for (const [k, v] of Object.entries(rest as Record<string, any>)) {
-    if (v === undefined) continue;
-    cleaned[k] = toJsonValue(v);
-  }
-
-  if (onAction !== undefined) {
-    (cleaned as any).onAction = normalizeActions(onAction);
-  }
-
-  if (cfg.children === 'text') {
-    if (children !== undefined) {
-      const toText = (c: any): string => {
-        const v = toJsonValue(c);
-        return v == null ? '' : String(v);
-      };
-      const textValue = Array.isArray(children)
-        ? children.flat().map(toText).join('')
-        : toText(children);
-
-      cleaned[cfg.mapToProp || 'text'] = textValue;
-    }
-    return { type, ...cleaned } as any;
-  }
-
-  const n: any = { type, ...cleaned };
-  if (cfg.children === 'nodes' && children !== undefined) {
-    n.children = Array.isArray(children) ? children.flat() : [children];
-  }
-  return n as any;
-}
-`);
-
-  for (const m of manifests) {
-    const cfg = {
-      children: m.children.kind === 'none' ? 'none' : m.children.kind === 'text' ? 'text' : 'nodes',
-      mapToProp: m.children.kind === 'text' ? m.children.mapToProp || 'text' : undefined,
-      aliases: m.aliases || undefined,
-    };
-    lines.push(
-      `export function ${m.type}(props: any): any { return node(${js(m.type)}, props, ${js(cfg)}); }`,
-    );
-  }
-
   const outPath = path.resolve(__dirname, '../src/generated/components.ts');
+  const contents = render(manifests);
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, lines.join('\n'), 'utf-8');
+  fs.writeFileSync(outPath, contents, 'utf-8');
   console.log('Generated DSL components at', outPath);
 }
 

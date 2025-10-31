@@ -17,17 +17,17 @@ export type ChildrenModel =
     }
   | {
       kind: 'slots';
-      slots: Record<
-        string,
-        | 'none'
-        | 'text'
-        | 'nodes'
-        | {
-            kind: 'text' | 'nodes';
-            required?: boolean;
-          }
-      >;
+      slots: SlotsDefinition;
     };
+export type SlotDeclaration =
+  | 'none'
+  | 'text'
+  | 'nodes'
+  | {
+      kind: 'text' | 'nodes';
+      required?: boolean;
+    };
+export type SlotsDefinition = Record<string, SlotDeclaration>;
 export type EventsDecl = string[];
 export type Aliases = Record<string, string>;
 export type ComponentManifest = {
@@ -41,7 +41,7 @@ export declare function children(): {
   none(): ChildrenModel;
   text(opts?: { mapToProp?: string; required?: boolean }): ChildrenModel;
   nodes(opts?: { min?: number; max?: number }): ChildrenModel;
-  slots(slots: any): ChildrenModel;
+  slots(slots: SlotsDefinition): ChildrenModel;
 };
 export declare function Component(cfg: {
   name: string;

@@ -12,6 +12,11 @@
     "build": "tsc -p tsconfig.json",
     "clean": "rimraf dist || true"
   },
+  "dependencies": {
+    "@bdui/common": "file:../common",
+    "@bdui/defs": "file:../defs",
+    "@bdui/dsl": "file:../dsl"
+  },
   "devDependencies": {
     "typescript": "^5.6.3",
     "@types/node": "^22.7.5",

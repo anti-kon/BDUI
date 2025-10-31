@@ -4,17 +4,25 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./components/web": "./dist/components/web/index.js",
-    "./components/web/jsx-runtime": "./dist/components/web/jsx-runtime.js"
+    "./web-renderers": "./dist/web-renderers/index.js",
+    "./web-renderers/jsx-runtime": "./dist/web-renderers/jsx-runtime.js",
+    "./components/web": "./dist/web-renderers/index.js",
+    "./components/web/jsx-runtime": "./dist/web-renderers/jsx-runtime.js"
   },
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
+      "web-renderers": [
+        "dist/web-renderers/index.d.ts"
+      ],
+      "web-renderers/jsx-runtime": [
+        "dist/web-renderers/jsx-runtime.d.ts"
+      ],
       "components/web": [
-        "dist/components/web/index.d.ts"
+        "dist/web-renderers/index.d.ts"
       ],
       "components/web/jsx-runtime": [
-        "dist/components/web/jsx-runtime.d.ts"
+        "dist/web-renderers/jsx-runtime.d.ts"
       ]
     }
   },

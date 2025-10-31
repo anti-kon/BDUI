@@ -1,4 +1,6 @@
-export type Contract = any;
+import type { Contract as ContractDocument } from '@bdui/common';
+
+export type Contract = ContractDocument;
 
 export type PublishRequest = {
   contract: Contract;

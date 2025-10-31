@@ -2,25 +2,22 @@ import ButtonDefinition from './Button/manifest.js';
 import ColumnDefinition from './Column/manifest.js';
 import RowDefinition from './Row/manifest.js';
 import TextDefinition from './Text/manifest.js';
-export const componentDefinitions = Object.freeze([
+import { createComponentRegistry } from './registry.js';
+const baseComponentDefinitions = [
   ButtonDefinition,
   ColumnDefinition,
   RowDefinition,
   TextDefinition,
-]);
-export const componentDefinitionMap = new Map(
-  componentDefinitions.map((definition) => [definition.manifest.type, definition]),
-);
+];
+export const componentRegistry = createComponentRegistry(baseComponentDefinitions);
+export const componentDefinitions = componentRegistry.definitions;
+export const componentDefinitionMap = new Map(componentRegistry.definitionMap);
 export function getComponentDefinition(type) {
-  return componentDefinitionMap.get(type);
+  return componentRegistry.getDefinition(type);
 }
-export const webComponentRenderers = new Map();
-for (const definition of componentDefinitions) {
-  const renderer = definition.renderers.web;
-  if (renderer) {
-    webComponentRenderers.set(definition.manifest.type, renderer);
-  }
+export function getComponentRendererByPlatform(platform, type) {
+  return componentRegistry.getRendererByPlatform(platform, type);
 }
 export function getWebComponentRenderer(type) {
-  return webComponentRenderers.get(type);
+  return componentRegistry.getRenderer(type);
 }

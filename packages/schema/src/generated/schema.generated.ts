@@ -120,7 +120,7 @@ export const contractSchema = {
       required: ['type'],
       properties: {
         type: {
-          enum: ['Text', 'Button', 'Row', 'Column'],
+          enum: ['Button', 'Column', 'Row', 'Text'],
         },
         id: {
           type: 'string',
@@ -140,33 +140,6 @@ export const contractSchema = {
       },
       additionalProperties: true,
       allOf: [
-        {
-          if: {
-            properties: {
-              type: {
-                const: 'Text',
-              },
-            },
-          },
-          then: {
-            type: 'object',
-            properties: {
-              id: {
-                type: 'string',
-              },
-              modifiers: {
-                type: 'object',
-                additionalProperties: {},
-              },
-              text: {},
-              type: {
-                const: 'Text',
-              },
-            },
-            required: ['type'],
-            additionalProperties: true,
-          },
-        },
         {
           if: {
             properties: {
@@ -209,6 +182,38 @@ export const contractSchema = {
           if: {
             properties: {
               type: {
+                const: 'Column',
+              },
+            },
+          },
+          then: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+              },
+              modifiers: {
+                type: 'object',
+                additionalProperties: {},
+              },
+              children: {
+                type: 'array',
+                items: {
+                  $ref: '#/$defs/Node',
+                },
+              },
+              type: {
+                const: 'Column',
+              },
+            },
+            required: ['type'],
+            additionalProperties: true,
+          },
+        },
+        {
+          if: {
+            properties: {
+              type: {
                 const: 'Row',
               },
             },
@@ -241,7 +246,7 @@ export const contractSchema = {
           if: {
             properties: {
               type: {
-                const: 'Column',
+                const: 'Text',
               },
             },
           },
@@ -255,14 +260,9 @@ export const contractSchema = {
                 type: 'object',
                 additionalProperties: {},
               },
-              children: {
-                type: 'array',
-                items: {
-                  $ref: '#/$defs/Node',
-                },
-              },
+              text: {},
               type: {
-                const: 'Column',
+                const: 'Text',
               },
             },
             required: ['type'],
