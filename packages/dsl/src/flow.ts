@@ -1,35 +1,27 @@
-import type { FlowRouteScreen, FlowStep, FlowTransition, RuntimeStateLike } from './types.js';
+import type { FlowRouteScreen, FlowStep, FlowTransition, RuntimeStateLike } from '@bdui/core';
+import { decodeExpr } from '@bdui/core';
+import { evalExpression } from '@bdui/expr';
 
-type GuardEvaluator = (
-  flow: Record<string, unknown>,
-  session: Record<string, unknown>,
-  local: Record<string, unknown>,
-) => unknown;
-
-const guardCache = new Map<string, GuardEvaluator>();
-
-function compileGuard(expr: string): GuardEvaluator {
-  if (!guardCache.has(expr)) {
-    const fn = new Function('flow', 'session', 'local', `return (${expr});`);
-    guardCache.set(expr, fn as GuardEvaluator);
-  }
-  return guardCache.get(expr)!;
-}
-
-function evaluateGuard(transition: FlowTransition, state: RuntimeStateLike): boolean {
+export function evaluateGuard(transition: FlowTransition, state: RuntimeStateLike): boolean {
   if (!transition.guard) return true;
   try {
-    const evaluator = compileGuard(transition.guard);
-    return !!evaluator(state.flow ?? {}, state.session ?? {}, state.local ?? {});
+    const code = transition.guard.code;
+    const result = evalExpression(code, state);
+    return Boolean(result);
   } catch {
     return false;
   }
 }
 
-export type FlowResolution = {
-  step: FlowStep;
-  stepId: string;
-};
+/**
+ * Resolve the next flow step given current state and the starting step id.
+ * If any transition guard evaluates to truthy, the first matching target
+ * becomes the next step; otherwise the starting step is returned unchanged.
+ */
+export interface FlowResolution {
+  readonly step: FlowStep;
+  readonly stepId: string;
+}
 
 export function resolveFlowStep(
   route: FlowRouteScreen,
@@ -41,21 +33,15 @@ export function resolveFlowStep(
     throw new Error(`Flow route "${route.id}" has no steps defined.`);
   }
 
-  const stepMap = new Map<string, FlowStep>(steps.map((step) => [step.id, step]));
+  const stepMap = new Map(steps.map((s) => [s.id, s] as const));
   const startId = currentStepId ?? route.startStep;
-
   let current = stepMap.get(startId);
-  if (!current) {
-    throw new Error(`Step not found: ${startId}`);
-  }
+  if (!current) throw new Error(`Step not found: "${startId}"`);
 
-  const transitions = current.transitions ?? [];
-  for (const transition of transitions) {
+  for (const transition of current.transitions ?? []) {
     if (evaluateGuard(transition, state)) {
       const next = stepMap.get(transition.to);
-      if (next) {
-        current = next;
-      }
+      if (next) current = next;
       break;
     }
   }
@@ -63,6 +49,12 @@ export function resolveFlowStep(
   return { step: current, stepId: current.id };
 }
 
-export function clearGuardCache() {
-  guardCache.clear();
+/** Helper used by builders to produce a guard from a source string or ExprRef. */
+export function asGuardExpr(value: string | { code: string } | undefined) {
+  if (value == null) return undefined;
+  if (typeof value === 'string') {
+    const decoded = decodeExpr(value);
+    return { __bduiExpr: true as const, code: decoded ?? value };
+  }
+  return { __bduiExpr: true as const, code: value.code };
 }

@@ -1,13 +1,14 @@
-import type { BDUIElement, RouteScreen } from './shared.js';
+import type { BDUIElement, RouteScreen } from '@bdui/core';
+
 import { createNode, ensureComponentNode, type Maybe, normalizeList } from './shared.js';
 
-type RouteProps = {
+export interface RouteProps {
   id: string;
   title?: string;
   path?: string;
-  cache?: Record<string, unknown>;
-  children?: Maybe<BDUIElement | BDUIElement[]>;
-};
+  cache?: Readonly<Record<string, unknown>>;
+  children?: Maybe<BDUIElement | readonly BDUIElement[]>;
+}
 
 export function Route({ id, title, path, cache, children }: RouteProps) {
   const nodes = normalizeList<BDUIElement>(children);

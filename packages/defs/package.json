@@ -1,13 +1,16 @@
 {
   "name": "@bdui/defs",
-  "version": "0.5.0",
+  "version": "0.6.0-alpha.0",
+  "description": "BDUI component manifests and web renderers",
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
     "./web-renderers": "./dist/web-renderers/index.js",
     "./web-renderers/jsx-runtime": "./dist/web-renderers/jsx-runtime.js",
+    "./web-renderers/jsx-dev-runtime": "./dist/web-renderers/jsx-dev-runtime.js",
     "./components/web": "./dist/web-renderers/index.js",
-    "./components/web/jsx-runtime": "./dist/web-renderers/jsx-runtime.js"
+    "./components/web/jsx-runtime": "./dist/web-renderers/jsx-runtime.js",
+    "./components/web/jsx-dev-runtime": "./dist/web-renderers/jsx-dev-runtime.js"
   },
   "types": "./dist/index.d.ts",
   "typesVersions": {
@@ -18,11 +21,17 @@
       "web-renderers/jsx-runtime": [
         "dist/web-renderers/jsx-runtime.d.ts"
       ],
+      "web-renderers/jsx-dev-runtime": [
+        "dist/web-renderers/jsx-dev-runtime.d.ts"
+      ],
       "components/web": [
         "dist/web-renderers/index.d.ts"
       ],
       "components/web/jsx-runtime": [
         "dist/web-renderers/jsx-runtime.d.ts"
+      ],
+      "components/web/jsx-dev-runtime": [
+        "dist/web-renderers/jsx-dev-runtime.d.ts"
       ]
     }
   },
@@ -32,9 +41,14 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@bdui/core": "file:../core"
   },
   "devDependencies": {
+    "rimraf": "^6.0.1",
     "typescript": "^5.6.3"
   }
 }

@@ -1,1 +1,2 @@
-export * from '@bdui/common';
+export * from '@bdui/core';
+//# sourceMappingURL=types.js.map

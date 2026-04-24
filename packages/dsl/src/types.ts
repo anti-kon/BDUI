@@ -1,1 +1,1 @@
-export * from '@bdui/common';
+export * from '@bdui/core';

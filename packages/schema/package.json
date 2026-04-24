@@ -1,6 +1,7 @@
 {
   "name": "@bdui/schema",
-  "version": "0.5.0",
+  "version": "0.6.0-alpha.0",
+  "description": "BDUI JSON Schema generator and runtime validator",
   "type": "module",
   "exports": {
     ".": "./dist/index.js"
@@ -13,15 +14,18 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/common": "file:../common",
-    "ajv": "^8.17.1"
+    "@bdui/core": "file:../core",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
+    "chokidar": "^4.0.1",
+    "rimraf": "^6.0.1",
     "ts-json-schema-generator": "^1.5.1",
-    "chokidar": "^4.0.1"
+    "typescript": "^5.6.3"
   }
 }

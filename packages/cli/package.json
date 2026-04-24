@@ -1,6 +1,7 @@
 {
   "name": "@bdui/cli",
-  "version": "0.5.0",
+  "version": "0.6.0-alpha.0",
+  "description": "BDUI command-line interface",
   "type": "module",
   "bin": {
     "bdui": "./dist/bin.js"
@@ -10,13 +11,19 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist"
   },
   "dependencies": {
+    "@bdui/core": "file:../core",
+    "@bdui/dsl": "file:../dsl",
+    "@bdui/registry": "file:../registry",
+    "@bdui/schema": "file:../schema",
     "@bdui/transpiler": "file:../transpiler",
     "commander": "^12.1.0"
   },
   "devDependencies": {
+    "rimraf": "^6.0.1",
     "typescript": "^5.6.3"
   }
 }

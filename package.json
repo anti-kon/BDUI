@@ -1,7 +1,8 @@
 {
   "name": "bdui",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.6.0-alpha.0",
+  "description": "Open cross-platform Backend-Driven UI stack (TSX DSL + JSON contract + web/mobile renderers)",
   "packageManager": "npm@10",
   "workspaces": [
     "packages/*"
@@ -10,9 +11,21 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "clean": "rimraf --glob \"packages/**/dist\" \"sandbox/**/.bdui-build.*\"",
+    "clean": "rimraf --glob \"packages/**/dist\" \"sandbox/**/.bdui-build.*\" \"**/.vitest-cache\"",
     "gen": "node packages/schema/scripts/generate.cjs && node packages/dsl/scripts/generate-glue.cjs",
-    "build:full": "npm run -w packages/common build && npm run -w packages/defs build && npm run gen && npm run -w packages/schema build && npm run gen && npm run -w packages/dsl build && npm run -w packages/transpiler build && npm run -w packages/cli build",
+    "build:core": "npm run -w packages/core build",
+    "build:expr": "npm run -w packages/expr build",
+    "build:defs": "npm run -w packages/defs build",
+    "build:schema": "npm run -w packages/schema build",
+    "build:dsl": "npm run -w packages/dsl build",
+    "build:runtime": "npm run -w packages/runtime build",
+    "build:transpiler": "npm run -w packages/transpiler build",
+    "build:registry": "npm run -w packages/registry build",
+    "build:renderer-web": "npm run -w packages/renderer-web build",
+    "build:cli": "npm run -w packages/cli build",
+    "build:sdk": "npm run -w packages/sdk build",
+    "build:full": "npm run build:core && npm run build:expr && npm run build:defs && npm run gen && npm run build:schema && npm run gen && npm run build:dsl && npm run build:runtime && npm run build:transpiler && npm run build:registry && npm run build:renderer-web && npm run build:sdk && npm run build:cli",
+    "build:contracts": "node scripts/build-contract-artifacts.cjs",
     "build": "npm run build:full",
     "bdui": "node packages/cli/dist/bin.js",
     "bootstrap": "npm i && npm run build:full",
@@ -20,12 +33,33 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "demo:web": "node scripts/prepare-web-demo.cjs && npx serve sandbox/web-demo"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -p tsconfig.typecheck.json",
+    "audit:all": "npm audit --audit-level=moderate && npm --prefix examples/task-manager audit --audit-level=moderate",
+    "prepare:web-demo": "node scripts/prepare-web-demo.cjs",
+    "verify:generated-contracts": "node scripts/verify-generated-contracts.cjs",
+    "verify:examples": "npm --prefix examples/task-manager run typecheck && npm --prefix examples/task-manager run build:contract && npm --prefix examples/task-manager run build:client && npm --prefix examples/task-manager run build:server",
+    "verify:contracts": "node scripts/verify-contract-artifacts.cjs",
+    "verify:browser": "npm run verify:web-demo && node scripts/verify-web-demo-browser.cjs",
+    "verify:browsers": "npm run verify:web-demo && node scripts/verify-web-demo-browser.cjs all",
+    "verify:native": "node scripts/verify-native-coverage.cjs",
+    "verify:all": "npm run build:full && npm run verify:generated-contracts && npm run verify:examples && npm run typecheck && npm run lint && npm run format:check && npm test -- --reporter=default && npm run test:coverage && npm run verify:contracts && npm run verify:native && npm run verify:web-demo && npm run audit:all",
+    "verify:web-demo": "node scripts/verify-web-demo-artifacts.cjs",
+    "verify:web-demo:committed": "node scripts/verify-web-demo-artifacts.cjs --committed",
+    "demo:web": "node scripts/prepare-web-demo.cjs && npx serve sandbox/web-demo",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "changeset publish"
   },
   "devDependencies": {
     "@bdui/cli": "file:packages/cli",
+    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^9.37.0",
+    "@playwright/test": "^1.60.0",
     "@types/node": "^22.7.5",
+    "@vitest/coverage-v8": "^4.1.8",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-import": "^2.32.0",
@@ -34,9 +68,11 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
+    "happy-dom": "^20.10.3",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
     "typescript": "^5.6.3",
-    "typescript-eslint": "^8.46.1"
+    "typescript-eslint": "^8.46.1",
+    "vitest": "^4.1.8"
   }
 }

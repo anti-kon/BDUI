@@ -1,3 +1,4 @@
+export * from './actions-normalize.js';
 export { Contract } from './builders/contract.js';
 export { FlowRoute } from './builders/flowRoute.js';
 export { Navigation } from './builders/navigation.js';

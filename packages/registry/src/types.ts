@@ -1,32 +1,30 @@
-import type { Contract as ContractDocument } from '@bdui/common';
+import type { Contract, RuntimeStateLike } from '@bdui/core';
 
-export type Contract = ContractDocument;
+export type StoredContract = {
+  readonly contractId: string;
+  readonly version: string;
+  readonly contract: Contract;
+  readonly etag: string;
+  readonly createdAt: string;
+  readonly tags: readonly string[];
+  readonly compatFrom?: string;
+};
+
+export type ResolveParams = {
+  readonly contractId: string;
+  readonly version?: string;
+  readonly compatFrom?: string;
+  readonly routeId?: string;
+  readonly currentStepId?: string;
+  readonly state?: RuntimeStateLike;
+};
+
+export type ResolveVersionResult = {
+  readonly stored: StoredContract;
+};
 
 export type PublishRequest = {
-  contract: Contract;
-  tags?: string[];
-};
-
-export type ResolveRequest = {
-  contractId: string;
-  version?: string;
-  routeId: string;
-  state?: {
-    flow?: Record<string, unknown>;
-    session?: Record<string, unknown>;
-    local?: Record<string, unknown>;
-  };
-  currentStepId?: string;
-};
-
-export type AdvanceRequest = {
-  contractId: string;
-  version?: string;
-  routeId: string;
-  currentStepId: string;
-  state?: {
-    flow?: Record<string, unknown>;
-    session?: Record<string, unknown>;
-    local?: Record<string, unknown>;
-  };
+  readonly contract: Contract;
+  readonly tags?: readonly string[];
+  readonly compatFrom?: string;
 };

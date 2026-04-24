@@ -1,6 +1,7 @@
 {
   "name": "@bdui/dsl",
-  "version": "0.5.0",
+  "version": "0.6.0-alpha.0",
+  "description": "BDUI authoring DSL: JSX runtime + builders + SAL shorthand",
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
@@ -18,12 +19,16 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/common": "file:../common"
+    "@bdui/core": "file:../core",
+    "@bdui/defs": "file:../defs",
+    "@bdui/expr": "file:../expr"
   },
   "devDependencies": {
+    "rimraf": "^6.0.1",
     "typescript": "^5.6.3"
   }
 }

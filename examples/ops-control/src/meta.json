@@ -1,0 +1,11 @@
+{
+  "contractId": "campus_mobile",
+  "version": "0.6.0",
+  "compatFrom": "0.6.0",
+  "appId": "dev.bdui.campus",
+  "features": {
+    "nativeRenderers": ["android-compose", "ios-swiftui"],
+    "language": "ru",
+    "screens": ["home", "schedule", "assignments", "deanery", "pass", "settings", "deanery-request"]
+  }
+}

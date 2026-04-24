@@ -1,17 +1,18 @@
 import type {
-  AnyDslNode,
   AppRoute,
   FlowRouteScreen,
-  NavigationType,
+  Navigation as NavigationType,
   RouteScreen,
-} from './shared.js';
+} from '@bdui/core';
+
+import type { AnyDslNode } from './shared.js';
 import { createNode, normalizeList } from './shared.js';
 
-type NavigationProps = {
+export interface NavigationProps {
   initialRoute: string;
   urlSync?: boolean;
-  children?: AnyDslNode | AnyDslNode[] | null | undefined | false;
-};
+  children?: AnyDslNode | readonly AnyDslNode[] | null | undefined | false;
+}
 
 export function Navigation({ initialRoute, urlSync, children }: NavigationProps) {
   const nodes = normalizeList<AnyDslNode>(children);

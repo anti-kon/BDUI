@@ -1,56 +1,150 @@
-import { E } from './expr.js';
-import type { InitialState, Scope } from './types.js';
+import type { Binding, InitialState, Scope } from '@bdui/core';
 
-type Var<T> = { scope: Scope; path: string; name: string };
+import { E, type Expr } from './expr.js';
 
-type FlowVar<T> = Var<T> & { _kind: 'flow' };
-type SessionVar<T> = Var<T> & { _kind: 'session' };
-type LocalVar<T> = Var<T> & { _kind: 'local' };
+/**
+ * A typed state variable handle. Produced by `Flow()`, `Session()`, `Local()`.
+ * Carries scope/path metadata, an optional initial value, and a brand used by
+ * DSL builders (`bind(...)`, `use(...)`, action shorthands).
+ */
+export interface StateVar<T = unknown> extends Binding {
+  readonly __var: true;
+  readonly name: string;
+  /** Only present for scopes that support initial values (flow/session). */
+  readonly initialValue?: T;
+}
 
-type MutableInitialState = {
-  flow: Record<string, unknown>;
-  session: Record<string, unknown>;
+export interface FlowVar<T = unknown> extends StateVar<T> {
+  readonly scope: 'flow';
+}
+export interface SessionVar<T = unknown> extends StateVar<T> {
+  readonly scope: 'session';
+}
+export interface LocalVar<T = unknown> extends StateVar<T> {
+  readonly scope: 'local';
+}
+
+export interface DeclaredInitialState extends InitialState {
+  readonly flow: Record<string, unknown>;
+  readonly session: Record<string, unknown>;
+}
+
+/**
+ * Collector of initial state. Each call to `Flow("x", default)` or
+ * `Session("y", default)` with a non-undefined default registers the value
+ * with the currently active collector (if any). This avoids the previous
+ * module-level mutable state.
+ */
+export interface StateCollector {
+  declare(scope: Scope, name: string, value: unknown): void;
+  snapshot(): DeclaredInitialState;
+}
+
+let activeCollector: StateCollector | null = null;
+
+const moduleDefaults: { flow: Record<string, unknown>; session: Record<string, unknown> } = {
+  flow: {},
+  session: {},
 };
 
-const initial: MutableInitialState = { flow: {}, session: {} };
+export function createStateCollector(): StateCollector {
+  const flow: Record<string, unknown> = {};
+  const session: Record<string, unknown> = {};
 
-function cloneInitial<T>(value: T): T {
-  const structured = (
-    globalThis as typeof globalThis & {
-      structuredClone?: <U>(input: U) => U;
-    }
-  ).structuredClone;
-  if (typeof structured === 'function') {
-    return structured(value);
+  return {
+    declare(scope, name, value) {
+      if (value === undefined) return;
+      if (scope === 'flow') flow[name] = clone(value);
+      else if (scope === 'session') session[name] = clone(value);
+      // 'local' scope has no declared defaults.
+    },
+    snapshot() {
+      return {
+        flow: { ...clone(moduleDefaults.flow), ...clone(flow) },
+        session: { ...clone(moduleDefaults.session), ...clone(session) },
+      };
+    },
+  };
+}
+
+export function withStateCollector<T>(collector: StateCollector, fn: () => T): T {
+  const prev = activeCollector;
+  activeCollector = collector;
+  try {
+    return fn();
+  } finally {
+    activeCollector = prev;
   }
+}
+
+/**
+ * Clears module-level default accumulator. Exposed for tests and tools that
+ * build several independent contracts in the same process.
+ */
+export function resetModuleDefaults(): void {
+  moduleDefaults.flow = {};
+  moduleDefaults.session = {};
+}
+
+function declareVar(scope: Scope, name: string, initialValue: unknown): void {
+  if (activeCollector) {
+    activeCollector.declare(scope, name, initialValue);
+  }
+  if (scope === 'flow' || scope === 'session') {
+    moduleDefaults[scope][name] = clone(initialValue);
+  }
+}
+
+function clone<T>(value: T): T {
+  const sc = (globalThis as { structuredClone?: <U>(u: U) => U }).structuredClone;
+  if (typeof sc === 'function') return sc(value);
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function makeVar<T>(scope: Scope, name: string, initialValue?: T): Var<T> {
-  if ((scope === 'flow' || scope === 'session') && initialValue !== undefined) {
-    (initial as any)[scope]![name] = initialValue;
+function makeVar<T, S extends Scope>(
+  scope: S,
+  name: string,
+  initialValue?: T,
+): StateVar<T> & {
+  readonly scope: S;
+} {
+  if (!name || typeof name !== 'string') {
+    throw new Error('State variable name must be a non-empty string');
   }
-  return { scope, path: name, name };
+  if (initialValue !== undefined && (scope === 'flow' || scope === 'session')) {
+    declareVar(scope, name, initialValue);
+  }
+  return { __var: true, scope, name, path: name, initialValue };
 }
 
-export function Flow<T = any>(name: string, initialValue?: T): FlowVar<T> {
-  return Object.assign(makeVar<T>('flow', name, initialValue), { _kind: 'flow' as const });
-}
-export function Session<T = any>(name: string, initialValue?: T): SessionVar<T> {
-  return Object.assign(makeVar<T>('session', name, initialValue), { _kind: 'session' as const });
-}
-export function Local<T = any>(name: string): LocalVar<T> {
-  return Object.assign(makeVar<T>('local', name), { _kind: 'local' as const });
+export function Flow<T>(name: string, initialValue?: T): FlowVar<T> {
+  return makeVar<T, 'flow'>('flow', name, initialValue);
 }
 
-export function use<T>(v: Var<T>) {
-  return E(`${v.scope}.${v.path}`);
+export function Session<T>(name: string, initialValue?: T): SessionVar<T> {
+  return makeVar<T, 'session'>('session', name, initialValue);
 }
 
-export function __collectInitial(): InitialState {
-  const snapshot = {
-    flow: cloneInitial(initial.flow),
-    session: cloneInitial(initial.session),
-  } satisfies InitialState;
-  return snapshot;
+export function Local<T>(name: string): LocalVar<T> {
+  return makeVar<T, 'local'>('local', name);
+}
+
+/** Produce an expression referencing the state var. */
+export function use<T>(v: StateVar<T>): Expr<T> {
+  return E<T>(`${v.scope}.${v.path}`);
+}
+
+/** Produce a two-way binding descriptor. */
+export function bind<T>(v: StateVar<T>): Binding {
+  return { scope: v.scope, path: v.path };
+}
+
+export function isStateVar(value: unknown): value is StateVar {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { __var?: unknown }).__var === true &&
+    typeof (value as { scope?: unknown }).scope === 'string' &&
+    typeof (value as { path?: unknown }).path === 'string'
+  );
 }

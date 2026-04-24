@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.x']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Taskly example dependencies
+        run: npm --prefix examples/task-manager ci
+
+      - name: Bootstrap (generate schema/glue + build all packages)
+        run: npm run build:full
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Generated contract source check
+        run: npm run verify:generated-contracts
+
+      - name: Taskly standalone verification
+        run: npm run verify:examples
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Prettier check
+        run: npm run format:check
+
+      - name: Test (vitest)
+        run: npm test -- --reporter=default
+
+      - name: Coverage gate
+        run: npm run test:coverage
+
+      - name: Contract artifact verification
+        run: npm run verify:contracts
+
+      - name: Native renderer coverage
+        run: npm run verify:native
+
+      - name: Web demo artifact verification
+        run: npm run verify:web-demo
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Browser smoke (Chromium, Firefox, WebKit)
+        run: npm run verify:browsers
+
+      - name: Dependency audit
+        run: npm run audit:all
+
+  android:
+    name: android native build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10.2
+
+      - name: Assemble Android debug app
+        run: gradle -p native/android :app:assembleDebug
+
+  ios:
+    name: ios native typecheck
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Typecheck SwiftUI renderer for iOS simulator
+        run: |
+          SDK_PATH="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+          xcrun swiftc \
+            -typecheck \
+            -target arm64-apple-ios16.0-simulator \
+            -sdk "$SDK_PATH" \
+            native/ios/OpsControl/*.swift
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    needs: [verify, android, ios]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build:full
+
+      - name: Create Release PR or Publish
+        uses: changesets/action@v1
+        with:
+          publish: npx changeset publish
+          version: npx changeset version
+          commit: 'chore(release): version packages'
+          title: 'chore(release): version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

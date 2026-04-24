@@ -1,6 +1,16 @@
 node_modules/
+coverage/
+sandbox/web-demo/vendor/
 **/dist/**
 **/.bdui-build.*
 package-lock.json
+examples/**/node_modules/**
+examples/**/dist/**
+examples/**/public/client.js
+examples/**/public/client.js.map
+examples/**/public/contract.json
+examples/**/contract.json
+sandbox/**/contract.json
+native/**/campus.contract.json
 
 

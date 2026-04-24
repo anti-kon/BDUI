@@ -2,7 +2,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { loadManifests } = require('./lib/manifests.cjs');
-const { createPropsSchemaLoader, buildContractSchema } = require('./lib/schema-builder.cjs');
+const {
+  createPropsSchemaLoader,
+  createCoreTypeLoader,
+  buildContractSchema,
+  buildActionDefs,
+} = require('./lib/schema-builder.cjs');
 
 const args = new Set(process.argv.slice(2));
 const watchMode = args.has('--watch');
@@ -11,17 +16,34 @@ const inspectMode = args.has('--inspect');
 const defsSrcGlob = path.resolve(__dirname, '../../defs/src/**/*.ts');
 const defsTsconfig = path.resolve(__dirname, '../../defs/tsconfig.json');
 const defsBundle = path.resolve(__dirname, '../../defs/dist/index.js');
+const coreSrcGlob = path.resolve(__dirname, '../../core/src/**/*.ts');
+const coreTsconfig = path.resolve(__dirname, '../../core/tsconfig.json');
 const outPath = path.resolve(__dirname, '../src/generated/schema.generated.ts');
+
+async function formatTypeScript(source) {
+  const prettier = await import('prettier');
+  return prettier.format(source, {
+    parser: 'typescript',
+    singleQuote: true,
+    trailingComma: 'all',
+  });
+}
 
 const loadPropsSchema = createPropsSchemaLoader({
   sourceGlob: defsSrcGlob,
   tsconfigPath: defsTsconfig,
 });
 
+const loadCoreTypeSchema = createCoreTypeLoader({
+  sourceGlob: coreSrcGlob,
+  tsconfigPath: coreTsconfig,
+});
+
 async function buildSchema() {
   const manifests = await loadManifests(defsBundle);
   const perComponentSchemas = manifests.map((manifest) => loadPropsSchema(manifest.propsTypeName));
-  const contractSchema = buildContractSchema(manifests, perComponentSchemas);
+  const actionDefs = buildActionDefs(loadCoreTypeSchema);
+  const contractSchema = buildContractSchema(manifests, perComponentSchemas, actionDefs);
 
   const lines = [
     '// AUTO-GENERATED. Do not edit.',
@@ -30,7 +52,7 @@ async function buildSchema() {
   ];
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, lines.join('\n'), 'utf-8');
+  fs.writeFileSync(outPath, await formatTypeScript(lines.join('\n')), 'utf-8');
 
   if (inspectMode) {
     const manifestSummary = manifests.map((manifest) => ({
@@ -39,6 +61,7 @@ async function buildSchema() {
       events: manifest.events ?? [],
     }));
     console.log('[schema] manifests:', manifestSummary);
+    console.log('[schema] actionDefs:', Object.keys(actionDefs));
   }
 
   console.log('Generated schema at', outPath);
@@ -59,6 +82,7 @@ if (watchMode) {
   const chokidar = require('chokidar');
   const watcher = chokidar.watch([
     path.resolve(__dirname, '../../defs/src'),
+    path.resolve(__dirname, '../../core/src'),
     path.resolve(__dirname, '../'),
   ]);
 

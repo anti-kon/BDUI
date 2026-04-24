@@ -1,62 +1,70 @@
-import type { Theme } from './types.js';
+import type { Theme } from '@bdui/core';
 
-type Palette = {
-  light: { bg: string; fg: string; primary: string; [k: string]: any };
-  dark: { bg: string; fg: string; primary: string; [k: string]: any };
-};
+import { createNode, type DslNode } from './builders/shared.js';
 
-type ThemeProps = {
+export interface PaletteMode {
+  bg: string;
+  fg: string;
+  primary: string;
+  [token: string]: string;
+}
+
+export interface Palette {
+  light: PaletteMode;
+  dark: PaletteMode;
+}
+
+export interface ThemeProps {
   palette: Palette;
   followSystem?: boolean;
   allowUserOverride?: boolean;
-  tokens?: (p: Palette['light']) => Record<string, any>;
-};
+  tokens?: (p: PaletteMode) => Record<string, unknown>;
+}
 
-export function ThemeConfig(props: ThemeProps) {
-  const p = props.palette;
+export function ThemeConfig(props: ThemeProps): DslNode<'Theme', Theme> {
   const tokens = props.tokens
-    ? props.tokens(p.light)
+    ? props.tokens(props.palette.light)
     : {
         'text.body': { color: '{fg}' },
         'button.primary.bg': { color: '{primary}' },
       };
-  const json: Theme = {
+  const theme: Theme = {
     followSystem: props.followSystem ?? true,
     allowUserOverride: props.allowUserOverride ?? true,
-    palette: props.palette,
+    palette: props.palette as unknown as Record<string, unknown>,
     tokens,
-  } as any;
-  return { __kind: 'Theme', value: json } as const;
+  };
+  return createNode('Theme', theme);
 }
 
-type ThemeSimpleProps = {
+export interface ThemeSimpleProps {
   primary: string;
   background: string;
   darkBackground?: string;
   followSystem?: boolean;
   allowUserOverride?: boolean;
-  extendTokens?: (p: any) => Record<string, any>;
-};
-
-export namespace ThemeConfig {
-  export function Simple(props: ThemeSimpleProps) {
-    const palette: Palette = {
-      light: { bg: props.background, fg: '#111111', primary: props.primary },
-      dark: { bg: props.darkBackground ?? '#111111', fg: '#FFFFFF', primary: props.primary },
-    };
-    const baseTokens = {
-      'text.body': { color: '{fg}' },
-      'button.primary.bg': { color: '{primary}' },
-    };
-    const tokens = props.extendTokens
-      ? { ...baseTokens, ...props.extendTokens(palette.light) }
-      : baseTokens;
-    const json: Theme = {
-      followSystem: props.followSystem ?? true,
-      allowUserOverride: props.allowUserOverride ?? true,
-      palette,
-      tokens,
-    } as any;
-    return { __kind: 'Theme', value: json } as const;
-  }
+  extendTokens?: (p: PaletteMode) => Record<string, unknown>;
 }
+
+function simple(props: ThemeSimpleProps): DslNode<'Theme', Theme> {
+  const palette: Palette = {
+    light: { bg: props.background, fg: '#111111', primary: props.primary },
+    dark: { bg: props.darkBackground ?? '#111111', fg: '#FFFFFF', primary: props.primary },
+  };
+  const baseTokens = {
+    'text.body': { color: '{fg}' },
+    'button.primary.bg': { color: '{primary}' },
+  };
+  const tokens = props.extendTokens
+    ? { ...baseTokens, ...props.extendTokens(palette.light) }
+    : baseTokens;
+  const theme: Theme = {
+    followSystem: props.followSystem ?? true,
+    allowUserOverride: props.allowUserOverride ?? true,
+    palette: palette as unknown as Record<string, unknown>,
+    tokens,
+  };
+  return createNode('Theme', theme);
+}
+
+ThemeConfig.Simple = simple;

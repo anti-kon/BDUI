@@ -8,10 +8,14 @@ const rootDir = path.resolve(__dirname, '..');
 const demoDir = path.join(rootDir, 'sandbox', 'web-demo');
 const vendorDir = path.join(demoDir, 'vendor');
 
-const commonDist = path.join(rootDir, 'packages', 'common', 'dist');
-const defsDist = path.join(rootDir, 'packages', 'defs', 'dist');
-const dslDist = path.join(rootDir, 'packages', 'dsl', 'dist');
-const rendererDist = path.join(rootDir, 'packages', 'renderer-web', 'dist');
+const packagesToVendor = [
+  { name: '@bdui/core', dir: 'core' },
+  { name: '@bdui/expr', dir: 'expr' },
+  { name: '@bdui/runtime', dir: 'runtime' },
+  { name: '@bdui/defs', dir: 'defs' },
+  { name: '@bdui/dsl', dir: 'dsl' },
+  { name: '@bdui/renderer-web', dir: 'renderer-web' },
+];
 
 function run(cmd) {
   execSync(cmd, { stdio: 'inherit', cwd: rootDir, env: process.env });
@@ -33,30 +37,20 @@ function copyDir(src, dest) {
 }
 
 function ensureBuildOutputs() {
-  if (!fs.existsSync(commonDist)) {
-    run('npm run build -w @bdui/common');
-  }
-  if (!fs.existsSync(defsDist)) {
-    run('npm run build -w @bdui/defs');
-  }
-  if (!fs.existsSync(dslDist)) {
-    run('npm run build -w @bdui/dsl');
-  }
-  if (!fs.existsSync(rendererDist)) {
-    run('npm run build -w @bdui/renderer-web');
+  for (const pkg of packagesToVendor) {
+    const dist = path.join(rootDir, 'packages', pkg.dir, 'dist');
+    if (!fs.existsSync(dist)) {
+      run(`npm run build -w ${pkg.name}`);
+    }
   }
 }
 
 ensureBuildOutputs();
 
-const vendorCommonDir = path.join(vendorDir, 'common');
-const vendorDefsDir = path.join(vendorDir, 'defs');
-const vendorDslDir = path.join(vendorDir, 'dsl');
-const vendorRendererDir = path.join(vendorDir, 'renderer-web');
-
-copyDir(commonDist, vendorCommonDir);
-copyDir(defsDist, vendorDefsDir);
-copyDir(dslDist, vendorDslDir);
-copyDir(rendererDist, vendorRendererDir);
+for (const pkg of packagesToVendor) {
+  const dist = path.join(rootDir, 'packages', pkg.dir, 'dist');
+  const target = path.join(vendorDir, pkg.dir);
+  copyDir(dist, target);
+}
 
 console.log(`✔ BDUI web-demo is prepared in ${vendorDir}`);

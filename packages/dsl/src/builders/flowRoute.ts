@@ -1,13 +1,15 @@
-import type { AnyDslNode, DslNode, FlowRouteScreen, FlowStep } from './shared.js';
+import type { FlowPersistence, FlowRouteScreen, FlowStep } from '@bdui/core';
+
+import type { AnyDslNode, DslNode } from './shared.js';
 import { createNode, normalizeList } from './shared.js';
 
-type FlowRouteProps = {
+export interface FlowRouteProps {
   id: string;
   title?: string;
   startStep: string;
-  persistence?: Record<string, unknown>;
-  children?: AnyDslNode | AnyDslNode[] | null | undefined | false;
-};
+  persistence?: FlowPersistence;
+  children?: AnyDslNode | readonly AnyDslNode[] | null | undefined | false;
+}
 
 export function FlowRoute({ id, title, startStep, persistence, children }: FlowRouteProps) {
   const nodes = normalizeList<AnyDslNode>(children);
@@ -23,6 +25,5 @@ export function FlowRoute({ id, title, startStep, persistence, children }: FlowR
     persistence,
     steps,
   };
-
   return createNode('FlowRoute', flowRoute);
 }

@@ -1,40 +1,33 @@
-import type { Theme } from './types.js';
-type Palette = {
-  light: {
+import type { Theme } from '@bdui/core';
+import { type DslNode } from './builders/shared.js';
+export interface PaletteMode {
     bg: string;
     fg: string;
     primary: string;
-    [k: string]: any;
-  };
-  dark: {
-    bg: string;
-    fg: string;
-    primary: string;
-    [k: string]: any;
-  };
-};
-type ThemeProps = {
-  palette: Palette;
-  followSystem?: boolean;
-  allowUserOverride?: boolean;
-  tokens?: (p: Palette['light']) => Record<string, any>;
-};
-export declare function ThemeConfig(props: ThemeProps): {
-  readonly __kind: 'Theme';
-  readonly value: Theme;
-};
-type ThemeSimpleProps = {
-  primary: string;
-  background: string;
-  darkBackground?: string;
-  followSystem?: boolean;
-  allowUserOverride?: boolean;
-  extendTokens?: (p: any) => Record<string, any>;
-};
-export declare namespace ThemeConfig {
-  function Simple(props: ThemeSimpleProps): {
-    readonly __kind: 'Theme';
-    readonly value: Theme;
-  };
+    [token: string]: string;
 }
+export interface Palette {
+    light: PaletteMode;
+    dark: PaletteMode;
+}
+export interface ThemeProps {
+    palette: Palette;
+    followSystem?: boolean;
+    allowUserOverride?: boolean;
+    tokens?: (p: PaletteMode) => Record<string, unknown>;
+}
+export declare function ThemeConfig(props: ThemeProps): DslNode<'Theme', Theme>;
+export declare namespace ThemeConfig {
+    var Simple: typeof simple;
+}
+export interface ThemeSimpleProps {
+    primary: string;
+    background: string;
+    darkBackground?: string;
+    followSystem?: boolean;
+    allowUserOverride?: boolean;
+    extendTokens?: (p: PaletteMode) => Record<string, unknown>;
+}
+declare function simple(props: ThemeSimpleProps): DslNode<'Theme', Theme>;
 export {};
+//# sourceMappingURL=theme.d.ts.map

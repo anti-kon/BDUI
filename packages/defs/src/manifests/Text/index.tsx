@@ -7,14 +7,12 @@ import type {
 import { withWebContext } from '../../web-renderers/context.js';
 import { TEXT_CLASS } from './styles.js';
 
-export type TextProps = {
-  id?: string;
-  modifiers?: Record<string, unknown>;
+export interface TextProps {
   text?: unknown;
   value?: unknown;
-};
+}
 
-export type TextNode = ComponentNode<TextProps>;
+export type TextNode = ComponentNode<TextProps> & TextProps;
 
 export const manifest = Component({
   name: 'Text',
@@ -28,10 +26,10 @@ const webRenderer: WebComponentRenderer<TextNode> = ({ node, context }) =>
   withWebContext(context, () => {
     const raw = node.text ?? node.value;
     const content = typeof raw === 'string' ? context.interpolate(raw) : context.format(raw);
-    const styles = context.utils.cssForModifiers(node.modifiers) as Record<string, string | number>;
+    const styles = context.utils.cssForModifiers(node.modifiers);
 
     return (
-      <span className={TEXT_CLASS} style={styles}>
+      <span className={TEXT_CLASS} style={styles as Record<string, string | number>}>
         {content}
       </span>
     );
@@ -39,9 +37,7 @@ const webRenderer: WebComponentRenderer<TextNode> = ({ node, context }) =>
 
 export const definition: ComponentDefinition<TextNode> = {
   manifest,
-  renderers: {
-    web: webRenderer,
-  },
+  renderers: { web: webRenderer },
 };
 
 export default definition;

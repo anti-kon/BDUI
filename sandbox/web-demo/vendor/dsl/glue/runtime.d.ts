@@ -1,12 +1,10 @@
-import type { BDUIElement } from '../types.js';
-export type ChildMode = 'none' | 'text' | 'nodes';
-export type NodeCfg = {
-  children: ChildMode;
-  mapToProp?: string;
-  aliases?: Record<string, string>;
-};
-export declare function createNode<T extends BDUIElement['type']>(
-  type: T,
-  props: any,
-  cfg: NodeCfg,
-): any;
+import type { BDUIElement } from '@bdui/core';
+export type ChildMode = 'none' | 'text' | 'nodes' | 'slots';
+export interface NodeCfg {
+    readonly children: ChildMode;
+    readonly mapToProp?: string;
+    readonly aliases?: Readonly<Record<string, string>>;
+    readonly events?: readonly string[];
+}
+export declare function createNode(type: string, props: Record<string, unknown> | null, cfg: NodeCfg): BDUIElement;
+//# sourceMappingURL=runtime.d.ts.map

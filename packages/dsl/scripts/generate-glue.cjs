@@ -5,31 +5,27 @@ const { pathToFileURL } = require('node:url');
 async function loadManifests() {
   const defsPath = path.resolve(__dirname, '../../defs/dist/index.js');
   const defs = await import(pathToFileURL(defsPath).href);
-  return [defs.TextManifest, defs.ButtonManifest, defs.RowManifest, defs.ColumnManifest].filter(
-    Boolean,
-  );
+  return defs.componentDefinitions.map((d) => d.manifest);
 }
 
 function childModeFor(manifest) {
-  switch (manifest.children?.kind) {
+  switch (manifest.children && manifest.children.kind) {
     case 'none':
       return 'none';
     case 'text':
       return 'text';
-    case 'nodes':
     case 'slots':
-      return 'nodes';
+      return 'slots';
+    case 'nodes':
     default:
-      return 'none';
+      return 'nodes';
   }
 }
 
 function buildConfig(manifest) {
-  const config = {
-    children: childModeFor(manifest),
-  };
+  const config = { children: childModeFor(manifest) };
 
-  if (manifest.children?.kind === 'text') {
+  if (manifest.children && manifest.children.kind === 'text') {
     config.mapToProp = manifest.children.mapToProp || 'text';
   }
 
@@ -37,7 +33,15 @@ function buildConfig(manifest) {
     config.aliases = manifest.aliases;
   }
 
+  if (Array.isArray(manifest.events) && manifest.events.length > 0) {
+    config.events = manifest.events;
+  }
+
   return config;
+}
+
+function isReservedJsKeyword(name) {
+  return ['If'].includes(name);
 }
 
 function render(manifests) {
@@ -49,6 +53,10 @@ function render(manifests) {
 
   for (const manifest of manifests) {
     const cfg = JSON.stringify(buildConfig(manifest));
+    // Component names are PascalCase and match JSX element names directly.
+    // Even names that look like reserved operators (e.g. "If") are fine here
+    // because TS allows identifier "If" as a function name.
+    void isReservedJsKeyword; // referenced for clarity
     lines.push(`export function ${manifest.type}(props: any): any {`);
     lines.push(`  return createNode(${JSON.stringify(manifest.type)}, props, ${cfg});`);
     lines.push('}');
@@ -58,13 +66,22 @@ function render(manifests) {
   return lines.join('\n');
 }
 
+async function formatTypeScript(source) {
+  const prettier = await import('prettier');
+  return prettier.format(source, {
+    parser: 'typescript',
+    singleQuote: true,
+    trailingComma: 'all',
+  });
+}
+
 async function run() {
   const manifests = await loadManifests();
   const outPath = path.resolve(__dirname, '../src/generated/components.ts');
-  const contents = render(manifests);
+  const contents = await formatTypeScript(render(manifests));
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, contents, 'utf-8');
-  console.log('Generated DSL components at', outPath);
+  console.log(`Generated ${manifests.length} DSL components at ${outPath}`);
 }
 
 run().catch((e) => {

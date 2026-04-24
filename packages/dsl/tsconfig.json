@@ -4,8 +4,11 @@
     "rootDir": "src",
     "outDir": "dist",
     "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@bdui/dsl"
   },
-  "include": ["src", "src/generated"]
+  "include": ["src", "src/generated"],
+  "exclude": ["src/__tests__/**"]
 }

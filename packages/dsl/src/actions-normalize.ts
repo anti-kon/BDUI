@@ -1,14 +1,15 @@
-import type { Action } from './types.js';
-type Scope = 'local' | 'session' | 'flow';
-type Target =
-  | string
-  | { scope: Scope; path: string }
-  | { scope: Scope; path: string; __var?: true };
+import type { Action, ExprRef, HttpMethod, Scope, StateTarget, ToastLevel } from '@bdui/core';
+import { exprRef, isExprRef } from '@bdui/core';
+
+import { isStateVar, type StateVar } from './state.js';
+
+/** Targetable reference — string like "flow.counter", StateVar, or explicit. */
+export type Target = string | StateTarget | StateVar<unknown>;
 
 const SCOPES: readonly Scope[] = ['local', 'session', 'flow'];
 
-function isScope(value: unknown): value is Scope {
-  return typeof value === 'string' && (SCOPES as readonly string[]).includes(value);
+function isScope(v: unknown): v is Scope {
+  return typeof v === 'string' && (SCOPES as readonly string[]).includes(v);
 }
 
 function ensurePath(path: unknown): string {
@@ -18,151 +19,280 @@ function ensurePath(path: unknown): string {
   return path;
 }
 
-function parseTarget(target: Target): { scope: Scope; path: string } {
+export function parseTarget(target: Target): StateTarget {
   if (typeof target === 'string') {
-    const [scopeCandidate, ...rest] = target.split('.');
-    if (!scopeCandidate || rest.length === 0) {
-      throw new Error(`Invalid string target: "${target}"`);
-    }
-    if (!isScope(scopeCandidate)) {
-      throw new Error(`Unsupported scope: "${scopeCandidate}"`);
-    }
-    const path = ensurePath(rest.join('.'));
-    return { scope: scopeCandidate, path };
+    const idx = target.indexOf('.');
+    if (idx < 0) throw new Error(`Invalid string target: "${target}"`);
+    const scope = target.slice(0, idx);
+    const path = target.slice(idx + 1);
+    if (!isScope(scope)) throw new Error(`Unsupported scope: "${scope}"`);
+    return { scope, path: ensurePath(path) };
   }
-
-  const scope = (target as any)?.scope;
-  const path = (target as any)?.path;
-  if (!isScope(scope)) {
-    throw new Error(`Unsupported scope: "${String(scope)}"`);
+  if (isStateVar(target)) {
+    return { scope: target.scope, path: target.path };
   }
+  const scope = (target as { scope?: unknown }).scope;
+  const path = (target as { path?: unknown }).path;
+  if (!isScope(scope)) throw new Error(`Unsupported scope: "${String(scope)}"`);
   return { scope, path: ensurePath(path) };
 }
 
-function isVar(x: any): x is { scope: Scope; path: string } {
-  return x && typeof x === 'object' && typeof x.scope === 'string' && typeof x.path === 'string';
+function ensureExprRef(value: unknown): ExprRef {
+  if (isExprRef(value)) return value;
+  if (typeof value === 'string') return exprRef(value);
+  throw new Error('Expected an expression reference or a string expression');
 }
 
-type ShortAction =
-  | { set: [Target, any] }
-  | { setVar: [any, any] }
-  | { update: [any, (prev: any) => any] }
+export type ShortAction =
+  | Action
+  | { readonly set: readonly [Target, unknown] }
+  | { readonly reset: readonly [Target, unknown?] }
+  | { readonly inc: Target | readonly [Target, number | ExprRef] }
+  | { readonly dec: Target | readonly [Target, number | ExprRef] }
+  | { readonly toggle: Target }
+  | { readonly append: readonly [Target, unknown] }
+  | { readonly merge: readonly [Target, Record<string, unknown> | ExprRef] }
   | {
-      navigate: [
-        to: string,
-        opts?: { mode?: 'push' | 'replace' | 'popToRoot'; params?: Record<string, unknown> },
+      readonly navigate: readonly [
+        string,
+        { mode?: 'push' | 'replace' | 'popToRoot'; params?: Record<string, unknown> }?,
       ];
     }
-  | { back: true }
-  | { replace: string }
-  | { popToRoot: true }
-  | { fetch: string }
+  | { readonly back: true }
+  | { readonly replace: string }
+  | { readonly popToRoot: true }
   | {
-      call: {
-        url: string;
-        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-        body?: any;
-        saveTo?: { scope: Scope; path: string };
-        rollback?: ShortAction | Action;
+      readonly fetch:
+        | string
+        | { sourceId: string; params?: Record<string, unknown>; saveTo?: Target };
+    }
+  | {
+      readonly call: {
+        url: string | ExprRef;
+        method: HttpMethod;
+        headers?: Record<string, string>;
+        body?: unknown;
+        saveTo?: Target;
+        timeoutMs?: number;
+        rollback?: ShortAction;
       };
     }
   | {
-      toast: [
-        message: string,
-        opts?: { level?: 'info' | 'success' | 'warning' | 'error'; durationMs?: number },
-      ];
+      readonly toast: readonly [string, { level?: ToastLevel; durationMs?: number }?];
     }
-  | { sync: any }
-  | { validate: [schemaRef: string, target: Target] };
+  | { readonly sync: Record<string, unknown> | undefined }
+  | { readonly validate: readonly [string, Target] }
+  | { readonly modalOpen: string }
+  | { readonly modalClose: string }
+  | { readonly prefetch: readonly string[] }
+  | { readonly batch: readonly ShortAction[]; readonly atomic?: boolean }
+  | {
+      readonly when: {
+        if: ExprRef | string;
+        then: readonly ShortAction[];
+        else?: readonly ShortAction[];
+      };
+    }
+  | { readonly flowStart: { routeId: string; params?: Record<string, unknown> } }
+  | { readonly flowAdvance: { routeId?: string } | true }
+  | { readonly flowGoTo: { stepId: string; routeId?: string } }
+  | { readonly flowResume: { routeId?: string } | true }
+  | { readonly flowAbort: { reason?: string; routeId?: string } | true }
+  | { readonly flowComplete: { routeId?: string } | true };
 
-function isFullAction(a: any): a is Action {
-  return a && typeof a === 'object' && typeof a.type === 'string';
+function isFullAction(a: unknown): a is Action {
+  return Boolean(a) && typeof a === 'object' && typeof (a as { type?: unknown }).type === 'string';
 }
 
-function fnToString(f: Function): string {
-  return String(f);
-}
-
-function normOne(literal: any): Action {
+export function normalizeOne(literal: ShortAction | Action): Action {
   if (isFullAction(literal)) return literal;
-
   if (!literal || typeof literal !== 'object') {
-    throw new Error('Unknown action literal: ' + JSON.stringify(literal));
+    throw new Error(`Unknown action literal: ${JSON.stringify(literal)}`);
   }
 
-  if ('set' in literal) {
-    const [target, value] = literal.set as [Target, any];
+  const l = literal as Record<string, unknown>;
+
+  if ('set' in l) {
+    const [target, value] = l.set as readonly [Target, unknown];
     return { type: 'set', params: { target: parseTarget(target), value } };
   }
 
-  if ('setVar' in literal) {
-    const [vref, value] = literal.setVar as [any, any];
-    if (isVar(vref)) {
-      return { type: 'set', params: { target: parseTarget(vref), value } };
-    }
+  if ('reset' in l) {
+    const [target, value] = l.reset as readonly [Target, unknown?];
+    return { type: 'reset', params: { target: parseTarget(target), value } };
   }
 
-  if ('update' in literal) {
-    const [vref, reducer] = literal.update as [any, Function];
-    if (isVar(vref)) {
-      return {
-        type: 'update',
-        params: { target: parseTarget(vref), reducer: fnToString(reducer) },
-      };
-    }
+  if ('inc' in l) {
+    const raw = l.inc;
+    const target: Target = Array.isArray(raw) ? (raw[0] as Target) : (raw as Target);
+    const by = Array.isArray(raw) ? (raw[1] as number | ExprRef | undefined) : undefined;
+    return { type: 'update.inc', params: { target: parseTarget(target), by } };
   }
 
-  if ('navigate' in literal) {
-    const [to, opts] = literal.navigate as [string, any?];
-    return { type: 'navigate', params: { to, ...(opts || {}) } };
+  if ('dec' in l) {
+    const raw = l.dec;
+    const target: Target = Array.isArray(raw) ? (raw[0] as Target) : (raw as Target);
+    const by = Array.isArray(raw) ? (raw[1] as number | ExprRef | undefined) : undefined;
+    return { type: 'update.dec', params: { target: parseTarget(target), by } };
   }
 
-  if ('back' in literal) return { type: 'back' };
+  if ('toggle' in l) {
+    return { type: 'update.toggle', params: { target: parseTarget(l.toggle as Target) } };
+  }
 
-  if ('replace' in literal) return { type: 'replace', params: { to: literal.replace as string } };
+  if ('append' in l) {
+    const [target, value] = l.append as readonly [Target, unknown];
+    return { type: 'update.append', params: { target: parseTarget(target), value } };
+  }
 
-  if ('popToRoot' in literal) return { type: 'popToRoot' };
+  if ('merge' in l) {
+    const [target, value] = l.merge as readonly [Target, Record<string, unknown> | ExprRef];
+    return { type: 'update.merge', params: { target: parseTarget(target), value } };
+  }
 
-  if ('fetch' in literal) return { type: 'fetch', params: { sourceId: literal.fetch as string } };
+  if ('navigate' in l) {
+    const [to, opts] = l.navigate as readonly [
+      string,
+      { mode?: 'push' | 'replace' | 'popToRoot'; params?: Record<string, unknown> }?,
+    ];
+    return { type: 'navigate', params: { to, ...(opts ?? {}) } };
+  }
 
-  if ('call' in literal) {
-    const call = literal.call as any;
-    const action: Action = {
-      type: 'callApi',
+  if ('back' in l) return { type: 'back' };
+  if ('replace' in l) return { type: 'replace', params: { to: l.replace as string } };
+  if ('popToRoot' in l) return { type: 'popToRoot' };
+
+  if ('fetch' in l) {
+    const v = l.fetch;
+    if (typeof v === 'string') return { type: 'fetch', params: { sourceId: v } };
+    const fetch = v as {
+      sourceId: string;
+      params?: Record<string, unknown>;
+      saveTo?: Target;
+    };
+    return {
+      type: 'fetch',
+      params: {
+        sourceId: fetch.sourceId,
+        params: fetch.params,
+        saveTo: fetch.saveTo ? parseTarget(fetch.saveTo) : undefined,
+      },
+    };
+  }
+
+  if ('call' in l) {
+    const call = l.call as {
+      url: string | ExprRef;
+      method: HttpMethod;
+      headers?: Record<string, string>;
+      body?: unknown;
+      saveTo?: Target;
+      timeoutMs?: number;
+      rollback?: ShortAction;
+    };
+    const base: Action = {
+      type: 'call',
       params: {
         url: call.url,
         method: call.method,
+        headers: call.headers,
         body: call.body,
-        saveTo: call.saveTo,
+        saveTo: call.saveTo ? parseTarget(call.saveTo) : undefined,
+        timeoutMs: call.timeoutMs,
       },
-      rollbackAction: call.rollback ? normOne(call.rollback) : undefined,
+      ...(call.rollback ? { rollbackAction: normalizeOne(call.rollback) } : {}),
     };
-    return action;
+    return base;
   }
 
-  if ('toast' in literal) {
-    const [message, opts] = literal.toast as [string, any?];
-    return { type: 'toast', params: { message, ...(opts || {}) } };
+  if ('toast' in l) {
+    const [message, opts] = l.toast as readonly [
+      string,
+      { level?: ToastLevel; durationMs?: number }?,
+    ];
+    return { type: 'toast', params: { message, ...(opts ?? {}) } };
   }
 
-  if ('sync' in literal) {
-    return { type: 'sync', params: literal.sync };
+  if ('sync' in l) {
+    return { type: 'sync', params: (l.sync as Record<string, unknown>) ?? {} };
   }
 
-  if ('validate' in literal) {
-    const [schemaRef, target] = literal.validate as [string, any];
+  if ('validate' in l) {
+    const [schemaRef, target] = l.validate as readonly [string, Target];
     return { type: 'validate', params: { schemaRef, target: parseTarget(target) } };
   }
 
-  throw new Error('Unknown action literal: ' + JSON.stringify(literal));
+  if ('modalOpen' in l) return { type: 'modal.open', params: { id: l.modalOpen as string } };
+  if ('modalClose' in l) return { type: 'modal.close', params: { id: l.modalClose as string } };
+
+  if ('prefetch' in l) {
+    return { type: 'prefetchScreens', params: { screens: l.prefetch as readonly string[] } };
+  }
+
+  if ('batch' in l) {
+    const list = l.batch as readonly ShortAction[];
+    const atomic = (l as { atomic?: boolean }).atomic;
+    return {
+      type: 'batch',
+      params: { actions: list.map(normalizeOne), ...(atomic !== undefined ? { atomic } : {}) },
+    };
+  }
+
+  if ('when' in l) {
+    const cfg = l.when as {
+      if: ExprRef | string;
+      then: readonly ShortAction[];
+      else?: readonly ShortAction[];
+    };
+    return {
+      type: 'when',
+      params: {
+        if: ensureExprRef(cfg.if),
+        then: cfg.then.map(normalizeOne),
+        ...(cfg.else ? { else: cfg.else.map(normalizeOne) } : {}),
+      },
+    };
+  }
+
+  if ('flowStart' in l) {
+    const p = l.flowStart as { routeId: string; params?: Record<string, unknown> };
+    return { type: 'flow.start', params: p };
+  }
+  if ('flowAdvance' in l) {
+    const p = l.flowAdvance;
+    return { type: 'flow.advance', params: p === true ? {} : (p as { routeId?: string }) };
+  }
+  if ('flowGoTo' in l) {
+    const p = l.flowGoTo as { stepId: string; routeId?: string };
+    return { type: 'flow.goTo', params: p };
+  }
+  if ('flowResume' in l) {
+    const p = l.flowResume;
+    return { type: 'flow.resume', params: p === true ? {} : (p as { routeId?: string }) };
+  }
+  if ('flowAbort' in l) {
+    const p = l.flowAbort;
+    return {
+      type: 'flow.abort',
+      params: p === true ? {} : (p as { reason?: string; routeId?: string }),
+    };
+  }
+  if ('flowComplete' in l) {
+    const p = l.flowComplete;
+    return { type: 'flow.complete', params: p === true ? {} : (p as { routeId?: string }) };
+  }
+
+  throw new Error(`Unknown action literal: ${JSON.stringify(literal)}`);
 }
 
-function asArray<T>(value: T | T[] | null | undefined): T[] {
+function asArray<T>(value: T | readonly T[] | null | undefined): readonly T[] {
   if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
+  return Array.isArray(value) ? (value as readonly T[]) : ([value] as readonly T[]);
 }
 
-export function normalizeActions(input: any): Action[] {
+export function normalizeActions(
+  input: ShortAction | Action | readonly (ShortAction | Action)[] | null | undefined,
+): Action[] {
   if (input == null) return [];
-  return asArray(input).map((item) => normOne(item));
+  return asArray<ShortAction | Action>(input).map(normalizeOne);
 }

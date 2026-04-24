@@ -1,40 +1,59 @@
 import { normalizeActions } from '../actions-normalize.js';
 import { toJsonValue } from '../expr.js';
-export function createNode(type, props, cfg) {
-  const { children, onAction, ...rest } = props ?? {};
-  const cleaned = {};
-  if (cfg.aliases) {
-    for (const key in cfg.aliases) {
-      if (Object.prototype.hasOwnProperty.call(rest, key) && rest[key] !== undefined) {
-        const real = cfg.aliases[key];
-        rest[real] = rest[key];
-        delete rest[key];
-      }
+import { isStateVar } from '../state.js';
+/** Serialise a prop value: handle StateVar → Binding, ExprRef → {{...}}, etc. */
+function normalisePropValue(value) {
+    if (isStateVar(value)) {
+        return { scope: value.scope, path: value.path };
     }
-  }
-  for (const [key, value] of Object.entries(rest)) {
-    if (value === undefined) continue;
-    cleaned[key] = toJsonValue(value);
-  }
-  if (onAction !== undefined) {
-    cleaned.onAction = normalizeActions(onAction);
-  }
-  if (cfg.children === 'text') {
-    if (children !== undefined) {
-      const toText = (c) => {
-        const value = toJsonValue(c);
-        return value == null ? '' : String(value);
-      };
-      const textValue = Array.isArray(children)
-        ? children.flat().map(toText).join('')
-        : toText(children);
-      cleaned[cfg.mapToProp || 'text'] = textValue;
+    if (Array.isArray(value)) {
+        return value.map(normalisePropValue);
     }
-    return { type, ...cleaned };
-  }
-  const node = { type, ...cleaned };
-  if (cfg.children === 'nodes' && children !== undefined) {
-    node.children = Array.isArray(children) ? children.flat() : [children];
-  }
-  return node;
+    if (value && typeof value === 'object' && !value.__bduiExpr) {
+        const record = value;
+        const out = {};
+        for (const [k, v] of Object.entries(record)) {
+            if (v === undefined)
+                continue;
+            out[k] = normalisePropValue(v);
+        }
+        return out;
+    }
+    return toJsonValue(value);
 }
+export function createNode(type, props, cfg) {
+    const src = props ?? {};
+    const { children, ...rest } = src;
+    const remapped = {};
+    for (const [rawKey, rawValue] of Object.entries(rest)) {
+        const actualKey = cfg.aliases?.[rawKey] ?? rawKey;
+        if (rawValue === undefined)
+            continue;
+        if (cfg.events && cfg.events.includes(actualKey)) {
+            remapped[actualKey] = normalizeActions(rawValue);
+        }
+        else {
+            remapped[actualKey] = normalisePropValue(rawValue);
+        }
+    }
+    if (cfg.children === 'text') {
+        if (children !== undefined) {
+            const toText = (c) => {
+                const value = toJsonValue(c);
+                return value == null ? '' : String(value);
+            };
+            const textValue = Array.isArray(children)
+                ? children.flat().map(toText).join('')
+                : toText(children);
+            remapped[cfg.mapToProp ?? 'text'] = textValue;
+        }
+        return { type, ...remapped };
+    }
+    const node = { type, ...remapped };
+    if ((cfg.children === 'nodes' || cfg.children === 'slots') && children !== undefined) {
+        const list = Array.isArray(children) ? children.flat() : [children];
+        node.children = list.filter((v) => v != null && v !== false);
+    }
+    return node;
+}
+//# sourceMappingURL=runtime.js.map

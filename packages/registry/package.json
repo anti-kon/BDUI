@@ -1,9 +1,29 @@
 {
   "name": "@bdui/registry",
-  "version": "0.1.0",
+  "version": "0.6.0-alpha.0",
+  "description": "BDUI contract registry (HTTP API, pluggable storage, SemVer-aware resolve)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./server": "./dist/server.js",
+    "./adapters/memory": "./dist/adapters/memory.js",
+    "./adapters/fs": "./dist/adapters/fs.js"
+  },
+  "typesVersions": {
+    "*": {
+      "server": [
+        "dist/server.d.ts"
+      ],
+      "adapters/memory": [
+        "dist/adapters/memory.d.ts"
+      ],
+      "adapters/fs": [
+        "dist/adapters/fs.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist",
     "src"
@@ -14,22 +34,23 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
-    "dev": "node --watch dist/index.js",
-    "clean": "rimraf dist || true"
+    "start": "node dist/bin.js",
+    "dev": "node --watch dist/bin.js",
+    "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/common": "file:../common",
-    "@bdui/dsl": "file:../dsl",
+    "@bdui/core": "file:../core",
+    "@bdui/runtime": "file:../runtime",
     "@bdui/schema": "file:../schema",
     "@fastify/cors": "^10.0.2",
-    "@fastify/etag": "^5.0.1",
-    "@fastify/static": "^7.0.4",
-    "fastify": "^4.28.1"
+    "@fastify/etag": "^6.0.3",
+    "fastify": "^5.2.1",
+    "semver": "^7.6.3"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
     "@types/node": "^22.7.5",
-    "rimraf": "^6.0.1"
+    "@types/semver": "^7.5.8",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.3"
   }
 }

@@ -1,13 +1,14 @@
+import type { Action } from '@bdui/core';
 import type { ComponentDefinition, ComponentNode } from '../../registry/types.js';
-export type ButtonProps = {
-  id?: string;
-  modifiers?: Record<string, unknown>;
-  title: string;
-  disabled?: boolean;
-  loading?: boolean;
-  onAction?: any[];
-};
-export type ButtonNode = ComponentNode<ButtonProps>;
-export declare const manifest: import('../../define.js').ComponentManifest;
+export interface ButtonProps {
+    title: string;
+    disabled?: boolean;
+    loading?: boolean;
+    variant?: 'primary' | 'secondary';
+    onAction?: readonly Action[];
+}
+export type ButtonNode = ComponentNode<ButtonProps> & ButtonProps;
+export declare const manifest: import("../../define.js").ComponentManifest;
 export declare const definition: ComponentDefinition<ButtonNode>;
 export default definition;
+//# sourceMappingURL=index.d.ts.map

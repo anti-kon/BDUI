@@ -38,7 +38,6 @@ function applyStyle(el: HTMLElement, style: any) {
 
 function applyProps(el: HTMLElement, props: any) {
   if (!props) return;
-  const doc = getWebContext().document;
   for (const [key, value] of Object.entries(props)) {
     if (key === 'children' || value === undefined || value === null) continue;
     if (key === 'style') {
@@ -100,7 +99,7 @@ function createElement(type: any, props: any): any {
   return el;
 }
 
-export function jsx(type: any, props: any, key?: any) {
+export function jsx(type: any, props: any, _key?: any) {
   return createElement(type, props);
 }
 

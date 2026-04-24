@@ -4,8 +4,12 @@
     "rootDir": "src",
     "outDir": "dist",
     "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@bdui/defs/web-renderers"
+    "jsxImportSource": "@bdui/defs/web-renderers",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src"]
 }

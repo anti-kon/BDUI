@@ -1,8 +1,17 @@
-import type { AnyDslNode, Contract as ContractType, Meta } from './shared.js';
+import type { Contract, Meta } from '@bdui/core';
+import type { AnyDslNode } from './shared.js';
 import { type Maybe } from './shared.js';
-type ContractProps = {
-  meta: Meta;
-  children?: Maybe<AnyDslNode | AnyDslNode[]>;
-};
-export declare function Contract({ meta, children }: ContractProps): ContractType;
-export {};
+export interface ContractProps {
+    meta: Omit<Meta, 'schemaVersion' | 'generatedAt'> & {
+        schemaVersion?: string;
+        generatedAt?: string;
+    };
+    children?: Maybe<AnyDslNode | readonly AnyDslNode[]>;
+}
+/**
+ * Top-level DSL entry. Collects an `InitialState` declared by `Flow()`/`Session()`
+ * variables used inside the TSX tree; the result is a fully-normalised JSON
+ * contract ready to be validated.
+ */
+export declare function Contract({ meta, children }: ContractProps): Contract;
+//# sourceMappingURL=contract.d.ts.map

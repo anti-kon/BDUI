@@ -1,0 +1,9 @@
+{
+  "contractId": "taskly",
+  "appId": "taskly",
+  "version": "0.1.0",
+  "schemaVersion": "1.0.0",
+  "features": {
+    "urlSync": true
+  }
+}

@@ -9,7 +9,7 @@ import {
   Text,
   ThemeConfig as Theme,
 } from '@bdui/dsl';
-import { Flow, use } from '@bdui/dsl';
+import { bind, Flow, use } from '@bdui/dsl';
 
 import meta from './meta.json';
 
@@ -31,14 +31,14 @@ export default (
             <Text>Welcome, {use(name)}!</Text>
             <Text>Increase counter to 3 to continue.</Text>
             <Row modifiers={{ gap: 8 }}>
-              <Button title="+1" onAction={[{ update: [counter, (p: number) => (p ?? 0) + 1] }]} />
-              <Button title="Reset" onAction={[{ setVar: [counter, 0] }]} />
+              <Button title="+1" onAction={[{ inc: bind(counter) }]} />
+              <Button title="Reset" onAction={[{ set: [bind(counter), 0] }]} />
             </Row>
             <Text>Current: {use(counter)}</Text>
           </Column>
         </Step>
 
-        <Step id="s2" title="Done" onEnter={[{ toast: ['Yay! You reached 3+ 🎉'] }]}>
+        <Step id="s2" title="Done" onEnter={[{ toast: ['Yay! You reached 3+'] }]}>
           <Column modifiers={{ gap: 12, padding: 24 }}>
             <Text>All set, {use(name)}.</Text>
             <Text>Counter: {use(counter)}</Text>

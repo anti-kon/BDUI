@@ -1,0 +1,25 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@bdui/core",
+      "@bdui/expr",
+      "@bdui/defs",
+      "@bdui/schema",
+      "@bdui/dsl",
+      "@bdui/runtime",
+      "@bdui/transpiler",
+      "@bdui/registry",
+      "@bdui/renderer-web",
+      "@bdui/sdk",
+      "@bdui/cli"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}

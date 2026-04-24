@@ -1,3 +1,5 @@
+import type { Action } from '@bdui/core';
+
 import { Component, props } from '../../define.js';
 import type {
   ComponentDefinition,
@@ -7,16 +9,15 @@ import type {
 import { withWebContext } from '../../web-renderers/context.js';
 import { BUTTON_BASE_CLASS, BUTTON_PRIMARY_CLASS, BUTTON_SECONDARY_CLASS } from './styles.js';
 
-export type ButtonProps = {
-  id?: string;
-  modifiers?: Record<string, unknown>;
+export interface ButtonProps {
   title: string;
   disabled?: boolean;
   loading?: boolean;
-  onAction?: any[];
-};
+  variant?: 'primary' | 'secondary';
+  onAction?: readonly Action[];
+}
 
-export type ButtonNode = ComponentNode<ButtonProps>;
+export type ButtonNode = ComponentNode<ButtonProps> & ButtonProps;
 
 export const manifest = Component({
   name: 'Button',
@@ -26,39 +27,38 @@ export const manifest = Component({
 
 function resolveClassName(node: ButtonNode): string {
   const classes = [BUTTON_BASE_CLASS];
-  const variant =
-    node.modifiers?.variant === 'primary' ? BUTTON_PRIMARY_CLASS : BUTTON_SECONDARY_CLASS;
-  if (variant) classes.push(variant);
+  const variant = node.variant ?? node.modifiers?.variant;
+  if (variant === 'primary') classes.push(BUTTON_PRIMARY_CLASS);
+  else classes.push(BUTTON_SECONDARY_CLASS);
   return classes.join(' ');
 }
 
 const webRenderer: WebComponentRenderer<ButtonNode> = ({ node, context }) =>
   withWebContext(context, () => {
     const className = resolveClassName(node);
-    const inlineStyles = context.utils.cssForModifiers(node.modifiers) as Record<
-      string,
-      string | number
-    >;
+    const inlineStyles = context.utils.cssForModifiers(node.modifiers);
+    const title =
+      typeof node.title === 'string'
+        ? context.interpolate(node.title)
+        : context.format(node.title ?? 'Button');
 
     return (
       <button
         type="button"
-        disabled={node.disabled}
+        disabled={Boolean(node.disabled)}
         data-state={node.loading ? 'loading' : undefined}
         onClick={() => context.runActions(node.onAction)}
         className={className}
-        style={inlineStyles}
+        style={inlineStyles as Record<string, string | number>}
       >
-        {context.format(node.title ?? 'Button')}
+        {title}
       </button>
     );
   });
 
 export const definition: ComponentDefinition<ButtonNode> = {
   manifest,
-  renderers: {
-    web: webRenderer,
-  },
+  renderers: { web: webRenderer },
 };
 
 export default definition;

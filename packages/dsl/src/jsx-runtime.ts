@@ -1,13 +1,30 @@
-import type { BDUIElement } from './types.js';
-export const Fragment = (props: { children?: any }) => props.children ?? [];
-function cleanProps(obj: any) {
-  if (!obj || typeof obj !== 'object') return obj;
-  const out: any = {};
-  for (const [k, v] of Object.entries(obj)) if (v !== undefined) out[k] = v;
+type JsxComponent<TProps> = (props: TProps) => unknown;
+
+export const Fragment = <P extends { children?: unknown }>(props: P): unknown =>
+  props.children ?? [];
+
+function cleanProps(obj: Record<string, unknown> | null | undefined): Record<string, unknown> {
+  if (!obj) return {};
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v !== undefined) out[k] = v;
+  }
   return out;
 }
-export function jsx(type: any, props: any, key?: any): BDUIElement | any {
-  if (typeof type === 'function') return type(cleanProps({ ...(props || {}), key }));
-  throw new Error('Unsupported JSX element type');
+
+export function jsx<TProps extends Record<string, unknown>>(
+  type: JsxComponent<TProps> | string,
+  props: TProps | null,
+  key?: unknown,
+): unknown {
+  if (typeof type === 'function') {
+    const merged = cleanProps({ ...(props ?? {}), key });
+    return type(merged as unknown as TProps);
+  }
+  throw new Error(
+    `Unsupported JSX element type: "${String(type)}". Only function components are allowed.`,
+  );
 }
+
 export const jsxs = jsx;
+export const jsxDEV = jsx;

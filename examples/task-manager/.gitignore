@@ -1,0 +1,7 @@
+node_modules/
+dist/
+public/contract.json
+public/client.js
+public/client.js.map
+.env
+*.log

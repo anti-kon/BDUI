@@ -7,12 +7,14 @@ import type {
 import { withWebContext } from '../../web-renderers/context.js';
 import { ROW_CLASS } from './styles.js';
 
-export type RowProps = {
-  id?: string;
-  modifiers?: Record<string, unknown>;
-};
+export interface RowProps {
+  align?: 'start' | 'center' | 'end' | 'stretch';
+  justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+  gap?: number | string;
+  wrap?: boolean;
+}
 
-export type RowNode = ComponentNode<RowProps>;
+export type RowNode = ComponentNode<RowProps> & RowProps;
 
 export const manifest = Component({
   name: 'Row',
@@ -23,9 +25,16 @@ export const manifest = Component({
 
 const webRenderer: WebComponentRenderer<RowNode> = ({ node, context }) =>
   withWebContext(context, () => {
-    const styles = context.utils.cssForModifiers(node.modifiers) as Record<string, string | number>;
+    const styles = {
+      ...context.utils.cssForModifiers(node.modifiers),
+      ...(node.gap != null
+        ? { gap: typeof node.gap === 'number' ? `${node.gap}px` : node.gap }
+        : {}),
+      ...(node.wrap ? { flexWrap: 'wrap' as const } : {}),
+    } as Record<string, string | number>;
+
     return (
-      <div className={ROW_CLASS} style={styles}>
+      <div className={ROW_CLASS} data-align={node.align} data-justify={node.justify} style={styles}>
         {context.renderChildren(node.children)}
       </div>
     );
@@ -33,9 +42,7 @@ const webRenderer: WebComponentRenderer<RowNode> = ({ node, context }) =>
 
 export const definition: ComponentDefinition<RowNode> = {
   manifest,
-  renderers: {
-    web: webRenderer,
-  },
+  renderers: { web: webRenderer },
 };
 
 export default definition;

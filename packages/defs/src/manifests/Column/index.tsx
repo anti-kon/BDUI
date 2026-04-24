@@ -7,12 +7,13 @@ import type {
 import { withWebContext } from '../../web-renderers/context.js';
 import { COLUMN_CLASS } from './styles.js';
 
-export type ColumnProps = {
-  id?: string;
-  modifiers?: Record<string, unknown>;
-};
+export interface ColumnProps {
+  align?: 'start' | 'center' | 'end' | 'stretch';
+  justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+  gap?: number | string;
+}
 
-export type ColumnNode = ComponentNode<ColumnProps>;
+export type ColumnNode = ComponentNode<ColumnProps> & ColumnProps;
 
 export const manifest = Component({
   name: 'Column',
@@ -23,9 +24,20 @@ export const manifest = Component({
 
 const webRenderer: WebComponentRenderer<ColumnNode> = ({ node, context }) =>
   withWebContext(context, () => {
-    const styles = context.utils.cssForModifiers(node.modifiers) as Record<string, string | number>;
+    const styles = {
+      ...context.utils.cssForModifiers(node.modifiers),
+      ...(node.gap != null
+        ? { gap: typeof node.gap === 'number' ? `${node.gap}px` : node.gap }
+        : {}),
+    } as Record<string, string | number>;
+
     return (
-      <div className={COLUMN_CLASS} style={styles}>
+      <div
+        className={COLUMN_CLASS}
+        data-align={node.align}
+        data-justify={node.justify}
+        style={styles}
+      >
         {context.renderChildren(node.children)}
       </div>
     );
@@ -33,9 +45,7 @@ const webRenderer: WebComponentRenderer<ColumnNode> = ({ node, context }) =>
 
 export const definition: ComponentDefinition<ColumnNode> = {
   manifest,
-  renderers: {
-    web: webRenderer,
-  },
+  renderers: { web: webRenderer },
 };
 
 export default definition;
