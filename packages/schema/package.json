@@ -18,7 +18,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "file:../core",
+    "@bdui/core": "0.6.0-alpha.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1"
   },

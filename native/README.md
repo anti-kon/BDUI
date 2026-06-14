@@ -13,7 +13,9 @@ BDUI application:
 - `flow`, `session` and `local` state scopes;
 - interpolation of `{{scope.path}}` expressions;
 - conditional rendering through `If`;
+- portable `Image` fallback rendering for contract-provided marks;
 - two-way bindings for `Input`, `Checkbox` and `Select`;
+- portable `modifiers` for spacing, padding, text roles and button variants;
 - core SAL actions: `navigate`, `back`, `set`, `reset`, `update.inc`,
   `update.toggle`, `batch`, `when`, `toast`, `flow.start`, `flow.goTo`,
   `flow.complete` and `flow.abort`.

@@ -76,7 +76,7 @@ See [`docs/getting-started.md`](docs/getting-started.md) for a walkthrough,
 
 ## Scripts
 
-- `npm test` — 120+ vitest cases across the workspace.
+- `npm test` — 130+ vitest cases across the workspace.
 - `npm run typecheck` — strict TypeScript check.
 - `npm run lint` / `npm run format` — ESLint and Prettier.
 - `npm run gen` — regenerate schema and DSL glue.
@@ -95,6 +95,9 @@ See [`docs/getting-started.md`](docs/getting-started.md) for a walkthrough,
   with Playwright (`BDUI_BROWSER=chromium|firefox|webkit`).
 - `npm run verify:browsers` — run the same smoke sequentially in Chromium,
   Firefox and WebKit.
+- `npm run verify:taskly-browser` — build and launch the standalone Taskly
+  app, then verify contract caching, modal actions, data sources, static
+  catalog loading and the three-step request flow in Chromium.
 - `npm run verify:native` — ensure the native prototypes cover every component
   and action used by the Campus contract.
 - `npm run verify:web-demo` — rebuild vendored web-demo packages and fail if
@@ -105,10 +108,11 @@ See [`docs/getting-started.md`](docs/getting-started.md) for a walkthrough,
 ## Release process
 
 Each package publishable change lives in a changeset under `.changeset/`.
-`.github/workflows/ci.yml` runs lint, typecheck, build, and tests on every
-push, and, on `main`, opens a "Version packages" PR via
-[changesets/action](https://github.com/changesets/action). Merging that PR
-publishes the new versions to npm.
+`.github/workflows/ci.yml` runs lint, typecheck, build, tests, browser smoke
+checks and native prototype checks on every push or pull request to the main
+branches. The release job is intentionally manual (`workflow_dispatch`) and
+uses [changesets/action](https://github.com/changesets/action) to open a
+versioning PR or publish when `NPM_TOKEN` is available.
 
 ## License
 

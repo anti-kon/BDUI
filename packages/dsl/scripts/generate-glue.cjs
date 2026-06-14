@@ -45,20 +45,41 @@ function isReservedJsKeyword(name) {
 }
 
 function render(manifests) {
+  const propTypes = [...new Set(manifests.map((manifest) => manifest.propsTypeName))].sort();
   const lines = [
     '// AUTO-GENERATED. Do not edit.',
+    "import type { BDUIElement } from '@bdui/core';",
+    `import type { ${propTypes.join(', ')} } from '@bdui/defs';`,
+    '',
+    "import type { NoChildrenProps, NodeChildrenProps, TextChildrenProps } from '../component-props.js';",
     "import { createNode } from '../glue/runtime.js';",
     '',
   ];
 
   for (const manifest of manifests) {
     const cfg = JSON.stringify(buildConfig(manifest));
+    const wrapper =
+      childModeFor(manifest) === 'text'
+        ? 'TextChildrenProps'
+        : childModeFor(manifest) === 'none'
+          ? 'NoChildrenProps'
+          : 'NodeChildrenProps';
+    const eventTypes =
+      Array.isArray(manifest.events) && manifest.events.length > 0
+        ? manifest.events.map((eventName) => JSON.stringify(eventName)).join(' | ')
+        : 'never';
+    const dslPropsName = `${manifest.type}DslProps`;
     // Component names are PascalCase and match JSX element names directly.
     // Even names that look like reserved operators (e.g. "If") are fine here
     // because TS allows identifier "If" as a function name.
     void isReservedJsKeyword; // referenced for clarity
-    lines.push(`export function ${manifest.type}(props: any): any {`);
-    lines.push(`  return createNode(${JSON.stringify(manifest.type)}, props, ${cfg});`);
+    lines.push(
+      `export type ${dslPropsName} = ${wrapper}<${manifest.propsTypeName}, ${eventTypes}>;`,
+    );
+    lines.push(`export function ${manifest.type}(props: ${dslPropsName}): BDUIElement {`);
+    lines.push(
+      `  return createNode(${JSON.stringify(manifest.type)}, props as unknown as Record<string, unknown>, ${cfg});`,
+    );
     lines.push('}');
   }
 
@@ -70,6 +91,7 @@ async function formatTypeScript(source) {
   const prettier = await import('prettier');
   return prettier.format(source, {
     parser: 'typescript',
+    printWidth: 100,
     singleQuote: true,
     trailingComma: 'all',
   });

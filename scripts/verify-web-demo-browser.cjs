@@ -15,6 +15,7 @@ const contentTypes = new Map([
   ['.js', 'text/javascript; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
   ['.map', 'application/json; charset=utf-8'],
+  ['.svg', 'image/svg+xml; charset=utf-8'],
 ]);
 
 function createServer() {
@@ -46,7 +47,13 @@ async function listen(server) {
 }
 
 async function close(server) {
-  await new Promise((resolveClose) => server.close(resolveClose));
+  await new Promise((resolveClose, rejectClose) => {
+    server.close((error) => {
+      if (error) rejectClose(error);
+      else resolveClose();
+    });
+    server.closeAllConnections?.();
+  });
 }
 
 async function smoke(browserName, browserType) {
@@ -56,7 +63,7 @@ async function smoke(browserName, browserType) {
   let browser;
 
   try {
-    browser = await browserType.launch({ headless: true });
+    browser = await browserType.launch({ headless: true, timeout: 30_000 });
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
     page.on('console', (message) => {

@@ -7,7 +7,7 @@ const DEFAULT_GENERATED_AT = '1970-01-01T00:00:00.000Z';
  * variables used inside the TSX tree; the result is a fully-normalised JSON
  * contract ready to be validated.
  */
-export function Contract({ meta, children }) {
+export function Contract({ meta, dataSources, children }) {
     const collector = createStateCollector();
     const result = withStateCollector(collector, () => {
         const nodes = normalizeList(children);
@@ -31,8 +31,12 @@ export function Contract({ meta, children }) {
     return {
         meta: normMeta,
         theme: result.themeNode?.value,
+        dataSources: metaDataSources(dataSources),
         navigation: result.navNode.value,
         initial: collector.snapshot(),
     };
+}
+function metaDataSources(dataSources) {
+    return dataSources && dataSources.length > 0 ? dataSources : undefined;
 }
 //# sourceMappingURL=contract.js.map

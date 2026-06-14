@@ -46,6 +46,7 @@ const nativeComponents = new Set([
   'Column',
   'Divider',
   'If',
+  'Image',
   'Input',
   'Row',
   'Select',

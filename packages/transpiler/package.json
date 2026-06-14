@@ -17,8 +17,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "file:../core",
-    "@bdui/schema": "file:../schema",
+    "@bdui/core": "0.6.0-alpha.0",
+    "@bdui/schema": "0.6.0-alpha.0",
     "esbuild": "^0.28.1"
   },
   "devDependencies": {

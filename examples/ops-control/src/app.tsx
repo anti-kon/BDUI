@@ -6,6 +6,7 @@ import {
   Divider,
   FlowRoute,
   If,
+  Image,
   Input,
   Navigation,
   Route,
@@ -81,10 +82,19 @@ const danger = { color: '#b91c1c', fontWeight: 700 };
 const qrLine = { color: '#0f172a', fontFamily: 'monospace', fontSize: 18, fontWeight: 700 };
 
 const Header = () => (
-  <Column modifiers={{ gap: 6 }}>
-    <Text modifiers={title}>Кампус</Text>
-    <Text modifiers={muted}>Расписание занятий, задания, деканат и цифровой пропуск.</Text>
-  </Column>
+  <Row modifiers={{ alignItems: 'center', gap: 12 }}>
+    <Image
+      src="campus-mark.svg"
+      alt="Campus"
+      width={44}
+      height={44}
+      modifiers={{ background: '#e0f2fe', borderRadius: 12 }}
+    />
+    <Column modifiers={{ gap: 6 }}>
+      <Text modifiers={title}>Кампус</Text>
+      <Text modifiers={muted}>Расписание занятий, задания, деканат и цифровой пропуск.</Text>
+    </Column>
+  </Row>
 );
 
 const Nav = () => (

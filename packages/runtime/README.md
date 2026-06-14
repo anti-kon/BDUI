@@ -1,23 +1,19 @@
 # @bdui/runtime
 
-Platform-agnostic BDUI runtime. Sits between a JSON contract and a concrete
-renderer plugin (web, iOS, Android, …) and owns everything that is not
-rendering.
+Platform-neutral BDUI runtime. It sits between a JSON contract and concrete
+renderers such as web, Android and iOS.
 
-## What's inside
+## What's Inside
 
-- **`RuntimeStateController`** — scoped state (`flow`, `session`, `local`,
-  `params`) with event emission and optional session persistence via
-  `StorageAdapter`.
-- **`NavigationController`** — push/replace/back/popToRoot with history.
-- **`FlowController`** + `resolveFlowStep` — guarded multi-step flows.
-- **`ActionRunner`** — executes every SAL action with atomic batches and
-  rollbacks, data-source `fetch`, and pluggable state validators.
-- **`ContractLoader`** — fetches contracts with stale-while-revalidate.
-- **`HttpClient`** — pluggable fetch abstraction.
-- **`ToastController`**, **`ModalController`** — overlay state containers.
-- **`RendererPlugin` interface** — renderers depend on this, not the other
-  way around.
+- `RuntimeStateController` for `flow`, `session`, `local` and `params` state.
+- `NavigationController` for push, replace, back and pop-to-root navigation.
+- `FlowController` and `resolveFlowStep` for guarded multi-step flows.
+- `ActionRunner` for SAL actions, including atomic batches, rollbacks,
+  `call`, data-source `fetch`, `validate`, toasts and modal commands.
+- `ContractLoader` with stale-while-revalidate semantics and ETag support.
+- `HttpClient` abstraction plus `createFetchHttpClient()`.
+- `MemoryStorageAdapter` and `createLocalStorageAdapter()`.
+- `RendererPlugin` interface used by platform renderers.
 
 ## Example
 
@@ -32,12 +28,17 @@ const runtime = createRuntime({
     nonEmpty: (value) => typeof value === 'string' && value.trim().length > 0,
   },
 });
+
 runtime.use(myPlatformPlugin, container);
 ```
 
-## Storage adapters
+## Contract Cache
 
-- `MemoryStorageAdapter` — for tests/server-side rendering.
-- `createLocalStorageAdapter()` — browser storage wrapper.
+`createContractLoader()` resolves contracts with stale-while-revalidate
+behavior:
 
-Custom adapters implement the `StorageAdapter` interface.
+1. Fresh cached contracts return immediately.
+2. Stale cached contracts return immediately and revalidate in the background.
+3. Missing contracts are fetched before rendering.
+
+The Taskly Operations example uses this loader in `examples/task-manager`.

@@ -1,4 +1,4 @@
-import type { Contract, Meta, Navigation as NavigationType, Theme } from '@bdui/core';
+import type { Contract, DataSource, Meta, Navigation as NavigationType, Theme } from '@bdui/core';
 import { SCHEMA_VERSION } from '@bdui/core';
 
 import { createStateCollector, withStateCollector } from '../state.js';
@@ -12,6 +12,7 @@ export interface ContractProps {
     schemaVersion?: string;
     generatedAt?: string;
   };
+  dataSources?: readonly DataSource[];
   children?: Maybe<AnyDslNode | readonly AnyDslNode[]>;
 }
 
@@ -20,7 +21,7 @@ export interface ContractProps {
  * variables used inside the TSX tree; the result is a fully-normalised JSON
  * contract ready to be validated.
  */
-export function Contract({ meta, children }: ContractProps): Contract {
+export function Contract({ meta, dataSources, children }: ContractProps): Contract {
   const collector = createStateCollector();
 
   const result = withStateCollector(collector, () => {
@@ -46,7 +47,14 @@ export function Contract({ meta, children }: ContractProps): Contract {
   return {
     meta: normMeta,
     theme: result.themeNode?.value,
+    dataSources: metaDataSources(dataSources),
     navigation: result.navNode.value,
     initial: collector.snapshot(),
   };
+}
+
+function metaDataSources(
+  dataSources: readonly DataSource[] | undefined,
+): readonly DataSource[] | undefined {
+  return dataSources && dataSources.length > 0 ? dataSources : undefined;
 }

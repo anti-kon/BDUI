@@ -17,10 +17,10 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "file:../core",
-    "@bdui/defs": "file:../defs",
-    "@bdui/expr": "file:../expr",
-    "@bdui/runtime": "file:../runtime"
+    "@bdui/core": "0.6.0-alpha.0",
+    "@bdui/defs": "0.6.0-alpha.0",
+    "@bdui/expr": "0.6.0-alpha.0",
+    "@bdui/runtime": "0.6.0-alpha.0"
   },
   "devDependencies": {
     "@types/node": "^22.7.5",

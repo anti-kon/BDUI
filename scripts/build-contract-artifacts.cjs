@@ -22,6 +22,10 @@ const campusCopies = [
   'native/ios/OpsControl/Resources/campus.contract.json',
 ];
 
+const campusAssetCopies = [
+  ['examples/ops-control/public/campus-mark.svg', 'sandbox/web-demo/campus-mark.svg'],
+];
+
 async function main() {
   const transpilerUrl = pathToFileURL(
     resolve(root, 'packages', 'transpiler', 'dist', 'index.js'),
@@ -39,6 +43,11 @@ async function main() {
 
   for (const copy of campusCopies) {
     copyFileSync(resolve(root, campusSource), resolve(root, copy));
+    console.log(`synced ${copy}`);
+  }
+
+  for (const [source, copy] of campusAssetCopies) {
+    copyFileSync(resolve(root, source), resolve(root, copy));
     console.log(`synced ${copy}`);
   }
 }

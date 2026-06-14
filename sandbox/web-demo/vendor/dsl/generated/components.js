@@ -1,4 +1,3 @@
-// AUTO-GENERATED. Do not edit.
 import { createNode } from '../glue/runtime.js';
 export function Button(props) {
     return createNode('Button', props, {

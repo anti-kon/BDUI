@@ -1,4 +1,11 @@
-import type { Action, AppRoute, BDUIElement, FlowRouteScreen, RouteScreen } from '@bdui/core';
+import type {
+  Action,
+  AppRoute,
+  BDUIElement,
+  Contract,
+  FlowRouteScreen,
+  RouteScreen,
+} from '@bdui/core';
 import type { ComponentNode, WebRendererContext } from '@bdui/defs';
 import { getWebComponentRenderer } from '@bdui/defs';
 import {
@@ -17,6 +24,7 @@ import { mountToastHost } from './toast-host.js';
 
 export interface WebPluginOptions {
   readonly urlSync?: boolean;
+  readonly contract?: Contract;
 }
 
 interface WebPluginState {
@@ -31,14 +39,32 @@ function getCurrentRoute(ctx: RendererPluginContext): AppRoute | undefined {
   return ctx.navigation.resolve(ctx.navigation.currentRoute);
 }
 
-function findModalDescriptor(
-  contract: Parameters<RendererPlugin['mount']>[1],
-  _id: string,
-): BDUIElement | undefined {
-  // Modal descriptors live in the tree; runtime does not track them separately.
-  // For now, return undefined; applications can subscribe to modal events
-  // themselves to render custom content.
-  void contract;
+function findModalDescriptor(contract: Contract | undefined, id: string): BDUIElement | undefined {
+  function visit(node: BDUIElement | undefined): BDUIElement | undefined {
+    if (!node) return undefined;
+    if ((node as { id?: unknown }).id === id) return node;
+    const children = (node as { children?: readonly BDUIElement[] }).children;
+    if (!children) return undefined;
+    for (const child of children) {
+      const match = visit(child);
+      if (match) return match;
+    }
+    return undefined;
+  }
+
+  for (const route of contract?.navigation.routes ?? []) {
+    if ((route as FlowRouteScreen).type === 'flow') {
+      for (const step of (route as FlowRouteScreen).steps) {
+        for (const child of step.children) {
+          const match = visit(child);
+          if (match) return match;
+        }
+      }
+    } else {
+      const match = visit((route as RouteScreen).node);
+      if (match) return match;
+    }
+  }
   return undefined;
 }
 
@@ -121,6 +147,7 @@ export function createWebPlugin(options: WebPluginOptions = {}): RendererPlugin<
     const resolution = resolveFlowStep(route, internal.context.state.snapshot(), currentStepId);
     if (resolution.stepId !== currentStepId) {
       internal.context.state.write('local', stepKey, resolution.stepId);
+      return;
     }
     internal.rendererContext = createRendererContext(internal.context);
     const wrapper = internal.doc.createElement('div');
@@ -169,8 +196,7 @@ export function createWebPlugin(options: WebPluginOptions = {}): RendererPlugin<
       const unsubToast = mountToastHost(internal.doc, ctx.toast);
       const unsubModal = mountModalHost(internal.doc, ctx.modal, {
         renderNode: (node) => renderNode(node),
-        lookupModal: (id) =>
-          findModalDescriptor(ctx as unknown as Parameters<RendererPlugin['mount']>[1], id),
+        lookupModal: (id) => findModalDescriptor(options.contract, id),
       });
       internal.disposers.push(unsubToast, unsubModal);
 

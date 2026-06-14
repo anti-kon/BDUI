@@ -1,112 +1,117 @@
-# Taskly
+# Taskly Operations
 
-A complete, standalone BDUI application used as an end-to-end smoke test of the
-public `@bdui/*` APIs. The repository itself is a normal npm project: the BDUI
-stack is installed as regular dependencies via `file:` references. Once the
-packages are published to npm you can drop-in replace those `file:` links with
-`^0.6.0` (or whatever version you consume) without touching any other code.
+Taskly Operations is the production-style BDUI showcase app. It is intentionally
+kept as a standalone npm project so it demonstrates how an external product
+would consume the public `@bdui/*` packages.
 
-## What the app demonstrates
+## What It Demonstrates
 
-| Route                    | Highlights                                                                |
-| ------------------------ | ------------------------------------------------------------------------- |
-| `login`                  | `Input`, conditional `If`, guarded `when`/`navigate` actions              |
-| `onboarding` (FlowRoute) | `Step` composition, `flow.goTo`/`flow.complete`/`flow.abort`, `toast`     |
-| `dashboard`              | `batch` + `atomic: true`, `call` with `rollback`, persistence via `Flow`  |
-| `settings`               | `Select`, `Checkbox`, server `call` with rollback and session persistence |
+| Area              | BDUI capability shown                                                      |
+| ----------------- | -------------------------------------------------------------------------- |
+| Contract delivery | `createContractLoader` with stale-while-revalidate cache and ETag support  |
+| Data loading      | Contract-level `dataSources` plus `fetch` actions for REST and static data |
+| Server effects    | `call` actions with rollback handlers and atomic `batch` composition       |
+| State             | `Flow` state for screen data and `Session` state persisted through storage |
+| Forms             | A three-step `FlowRoute` with `flow.goTo`, `flow.complete`, `flow.abort`   |
+| Validation        | Pluggable renderer validators invoked by the `validate` action             |
+| Overlays          | Contract-defined modal descriptor opened and closed through SAL            |
+| UX feedback       | `toast`, guarded `when` branches, status lines and route navigation        |
+| Customization     | Platform modifiers plus `modifiers.style` web escape hatches               |
 
-The TSX contract at `src/app.tsx` is compiled to `public/contract.json` by the
-BDUI CLI. A thin esbuild bundle (`src/client.ts` → `public/client.js`) loads
-the contract and mounts `@bdui/renderer-web`. A Fastify server serves the
-static `public/` directory together with three mock REST endpoints
-(`/api/profile`, `/api/task`, `/api/settings`) used by the `call` actions.
+## Project Layout
 
-## Project layout
-
-```
+```text
 examples/task-manager/
-├── package.json
-├── tsconfig.json          # client/DSL
-├── tsconfig.server.json   # server (NodeNext)
-├── public/
-│   ├── index.html
-│   ├── contract.json      # generated
-│   └── client.js          # generated
-├── src/
-│   ├── app.tsx            # entire app UI in TSX
-│   ├── client.ts          # browser bootstrap
-│   └── meta.json
-└── server/
-    └── index.ts           # Fastify + static + API
+  package.json
+  tsconfig.json
+  tsconfig.server.json
+  public/
+    brand-mark.svg
+    index.html
+    contract.json      # generated
+    client.js          # generated
+  src/
+    app.tsx            # full BDUI contract source
+    client.ts          # contract cache + mount bootstrap
+    meta.json
+  server/
+    index.ts           # Fastify static server + mock API
 ```
 
 ## Requirements
 
-- Node.js ≥ 22
-- The BDUI workspace built in the repository root (`npm install && npm run build:full` in `c:\Coding\BDUI`).
+- Node.js 22 or newer.
+- The BDUI workspace built from the repository root:
 
-## Install & build
+```bash
+npm install
+npm run build:full
+```
+
+## Build
 
 ```bash
 cd examples/task-manager
 npm install
-npm run build         # builds contract, client, server
+npm run build
 ```
 
-Individual steps:
+The build runs:
 
 ```bash
-npm run build:contract   # bdui build src/app.tsx -> public/contract.json
-npm run build:client     # esbuild src/client.ts -> public/client.js
-npm run build:server     # tsc -> dist/server/index.js
+npm run build:contract
+npm run build:client
+npm run build:server
 ```
 
 ## Run
 
 ```bash
 npm start
-# Taskly is up on http://localhost:4000
 ```
 
-Override the port with `PORT=4123 npm start`.
+Open `http://localhost:4000`.
 
-Open <http://localhost:4000> in a browser. You will walk through:
+Recommended demo path:
 
-1. The **login** screen — fill name/email and press _Continue_.
-2. The **onboarding** `FlowRoute` — three steps navigated by `flow.goTo`. The
-   last step issues a `call` that hits `POST /api/profile` and then finishes
-   the flow via `flow.complete`.
-3. The **dashboard** — a task input. Submitting triggers an atomic batch:
-   `call` saves to the server, `update.inc` bumps a counter, a success toast
-   is shown. If the server call fails, the whole batch rolls back and an
-   error message appears.
-4. The **settings** screen — theme/notifications persisted to the session
-   scope and synced to `POST /api/settings` with automatic rollback on
-   failure.
+1. Open the dashboard and press **Refresh data source**. This fetches
+   `/api/workspace` through the contract-level `workspaceSnapshot` data source.
+2. Press **Load static catalog**. This uses the static `starterCatalog` data
+   source without any network request.
+3. Save a task. The app sends a `call` to `/api/task`, clears the draft and
+   updates counters in an atomic batch.
+4. Open **New request**. Complete the three-step flow and submit it to
+   `/api/request`.
+5. Open **Settings**. Change profile/session values and press **Save settings**
+   to persist session state and sync with the server.
+6. Reload the page. The cache badge shows whether the contract came from
+   `network`, `cache` or `stale`.
+
+## API Endpoints
+
+| Endpoint                      | Purpose                                     |
+| ----------------------------- | ------------------------------------------- |
+| `GET /healthz`                | Server liveness check                       |
+| `GET /api/workspace?plan=...` | Workspace snapshot for the REST data source |
+| `POST /api/profile`           | Profile sync                                |
+| `POST /api/task`              | Task capture                                |
+| `POST /api/settings`          | Settings sync                               |
+| `POST /api/request`           | Multi-step request submission               |
 
 ## Scripts
 
-| Script                   | Description                                        |
-| ------------------------ | -------------------------------------------------- |
-| `npm run build`          | Build the contract, client and server in one go.   |
-| `npm start`              | Start the Fastify server (uses the prebuilt dist). |
-| `npm run dev`            | `build` + `start` (useful during development).     |
-| `npm run typecheck`      | `tsc --noEmit` over the whole project.             |
-| `npm run build:contract` | Only rebuild `public/contract.json` from TSX.      |
-| `npm run build:client`   | Only rebuild the browser bundle.                   |
-| `npm run build:server`   | Only rebuild the server.                           |
+| Script                   | Description                                       |
+| ------------------------ | ------------------------------------------------- |
+| `npm run build`          | Build contract, client bundle and server          |
+| `npm start`              | Start the prebuilt Fastify server                 |
+| `npm run dev`            | Build and start in one command                    |
+| `npm run typecheck`      | Typecheck client, DSL and server sources          |
+| `npm run build:contract` | Compile `src/app.tsx` into `public/contract.json` |
+| `npm run build:client`   | Bundle `src/client.ts` into `public/client.js`    |
+| `npm run build:server`   | Compile the Fastify server                        |
 
-## Using published packages
+## Published Package Usage
 
-When `@bdui/*` is available on npm just replace the `file:` entries in
-`package.json` with a semver range, e.g.
-
-```json
-"dependencies": {
-  "@bdui/dsl": "^0.6.0",
-  "@bdui/renderer-web": "^0.6.0",
-  "@bdui/sdk": "^0.6.0"
-}
-```
-
-Nothing else changes — the source code imports the same symbols either way.
+When the BDUI packages are published, replace the local `file:` dependencies in
+`package.json` with semver ranges such as `^0.6.0`. The application source does
+not need to change.

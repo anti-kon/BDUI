@@ -1,47 +1,72 @@
 // AUTO-GENERATED. Do not edit.
+import type { BDUIElement } from '@bdui/core';
+import type {
+  ButtonProps,
+  CheckboxProps,
+  ColumnProps,
+  DividerProps,
+  IfProps,
+  ImageProps,
+  InputProps,
+  RowProps,
+  SelectProps,
+  TextProps,
+} from '@bdui/defs';
+
+import type { NoChildrenProps, NodeChildrenProps, TextChildrenProps } from '../component-props.js';
 import { createNode } from '../glue/runtime.js';
 
-export function Button(props: any): any {
-  return createNode('Button', props, {
+export type ButtonDslProps = NoChildrenProps<ButtonProps, 'onAction'>;
+export function Button(props: ButtonDslProps): BDUIElement {
+  return createNode('Button', props as unknown as Record<string, unknown>, {
     children: 'none',
     events: ['onAction'],
   });
 }
-export function Checkbox(props: any): any {
-  return createNode('Checkbox', props, {
+export type CheckboxDslProps = NoChildrenProps<CheckboxProps, 'onChangeAction'>;
+export function Checkbox(props: CheckboxDslProps): BDUIElement {
+  return createNode('Checkbox', props as unknown as Record<string, unknown>, {
     children: 'none',
     events: ['onChangeAction'],
   });
 }
-export function Column(props: any): any {
-  return createNode('Column', props, { children: 'nodes' });
+export type ColumnDslProps = NodeChildrenProps<ColumnProps, never>;
+export function Column(props: ColumnDslProps): BDUIElement {
+  return createNode('Column', props as unknown as Record<string, unknown>, { children: 'nodes' });
 }
-export function Divider(props: any): any {
-  return createNode('Divider', props, { children: 'none' });
+export type DividerDslProps = NoChildrenProps<DividerProps, never>;
+export function Divider(props: DividerDslProps): BDUIElement {
+  return createNode('Divider', props as unknown as Record<string, unknown>, { children: 'none' });
 }
-export function If(props: any): any {
-  return createNode('If', props, { children: 'nodes' });
+export type IfDslProps = NodeChildrenProps<IfProps, never>;
+export function If(props: IfDslProps): BDUIElement {
+  return createNode('If', props as unknown as Record<string, unknown>, { children: 'nodes' });
 }
-export function Image(props: any): any {
-  return createNode('Image', props, { children: 'none' });
+export type ImageDslProps = NoChildrenProps<ImageProps, never>;
+export function Image(props: ImageDslProps): BDUIElement {
+  return createNode('Image', props as unknown as Record<string, unknown>, { children: 'none' });
 }
-export function Input(props: any): any {
-  return createNode('Input', props, {
+export type InputDslProps = NoChildrenProps<InputProps, 'onChangeAction' | 'onBlurAction'>;
+export function Input(props: InputDslProps): BDUIElement {
+  return createNode('Input', props as unknown as Record<string, unknown>, {
     children: 'none',
     events: ['onChangeAction', 'onBlurAction'],
   });
 }
-export function Row(props: any): any {
-  return createNode('Row', props, { children: 'nodes' });
+export type RowDslProps = NodeChildrenProps<RowProps, never>;
+export function Row(props: RowDslProps): BDUIElement {
+  return createNode('Row', props as unknown as Record<string, unknown>, { children: 'nodes' });
 }
-export function Select(props: any): any {
-  return createNode('Select', props, {
+export type SelectDslProps = NoChildrenProps<SelectProps, 'onChangeAction'>;
+export function Select(props: SelectDslProps): BDUIElement {
+  return createNode('Select', props as unknown as Record<string, unknown>, {
     children: 'none',
     events: ['onChangeAction'],
   });
 }
-export function Text(props: any): any {
-  return createNode('Text', props, {
+export type TextDslProps = TextChildrenProps<TextProps, never>;
+export function Text(props: TextDslProps): BDUIElement {
+  return createNode('Text', props as unknown as Record<string, unknown>, {
     children: 'text',
     mapToProp: 'text',
     aliases: { value: 'text' },

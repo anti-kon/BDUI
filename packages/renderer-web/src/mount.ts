@@ -1,9 +1,11 @@
 import type { Contract } from '@bdui/core';
 import {
+  createFetchHttpClient,
   createLocalStorageAdapter,
   createRuntime,
   type HttpClient,
   type Runtime,
+  type StateValidator,
   type StorageAdapter,
 } from '@bdui/runtime';
 
@@ -13,6 +15,7 @@ export interface MountOptions {
   readonly urlSync?: boolean;
   readonly storage?: StorageAdapter;
   readonly http?: HttpClient;
+  readonly validators?: Readonly<Record<string, StateValidator>>;
   readonly prefetchScreens?: (screens: readonly string[]) => Promise<void> | void;
 }
 
@@ -30,10 +33,14 @@ export function mount(
   const runtime = createRuntime({
     contract,
     storage,
-    http: options.http,
+    http: options.http ?? createFetchHttpClient(),
+    validators: options.validators,
     prefetchScreens: options.prefetchScreens,
   });
-  const plugin = createWebPlugin({ urlSync: options.urlSync ?? !!contract.navigation.urlSync });
+  const plugin = createWebPlugin({
+    urlSync: options.urlSync ?? !!contract.navigation.urlSync,
+    contract,
+  });
   runtime.use(plugin, container);
 
   return {

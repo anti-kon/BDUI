@@ -17,8 +17,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "file:../core",
-    "@bdui/expr": "file:../expr"
+    "@bdui/core": "0.6.0-alpha.0",
+    "@bdui/expr": "0.6.0-alpha.0"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

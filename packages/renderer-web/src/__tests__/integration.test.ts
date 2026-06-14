@@ -57,6 +57,90 @@ function simpleContract(): Contract {
   };
 }
 
+function flowContract(): Contract {
+  return {
+    meta: {
+      contractId: 'flow-demo',
+      version: '1.0.0',
+      schemaVersion: '1.0.0',
+      generatedAt: '2026-01-01T00:00:00Z',
+    },
+    navigation: {
+      initialRoute: 'wizard',
+      routes: [
+        {
+          id: 'wizard',
+          type: 'flow',
+          title: 'Wizard',
+          startStep: 'start',
+          steps: [
+            {
+              id: 'start',
+              title: 'Start',
+              children: [
+                {
+                  type: 'Column',
+                  children: [
+                    { type: 'Text', text: 'Only once' },
+                    { type: 'Button', title: 'Continue' },
+                  ],
+                },
+              ],
+            },
+          ],
+        } as unknown as never,
+      ],
+    },
+  };
+}
+
+function modalContract(): Contract {
+  return {
+    meta: {
+      contractId: 'modal-demo',
+      version: '1.0.0',
+      schemaVersion: '1.0.0',
+      generatedAt: '2026-01-01T00:00:00Z',
+    },
+    navigation: {
+      initialRoute: 'home',
+      routes: [
+        {
+          id: 'home',
+          node: {
+            type: 'Column',
+            children: [
+              {
+                type: 'Button',
+                title: 'Open modal',
+                onAction: [{ type: 'modal.open', params: { id: 'help-modal' } }],
+              },
+              {
+                type: 'If',
+                condition: false,
+                children: [
+                  {
+                    id: 'help-modal',
+                    type: 'Column',
+                    children: [
+                      { type: 'Text', text: 'Modal body' },
+                      {
+                        type: 'Button',
+                        title: 'Close modal',
+                        onAction: [{ type: 'modal.close', params: { id: 'help-modal' } }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        } as unknown as never,
+      ],
+    },
+  };
+}
+
 describe('mount (renderer-web integration)', () => {
   let dom: ReturnType<typeof createDom>;
 
@@ -90,6 +174,31 @@ describe('mount (renderer-web integration)', () => {
     await Promise.resolve();
     expect(app.runtime.state.read('flow', 'counter')).toBe(1);
     expect(dom.container.textContent).toContain('count=1');
+    app.dispose();
+  });
+
+  it('does not duplicate the first flow step while initializing flow state', async () => {
+    const app = mount(dom.container, flowContract());
+    await Promise.resolve();
+    const buttons = [...dom.container.querySelectorAll('button')].filter(
+      (button) => button.textContent === 'Continue',
+    );
+    expect(buttons).toHaveLength(1);
+    expect(dom.container.textContent?.match(/Only once/g)).toHaveLength(1);
+    app.dispose();
+  });
+
+  it('opens and closes modal descriptors by node id', async () => {
+    const app = mount(dom.container, modalContract());
+    (dom.container.querySelector('button') as unknown as { click: () => void }).click();
+    await Promise.resolve();
+
+    const modal = dom.window.document.body.querySelector('.bdui-modal');
+    expect(modal?.textContent).toContain('Modal body');
+
+    (modal?.querySelector('button') as unknown as { click: () => void }).click();
+    await Promise.resolve();
+    expect(dom.window.document.body.querySelector('.bdui-modal')).toBeNull();
     app.dispose();
   });
 

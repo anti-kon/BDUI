@@ -1,8 +1,11 @@
-# iOS SwiftUI BDUI renderer
+# iOS SwiftUI BDUI Renderer
 
-`OpsControl/` contains a complete SwiftUI source set for the Russian Кампус
+`OpsControl/` contains a complete SwiftUI source set for the Russian Campus
 native application. The app loads `Resources/campus.contract.json`, interprets
 the BDUI tree and executes the same core SAL subset as the Android renderer.
+
+The renderer consumes the shared `modifiers` object for portable spacing,
+padding, text roles and button variants. Web-only CSS escape hatches are ignored.
 
 To run it in Xcode:
 

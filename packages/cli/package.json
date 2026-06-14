@@ -15,11 +15,11 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "file:../core",
-    "@bdui/dsl": "file:../dsl",
-    "@bdui/registry": "file:../registry",
-    "@bdui/schema": "file:../schema",
-    "@bdui/transpiler": "file:../transpiler",
+    "@bdui/core": "0.6.0-alpha.0",
+    "@bdui/dsl": "0.6.0-alpha.0",
+    "@bdui/registry": "0.6.0-alpha.0",
+    "@bdui/schema": "0.6.0-alpha.0",
+    "@bdui/transpiler": "0.6.0-alpha.0",
     "commander": "^12.1.0"
   },
   "devDependencies": {

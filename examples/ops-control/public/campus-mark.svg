@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="88" height="88" viewBox="0 0 88 88" role="img" aria-labelledby="title desc">
+  <title id="title">Campus mark</title>
+  <desc id="desc">A compact university campus mark for the BDUI demo.</desc>
+  <rect width="88" height="88" rx="22" fill="#e0f2fe"/>
+  <path d="M17 37h54L44 21 17 37Z" fill="#0369a1"/>
+  <path d="M24 40h40v29H24V40Z" fill="#0ea5e9"/>
+  <path d="M30 45h7v24h-7V45Zm11 0h7v24h-7V45Zm11 0h7v24h-7V45Z" fill="#f8fafc"/>
+  <path d="M20 72h48" stroke="#0369a1" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="44" cy="33" r="4" fill="#f8fafc"/>
+</svg>

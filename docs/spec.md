@@ -4,7 +4,7 @@ This document describes the on-the-wire shape of a BDUI contract. The
 authoritative schema lives in `packages/schema/src/generated/schema.generated.ts`
 and is derived from the TypeScript types in `@bdui/core`.
 
-## Top-level shape
+## Top-Level Shape
 
 ```json
 {
@@ -31,8 +31,9 @@ and is derived from the TypeScript types in `@bdui/core`.
 }
 ```
 
-`additionalProperties: false` is enforced on every object (`meta`, `navigation`,
-nodes). Unknown fields cause validation errors.
+`additionalProperties: false` is enforced on structured contract objects such
+as `meta` and `navigation`. Component nodes remain extensible through manifest
+props and the open-ended `modifiers` bag.
 
 ## Nodes
 
@@ -43,43 +44,60 @@ component-specific props.
 {
   "type": "Button",
   "title": "Submit",
-  "variant": "primary",
-  "onAction": [{ "type": "navigate", "params": { "to": "next" } }],
-  "children": []
+  "modifiers": { "variant": "primary", "minHeight": 40 },
+  "onAction": [{ "type": "navigate", "params": { "to": "next" } }]
 }
 ```
 
 The generator emits one `Node_<Component>` definition per manifest and unites
 them via `oneOf` on the root `Node` type.
 
+## Modifiers
+
+`modifiers` is the cross-platform design surface. Renderers should honour the
+platform-neutral subset where possible:
+
+- layout: `padding`, `margin`, `gap`, `width`, `minHeight`, `align`,
+  `justify`, `flexWrap`;
+- surface: `background`, `color`, `border`, `borderRadius`, `boxShadow`,
+  `opacity`;
+- typography: `fontFamily`, `fontSize`, `fontWeight`, `lineHeight`,
+  `textAlign`;
+- semantics: `role`, `variant`, `testId`, `accessibilityLabel`.
+
+Web renderers may additionally pass through camelCase CSS keys and nested
+`modifiers.style`. Native renderers may ignore web-only keys while preserving
+the same contract shape.
+
 ## Routes
 
 Routes come in two flavours:
 
-- **Screen route** — static `node` tree.
-- **Flow route** — `type: "flow"`, `startStep`, `steps[]` with guarded
+- **Screen route** - static `node` tree.
+- **Flow route** - `type: "flow"`, `startStep`, `steps[]` with guarded
   `transitions`.
 
 ## Expressions
 
 Expressions are serialised as `"{{ ... }}"` strings. Values typed as
 `Expression<T>` accept either a literal `T` or such a string. The schema
-validates expression strings against a conservative pattern; actual grammar
-is enforced at parse time by `@bdui/expr`.
+validates expression strings against a conservative pattern; actual grammar is
+enforced at parse time by `@bdui/expr`.
 
 ## Actions
 
-Actions are strongly-typed via the `Action` union (see [`actions.md`](./actions.md)).
-Event props like `onAction`, `onEnter`, `onSubmit` always carry an array of
-actions — never a string of arbitrary JavaScript.
+Actions are strongly typed via the `Action` union (see
+[`actions.md`](./actions.md)). Event props like `onAction`, `onEnter` and
+`onSubmit` always carry an array of actions - never a string of arbitrary
+JavaScript.
 
 ## Canonicalisation
 
 Contracts produced by `@bdui/transpiler` are canonicalised:
 
-- object keys are sorted alphabetically,
-- `undefined` values are stripped,
-- arrays keep authoring order,
+- object keys are sorted alphabetically;
+- `undefined` values are stripped;
+- arrays keep authoring order;
 - no trailing whitespace or BOM.
 
 This guarantees byte-stable hashes and deterministic ETags in the registry.

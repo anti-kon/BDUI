@@ -7,6 +7,8 @@ const path = require('node:path');
 const rootDir = path.resolve(__dirname, '..');
 const demoDir = path.join(rootDir, 'sandbox', 'web-demo');
 const vendorDir = path.join(demoDir, 'vendor');
+const campusAsset = path.join(rootDir, 'examples', 'ops-control', 'public', 'campus-mark.svg');
+const demoCampusAsset = path.join(demoDir, 'campus-mark.svg');
 
 const packagesToVendor = [
   { name: '@bdui/core', dir: 'core' },
@@ -52,5 +54,7 @@ for (const pkg of packagesToVendor) {
   const target = path.join(vendorDir, pkg.dir);
   copyDir(dist, target);
 }
+
+fs.copyFileSync(campusAsset, demoCampusAsset);
 
 console.log(`✔ BDUI web-demo is prepared in ${vendorDir}`);

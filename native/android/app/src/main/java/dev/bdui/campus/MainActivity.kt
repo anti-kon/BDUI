@@ -3,6 +3,7 @@ package dev.bdui.campus
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -35,6 +38,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -449,12 +453,39 @@ private fun RenderNode(node: JSONObject?, runtime: BduiRuntime) {
         Text(BduiExpression.interpolate(node.opt("label"), runtime.state))
       }
     }
+    "Image" -> ImageNode(node, runtime)
     "Select" -> SelectNode(node, runtime)
     "If" -> if (BduiExpression.evalBool(node.opt("condition"), runtime.state)) {
       RenderChildren(node.optJSONArray("children"), runtime)
     }
     "Divider" -> HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
     else -> Text("Unsupported node: ${node.optString("type")}")
+  }
+}
+
+@Composable
+private fun ImageNode(node: JSONObject, runtime: BduiRuntime) {
+  val label = BduiExpression.interpolate(node.opt("alt") ?: node.opt("src"), runtime.state)
+    .ifBlank { "Image" }
+  val modifiers = node.optJSONObject("modifiers")
+  val radius = (modifiers?.optDouble("borderRadius", 12.0) ?: 12.0).toFloat().dp
+
+  Surface(
+    modifier = Modifier.size(
+      width = node.dimension("width", 44.0),
+      height = node.dimension("height", 44.0),
+    ),
+    color = MaterialTheme.colorScheme.primaryContainer,
+    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    shape = RoundedCornerShape(radius),
+  ) {
+    Box(contentAlignment = Alignment.Center) {
+      Text(
+        text = label.take(2).uppercase(),
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+      )
+    }
   }
 }
 
@@ -504,6 +535,13 @@ private fun JSONObject.spacing() =
 
 private fun JSONObject.padding() =
   (optJSONObject("modifiers")?.optDouble("padding", 0.0) ?: 0.0).toFloat().dp
+
+private fun JSONObject.dimension(key: String, fallback: Double) =
+  when (val value = opt(key)) {
+    is Number -> value.toDouble().toFloat().dp
+    is String -> value.removeSuffix("px").toFloatOrNull()?.dp ?: fallback.toFloat().dp
+    else -> fallback.toFloat().dp
+  }
 
 private fun JSONArray.findObject(predicate: (JSONObject) -> Boolean): JSONObject? {
   for (i in 0 until length()) {

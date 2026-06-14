@@ -1,9 +1,10 @@
 import type { Contract } from '@bdui/core';
-import { type HttpClient, type Runtime, type StorageAdapter } from '@bdui/runtime';
+import { type HttpClient, type Runtime, type StateValidator, type StorageAdapter } from '@bdui/runtime';
 export interface MountOptions {
     readonly urlSync?: boolean;
     readonly storage?: StorageAdapter;
     readonly http?: HttpClient;
+    readonly validators?: Readonly<Record<string, StateValidator>>;
     readonly prefetchScreens?: (screens: readonly string[]) => Promise<void> | void;
 }
 export interface MountedApp {

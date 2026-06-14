@@ -12,7 +12,7 @@ struct BDUIRenderer: View {
         }
         .background(Color(.systemGroupedBackground))
         .alert(
-            "Кампус",
+            "Campus",
             isPresented: Binding(
                 get: { runtime.toastMessage != nil },
                 set: { if !$0 { runtime.toastMessage = nil } }
@@ -89,6 +89,8 @@ struct BDUINodeView: View {
                 isOn: runtime.boolBinding(node["binding"] as? [String: Any])
             )
             .toggleStyle(.switch)
+        case "Image":
+            imageView
         case "Select":
             selectView
         case "If":
@@ -143,6 +145,25 @@ struct BDUINodeView: View {
             Button(title) { runtime.run(actions: node["onAction"]) }
                 .buttonStyle(.bordered)
         }
+    }
+
+    @ViewBuilder
+    private var imageView: some View {
+        let label = BDUIExpression.interpolate(node["alt"] ?? node["src"], runtime: runtime)
+        let modifiers = node["modifiers"] as? [String: Any]
+        let width = CGFloat(BDUIExpression.asDouble(node["width"], defaultValue: 44))
+        let height = CGFloat(BDUIExpression.asDouble(node["height"], defaultValue: 44))
+        let radius = CGFloat(BDUIExpression.asDouble(modifiers?["borderRadius"], defaultValue: 12))
+
+        ZStack {
+            RoundedRectangle(cornerRadius: radius)
+                .fill(Color.accentColor.opacity(0.16))
+            Text(String(label.prefix(2)).uppercased())
+                .font(.caption.bold())
+                .foregroundColor(.accentColor)
+        }
+        .frame(width: width, height: height)
+        .accessibilityLabel(Text(label.isEmpty ? "Image" : label))
     }
 
     @ViewBuilder

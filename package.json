@@ -44,6 +44,7 @@
     "verify:contracts": "node scripts/verify-contract-artifacts.cjs",
     "verify:browser": "npm run verify:web-demo && node scripts/verify-web-demo-browser.cjs",
     "verify:browsers": "npm run verify:web-demo && node scripts/verify-web-demo-browser.cjs all",
+    "verify:taskly-browser": "npm run verify:examples && node scripts/verify-taskly-browser.cjs",
     "verify:native": "node scripts/verify-native-coverage.cjs",
     "verify:all": "npm run build:full && npm run verify:generated-contracts && npm run verify:examples && npm run typecheck && npm run lint && npm run format:check && npm test -- --reporter=default && npm run test:coverage && npm run verify:contracts && npm run verify:native && npm run verify:web-demo && npm run audit:all",
     "verify:web-demo": "node scripts/verify-web-demo-artifacts.cjs",

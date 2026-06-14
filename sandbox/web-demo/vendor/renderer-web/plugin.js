@@ -8,11 +8,38 @@ import { mountToastHost } from './toast-host.js';
 function getCurrentRoute(ctx) {
     return ctx.navigation.resolve(ctx.navigation.currentRoute);
 }
-function findModalDescriptor(contract, _id) {
-    // Modal descriptors live in the tree; runtime does not track them separately.
-    // For now, return undefined; applications can subscribe to modal events
-    // themselves to render custom content.
-    void contract;
+function findModalDescriptor(contract, id) {
+    function visit(node) {
+        if (!node)
+            return undefined;
+        if (node.id === id)
+            return node;
+        const children = node.children;
+        if (!children)
+            return undefined;
+        for (const child of children) {
+            const match = visit(child);
+            if (match)
+                return match;
+        }
+        return undefined;
+    }
+    for (const route of contract?.navigation.routes ?? []) {
+        if (route.type === 'flow') {
+            for (const step of route.steps) {
+                for (const child of step.children) {
+                    const match = visit(child);
+                    if (match)
+                        return match;
+                }
+            }
+        }
+        else {
+            const match = visit(route.node);
+            if (match)
+                return match;
+        }
+    }
     return undefined;
 }
 export function createWebPlugin(options = {}) {
@@ -93,6 +120,7 @@ export function createWebPlugin(options = {}) {
         const resolution = resolveFlowStep(route, internal.context.state.snapshot(), currentStepId);
         if (resolution.stepId !== currentStepId) {
             internal.context.state.write('local', stepKey, resolution.stepId);
+            return;
         }
         internal.rendererContext = createRendererContext(internal.context);
         const wrapper = internal.doc.createElement('div');
@@ -140,7 +168,7 @@ export function createWebPlugin(options = {}) {
             const unsubToast = mountToastHost(internal.doc, ctx.toast);
             const unsubModal = mountModalHost(internal.doc, ctx.modal, {
                 renderNode: (node) => renderNode(node),
-                lookupModal: (id) => findModalDescriptor(ctx, id),
+                lookupModal: (id) => findModalDescriptor(options.contract, id),
             });
             internal.disposers.push(unsubToast, unsubModal);
             if (options.urlSync)
