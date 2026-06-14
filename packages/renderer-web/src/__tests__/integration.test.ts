@@ -179,6 +179,40 @@ function selectContract(): Contract {
   };
 }
 
+function inputContract(): Contract {
+  return {
+    meta: {
+      contractId: 'input-demo',
+      version: '1.0.0',
+      schemaVersion: '1.0.0',
+      generatedAt: '2026-01-01T00:00:00Z',
+    },
+    navigation: {
+      initialRoute: 'home',
+      routes: [
+        {
+          id: 'home',
+          node: {
+            type: 'Column',
+            children: [
+              {
+                type: 'Input',
+                binding: { scope: 'flow', path: 'name' },
+                placeholder: 'Name',
+              },
+              {
+                type: 'Text',
+                text: 'name={{flow.name}}',
+              },
+            ],
+          },
+        } as unknown as never,
+      ],
+    },
+    initial: { flow: { name: '' } },
+  };
+}
+
 describe('mount (renderer-web integration)', () => {
   let dom: ReturnType<typeof createDom>;
 
@@ -254,6 +288,25 @@ describe('mount (renderer-web integration)', () => {
     expect(app.runtime.state.read('flow', 'plan')).toBe('enterprise');
     expect(nextSelect?.value).toBe('enterprise');
     expect(dom.container.textContent).toContain('plan=enterprise');
+    app.dispose();
+  });
+
+  it('preserves focused input while state-driven re-render runs', async () => {
+    const app = mount(dom.container, inputContract());
+    const input = dom.container.querySelector('input') as HTMLInputElement | null;
+    expect(input).not.toBeNull();
+
+    input!.focus();
+    input!.value = 'Анна';
+    input!.setSelectionRange(4, 4);
+    input!.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    await Promise.resolve();
+
+    const nextInput = dom.container.querySelector('input') as HTMLInputElement | null;
+    expect(app.runtime.state.read('flow', 'name')).toBe('Анна');
+    expect(dom.window.document.activeElement).toBe(nextInput);
+    expect(nextInput?.selectionStart).toBe(4);
+    expect(dom.container.textContent).toContain('name=Анна');
     app.dispose();
   });
 

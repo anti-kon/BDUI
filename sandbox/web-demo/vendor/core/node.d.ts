@@ -1,6 +1,8 @@
 import type { Action } from './action.js';
-export type ModifierLength = number | string;
-export type ModifierColor = string;
+import type { Expression } from './expr.js';
+export type ModifierLength = Expression<number | string>;
+export type ModifierColor = Expression<string>;
+export type ModifierScalar = Expression<number | string>;
 /**
  * Platform-neutral styling and layout hints shared by the base components.
  *
@@ -40,18 +42,18 @@ export interface PlatformModifiers {
     readonly background?: ModifierColor;
     readonly backgroundColor?: ModifierColor;
     readonly color?: ModifierColor;
-    readonly border?: string;
+    readonly border?: Expression<string>;
     readonly borderColor?: ModifierColor;
     readonly borderRadius?: ModifierLength;
-    readonly boxShadow?: string;
-    readonly opacity?: number | string;
-    readonly fontFamily?: string;
+    readonly boxShadow?: Expression<string>;
+    readonly opacity?: ModifierScalar;
+    readonly fontFamily?: Expression<string>;
     readonly fontSize?: ModifierLength;
-    readonly fontWeight?: number | string;
+    readonly fontWeight?: ModifierScalar;
     readonly lineHeight?: ModifierLength;
     readonly textAlign?: 'left' | 'center' | 'right' | 'start' | 'end' | string;
     readonly letterSpacing?: ModifierLength;
-    readonly style?: Readonly<Record<string, string | number | null | undefined>>;
+    readonly style?: Readonly<Record<string, Expression<string | number> | null | undefined>>;
     readonly testId?: string;
     readonly accessibilityLabel?: string;
 }

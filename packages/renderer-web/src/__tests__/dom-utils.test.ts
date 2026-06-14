@@ -28,4 +28,20 @@ describe('cssForModifiers', () => {
       background: 'linear-gradient(#fff, #eef2ff)',
     });
   });
+
+  it('resolves state-driven modifier values before CSS serialization', () => {
+    expect(
+      cssForModifiers(
+        {
+          background: '{{session.theme == "dark" ? "#111827" : "#ffffff"}}',
+          borderRadius: 6,
+        },
+        (value) =>
+          value === '{{session.theme == "dark" ? "#111827" : "#ffffff"}}' ? '#111827' : value,
+      ),
+    ).toEqual({
+      background: '#111827',
+      borderRadius: '6px',
+    });
+  });
 });

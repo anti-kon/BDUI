@@ -30,12 +30,18 @@ const LENGTH_PROPS = new Set([
 ]);
 
 const NON_CSS_MODIFIERS = new Set(['accessibilityLabel', 'role', 'testId', 'variant']);
+type ModifierValueResolver = (value: unknown) => unknown;
 
-function cssValue(key: string, value: unknown): string | undefined {
-  if (value == null) return undefined;
-  if (key === 'lineHeight' && typeof value === 'number') return String(value);
-  if (typeof value === 'number' && LENGTH_PROPS.has(key)) return `${value}px`;
-  return String(value);
+function cssValue(
+  key: string,
+  value: unknown,
+  resolveValue?: ModifierValueResolver,
+): string | undefined {
+  const resolved = resolveValue ? resolveValue(value) : value;
+  if (resolved == null) return undefined;
+  if (key === 'lineHeight' && typeof resolved === 'number') return String(resolved);
+  if (typeof resolved === 'number' && LENGTH_PROPS.has(key)) return `${resolved}px`;
+  return String(resolved);
 }
 
 function flexPosition(value: unknown): string {
@@ -55,13 +61,17 @@ function flexPosition(value: unknown): string {
 
 export function cssForModifiers(
   modifiers: Readonly<Record<string, unknown>> | undefined,
+  resolveValue?: ModifierValueResolver,
 ): Record<string, string> {
   if (!modifiers) return {};
   const style: Record<string, string> = {};
   for (const [key, value] of Object.entries(modifiers)) {
     if (value == null) continue;
     if (key === 'style' && typeof value === 'object' && !Array.isArray(value)) {
-      Object.assign(style, cssForModifiers(value as Readonly<Record<string, unknown>>));
+      Object.assign(
+        style,
+        cssForModifiers(value as Readonly<Record<string, unknown>>, resolveValue),
+      );
       continue;
     }
     if (NON_CSS_MODIFIERS.has(key)) continue;
@@ -73,7 +83,7 @@ export function cssForModifiers(
         style.justifyContent = flexPosition(value);
         break;
       default: {
-        const nextValue = cssValue(key, value);
+        const nextValue = cssValue(key, value, resolveValue);
         if (nextValue !== undefined) style[key] = nextValue;
       }
     }

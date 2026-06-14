@@ -91,6 +91,26 @@ async function main() {
     await expect(page.getByText('Операционный пульт')).toBeVisible();
     await expect(page.getByText(/Кэш контракта: (сеть|кэш|устаревший кэш)/)).toBeVisible();
 
+    await page.getByRole('button', { name: 'Настройки' }).click();
+    const nameInput = page.getByPlaceholder('Полное имя');
+    await nameInput.fill('');
+    await nameInput.type('Иван Петров');
+    await expect(nameInput).toBeFocused();
+    await expect(nameInput).toHaveValue('Иван Петров');
+
+    const themeSelect = page.locator('select').nth(1);
+    await themeSelect.selectOption('Тёмная');
+    await expect(page.locator('#app .bdui-column').first()).toHaveCSS(
+      'background-color',
+      'rgb(15, 23, 42)',
+    );
+    await themeSelect.selectOption('Светлая');
+    await expect(page.locator('#app .bdui-column').first()).toHaveCSS(
+      'background-color',
+      'rgb(251, 252, 254)',
+    );
+    await page.getByRole('button', { name: 'Дашборд' }).click();
+
     const gridCount = await page.evaluate(
       () =>
         Array.from(document.querySelectorAll('.bdui-column')).filter(

@@ -27,14 +27,15 @@ const LENGTH_PROPS = new Set([
     'width',
 ]);
 const NON_CSS_MODIFIERS = new Set(['accessibilityLabel', 'role', 'testId', 'variant']);
-function cssValue(key, value) {
-    if (value == null)
+function cssValue(key, value, resolveValue) {
+    const resolved = resolveValue ? resolveValue(value) : value;
+    if (resolved == null)
         return undefined;
-    if (key === 'lineHeight' && typeof value === 'number')
-        return String(value);
-    if (typeof value === 'number' && LENGTH_PROPS.has(key))
-        return `${value}px`;
-    return String(value);
+    if (key === 'lineHeight' && typeof resolved === 'number')
+        return String(resolved);
+    if (typeof resolved === 'number' && LENGTH_PROPS.has(key))
+        return `${resolved}px`;
+    return String(resolved);
 }
 function flexPosition(value) {
     switch (value) {
@@ -50,7 +51,7 @@ function flexPosition(value) {
             return String(value);
     }
 }
-export function cssForModifiers(modifiers) {
+export function cssForModifiers(modifiers, resolveValue) {
     if (!modifiers)
         return {};
     const style = {};
@@ -58,7 +59,7 @@ export function cssForModifiers(modifiers) {
         if (value == null)
             continue;
         if (key === 'style' && typeof value === 'object' && !Array.isArray(value)) {
-            Object.assign(style, cssForModifiers(value));
+            Object.assign(style, cssForModifiers(value, resolveValue));
             continue;
         }
         if (NON_CSS_MODIFIERS.has(key))
@@ -71,7 +72,7 @@ export function cssForModifiers(modifiers) {
                 style.justifyContent = flexPosition(value);
                 break;
             default: {
-                const nextValue = cssValue(key, value);
+                const nextValue = cssValue(key, value, resolveValue);
                 if (nextValue !== undefined)
                     style[key] = nextValue;
             }
