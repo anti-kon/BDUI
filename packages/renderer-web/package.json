@@ -1,6 +1,6 @@
 {
   "name": "@bdui/renderer-web",
-  "version": "0.6.0-alpha.0",
+  "version": "0.6.0",
   "description": "BDUI DOM renderer plugin on top of @bdui/runtime",
   "type": "module",
   "main": "./dist/index.js",

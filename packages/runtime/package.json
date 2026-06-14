@@ -1,6 +1,6 @@
 {
   "name": "@bdui/runtime",
-  "version": "0.6.0-alpha.0",
+  "version": "0.6.0",
   "description": "BDUI platform-agnostic runtime (state, navigation, actions, flow, loader)",
   "type": "module",
   "exports": {

@@ -1,6 +1,6 @@
 {
   "name": "@bdui/schema",
-  "version": "0.6.0-alpha.0",
+  "version": "0.6.0",
   "description": "BDUI JSON Schema generator and runtime validator",
   "type": "module",
   "exports": {

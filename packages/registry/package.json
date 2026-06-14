@@ -1,6 +1,6 @@
 {
   "name": "@bdui/registry",
-  "version": "0.6.0-alpha.0",
+  "version": "0.6.0",
   "description": "BDUI contract registry (HTTP API, pluggable storage, SemVer-aware resolve)",
   "type": "module",
   "main": "./dist/index.js",
