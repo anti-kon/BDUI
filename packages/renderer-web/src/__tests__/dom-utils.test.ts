@@ -10,6 +10,7 @@ describe('cssForModifiers', () => {
         variant: 'primary',
         padding: 12,
         borderRadius: 10,
+        lineHeight: 1.55,
         align: 'start',
         justify: 'between',
         style: {
@@ -20,6 +21,7 @@ describe('cssForModifiers', () => {
     ).toEqual({
       padding: '12px',
       borderRadius: '10px',
+      lineHeight: '1.55',
       alignItems: 'flex-start',
       justifyContent: 'space-between',
       minHeight: '44px',

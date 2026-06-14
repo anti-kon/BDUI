@@ -7,7 +7,6 @@ const LENGTH_PROPS = new Set([
     'height',
     'left',
     'letterSpacing',
-    'lineHeight',
     'margin',
     'marginBottom',
     'marginLeft',
@@ -31,6 +30,8 @@ const NON_CSS_MODIFIERS = new Set(['accessibilityLabel', 'role', 'testId', 'vari
 function cssValue(key, value) {
     if (value == null)
         return undefined;
+    if (key === 'lineHeight' && typeof value === 'number')
+        return String(value);
     if (typeof value === 'number' && LENGTH_PROPS.has(key))
         return `${value}px`;
     return String(value);

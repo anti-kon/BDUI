@@ -141,6 +141,44 @@ function modalContract(): Contract {
   };
 }
 
+function selectContract(): Contract {
+  return {
+    meta: {
+      contractId: 'select-demo',
+      version: '1.0.0',
+      schemaVersion: '1.0.0',
+      generatedAt: '2026-01-01T00:00:00Z',
+    },
+    navigation: {
+      initialRoute: 'home',
+      routes: [
+        {
+          id: 'home',
+          node: {
+            type: 'Column',
+            children: [
+              {
+                type: 'Select',
+                binding: { scope: 'flow', path: 'plan' },
+                options: [
+                  { value: 'starter', label: 'Starter' },
+                  { value: 'scale', label: 'Scale' },
+                  { value: 'enterprise', label: 'Enterprise' },
+                ],
+              },
+              {
+                type: 'Text',
+                text: 'plan={{flow.plan}}',
+              },
+            ],
+          },
+        } as unknown as never,
+      ],
+    },
+    initial: { flow: { plan: 'scale' } },
+  };
+}
+
 describe('mount (renderer-web integration)', () => {
   let dom: ReturnType<typeof createDom>;
 
@@ -199,6 +237,23 @@ describe('mount (renderer-web integration)', () => {
     (modal?.querySelector('button') as unknown as { click: () => void }).click();
     await Promise.resolve();
     expect(dom.window.document.body.querySelector('.bdui-modal')).toBeNull();
+    app.dispose();
+  });
+
+  it('keeps select value in sync with bound runtime state', async () => {
+    const app = mount(dom.container, selectContract());
+    const select = dom.container.querySelector('select') as HTMLSelectElement | null;
+    expect(select).not.toBeNull();
+    expect(select?.value).toBe('scale');
+
+    select!.value = 'enterprise';
+    select!.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    await Promise.resolve();
+
+    const nextSelect = dom.container.querySelector('select') as HTMLSelectElement | null;
+    expect(app.runtime.state.read('flow', 'plan')).toBe('enterprise');
+    expect(nextSelect?.value).toBe('enterprise');
+    expect(dom.container.textContent).toContain('plan=enterprise');
     app.dispose();
   });
 

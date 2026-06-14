@@ -2,7 +2,7 @@
   "name": "taskly",
   "version": "0.1.0",
   "private": true,
-  "description": "Taskly — demo BDUI app built on top of @bdui/* packages.",
+  "description": "Операционный пульт — демо-приложение BDUI на базе @bdui/* пакетов.",
   "type": "module",
   "engines": {
     "node": ">=22"

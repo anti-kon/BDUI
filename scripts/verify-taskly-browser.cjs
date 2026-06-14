@@ -88,8 +88,8 @@ async function main() {
     });
 
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
-    await expect(page.getByText('Taskly Operations')).toBeVisible();
-    await expect(page.getByText(/Contract source: (network|cache|stale)/)).toBeVisible();
+    await expect(page.getByText('Операционный пульт')).toBeVisible();
+    await expect(page.getByText(/Кэш контракта: (сеть|кэш|устаревший кэш)/)).toBeVisible();
 
     const gridCount = await page.evaluate(
       () =>
@@ -101,38 +101,44 @@ async function main() {
       throw new Error(`Expected at least 2 styled BDUI grids, found ${gridCount}`);
     }
 
-    await page.getByRole('button', { name: 'Open modal brief' }).click();
-    await expect(page.getByText('BDUI capability brief')).toBeVisible();
-    await page.getByRole('button', { name: 'Close' }).click();
-    await expect(page.getByText('BDUI capability brief')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Открыть описание' }).click();
+    await expect(page.getByText('Кратко о возможностях BDUI')).toBeVisible();
+    await page.getByRole('button', { name: 'Закрыть' }).click();
+    await expect(page.getByText('Кратко о возможностях BDUI')).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Refresh data source' }).click();
-    await expect(page.getByText('Operational')).toBeVisible();
+    await page.getByRole('button', { name: 'Обновить данные' }).click();
+    await expect(page.getByText('В работе')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Load static catalog' }).click();
-    await expect(page.getByText('Launch readiness template')).toBeVisible();
+    await page.getByRole('button', { name: 'Загрузить каталог' }).click();
+    await expect(page.getByText('Шаблон готовности запуска')).toBeVisible();
 
-    await page.getByRole('button', { name: 'New request' }).click();
-    await expect(page.getByText('Step 1 of 3')).toBeVisible();
+    await page.getByRole('button', { name: 'Новая заявка' }).click();
+    await expect(page.getByText('Шаг 1 из 3')).toBeVisible();
+    await page.locator('select').nth(0).selectOption('Миграция данных');
+    await page.locator('select').nth(1).selectOption('Срочный');
+    await expect(page.locator('select').nth(0)).toHaveValue('Миграция данных');
+    await expect(page.locator('select').nth(1)).toHaveValue('Срочный');
     await page
-      .getByPlaceholder('Example: Approve billing launch for enterprise pilot')
-      .fill('Approve enterprise billing pilot');
-    await page.getByRole('button', { name: 'Continue' }).click();
+      .getByPlaceholder('Например: согласовать запуск биллинга для пилотной группы')
+      .fill('Согласовать миграцию данных для пилотной группы');
+    await page.getByRole('button', { name: 'Продолжить' }).click();
 
-    await expect(page.getByText('Step 2 of 3')).toBeVisible();
+    await expect(page.getByText('Шаг 2 из 3')).toBeVisible();
     await page
-      .getByPlaceholder('Who is affected, what changes, and how risk is reduced')
-      .fill('Enterprise pilot customers get a safer launch path with clearer rollback gates.');
+      .getByPlaceholder('Кого затронет изменение, что меняется и как снижается риск')
+      .fill('Пилотная группа получает безопасную миграцию с понятными точками отката.');
     await page.getByPlaceholder('25000').fill('42000');
-    await page.getByRole('button', { name: 'Review' }).click();
+    await page.getByRole('button', { name: 'На проверку' }).click();
 
-    await expect(page.getByText('Step 3 of 3')).toBeVisible();
-    await page.getByRole('button', { name: 'Submit request' }).click();
-    await expect(page.getByText('Submitted', { exact: true })).toBeVisible();
+    await expect(page.getByText('Шаг 3 из 3')).toBeVisible();
+    await expect(page.getByText('Миграция данных')).toBeVisible();
+    await expect(page.getByText('Срочный')).toBeVisible();
+    await page.getByRole('button', { name: 'Отправить заявку' }).click();
+    await expect(page.getByText('Отправлена', { exact: true })).toBeVisible();
     await expect(page.getByText(/REQ-[A-F0-9]{6}/)).toBeVisible();
 
     await page.reload({ waitUntil: 'networkidle' });
-    await expect(page.getByText(/Contract source: (network|cache|stale)/)).toBeVisible();
+    await expect(page.getByText(/Кэш контракта: (сеть|кэш|устаревший кэш)/)).toBeVisible();
     const contractSource = await page.evaluate(() => window.__taskly?.contractSource ?? null);
     if (!['network', 'cache', 'stale'].includes(contractSource)) {
       throw new Error(`Unexpected Taskly contract source after reload: ${contractSource}`);

@@ -1,14 +1,16 @@
 const STYLE_ELEMENT_ID = 'bdui-default-styles';
 const CSS_CONTENT = `
 .bdui-button {
-  padding: 8px 12px;
+  padding: 9px 14px;
   cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  transition: background 0.2s ease;
-  background: #f3f4f6;
-  color: #111827;
+  border-radius: 4px;
+  border: 1px solid #aebccd;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  background: #ffffff;
+  color: #16213a;
   font: inherit;
+  font-weight: 800;
+  box-shadow: none;
 }
 
 .bdui-button:disabled {
@@ -17,13 +19,14 @@ const CSS_CONTENT = `
 }
 
 .bdui-button--primary {
-  background: #4F46E5;
+  border-color: #0f766e;
+  background: #0f766e;
   color: #ffffff;
 }
 
 .bdui-button--secondary {
-  background: #f3f4f6;
-  color: #111827;
+  background: #ffffff;
+  color: #16213a;
 }
 
 .bdui-row {
@@ -88,8 +91,8 @@ const CSS_CONTENT = `
   max-width: 90vw;
   background: #ffffff;
   color: #111827;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  box-shadow: none;
   padding: 20px;
 }
 `;

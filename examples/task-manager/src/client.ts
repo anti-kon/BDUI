@@ -9,6 +9,19 @@ import {
 
 const DEFAULT_CONTRACT_URL = '/contract.json';
 
+function contractSourceLabel(source: string): string {
+  switch (source) {
+    case 'network':
+      return 'сеть';
+    case 'cache':
+      return 'кэш';
+    case 'stale':
+      return 'устаревший кэш';
+    default:
+      return source;
+  }
+}
+
 async function fetchContract(args: {
   readonly url: string;
   readonly ifNoneMatch?: string;
@@ -38,14 +51,14 @@ async function fetchContract(args: {
 const validators: Readonly<Record<string, StateValidator>> = {
   requestIntake(value, context) {
     const summary = String(value ?? '').trim();
-    const priority = String(context.state.flow?.requestPriority ?? 'Normal');
+    const priority = String(context.state.flow?.requestPriority ?? 'Обычный');
     const errors: string[] = [];
 
     if (summary.length < 12) {
-      errors.push('Summary must be at least 12 characters.');
+      errors.push('Описание должно быть не короче 12 символов.');
     }
-    if (priority === 'Urgent' && summary.length < 24) {
-      errors.push('Urgent requests need a more specific summary.');
+    if (priority === 'Срочный' && summary.length < 24) {
+      errors.push('Для срочной заявки нужно более конкретное описание.');
     }
 
     return { ok: errors.length === 0, errors };
@@ -65,25 +78,25 @@ async function bootstrap(): Promise<void> {
     cachePrefix: 'taskly_contract_',
     defaultTtlMs: 15_000,
     onRevalidate() {
-      if (cacheStatus) cacheStatus.textContent = 'Contract cache refreshed in background';
+      if (cacheStatus) cacheStatus.textContent = 'Кэш контракта обновлён в фоне';
     },
   });
 
   const result = await loader.load(DEFAULT_CONTRACT_URL);
   if (cacheStatus) {
-    cacheStatus.textContent = `Contract source: ${result.source}`;
+    cacheStatus.textContent = `Источник контракта: ${contractSourceLabel(result.source)}`;
   }
 
   const mounted = mount(app, result.contract, {
     urlSync: true,
     validators,
     prefetchScreens(screens) {
-      console.info('[Taskly] prefetch requested:', screens.join(', '));
+      console.info('[BDUI demo] запрошен prefetch:', screens.join(', '));
     },
   });
 
   app.classList.remove('loading');
-  mounted.runtime.state.write('flow', 'contractCacheSource', result.source);
+  mounted.runtime.state.write('flow', 'contractCacheSource', contractSourceLabel(result.source));
 
   (window as unknown as { __taskly?: unknown }).__taskly = {
     ...mounted,
@@ -98,7 +111,7 @@ bootstrap().catch((error: unknown) => {
   const message =
     error instanceof Error ? error.message : String(error ?? 'unknown bootstrap error');
   if (app) {
-    app.textContent = `Taskly failed to start: ${message}`;
+    app.textContent = `Не удалось запустить пример: ${message}`;
   }
   console.error(error);
 });

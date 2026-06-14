@@ -1,6 +1,7 @@
 import { getWebContext } from './context.js';
 
 type StyleRecord = Record<string, string | number>;
+const DOM_PROPERTY_PROPS = new Set(['checked', 'selected', 'value']);
 
 function toDomChild(value: any): Node | null {
   if (value == null || value === false) return null;
@@ -38,6 +39,7 @@ function applyStyle(el: HTMLElement, style: any) {
 
 function applyProps(el: HTMLElement, props: any) {
   if (!props) return;
+  const deferredDomProps: Array<readonly [string, unknown]> = [];
   for (const [key, value] of Object.entries(props)) {
     if (key === 'children' || value === undefined || value === null) continue;
     if (key === 'style') {
@@ -70,6 +72,10 @@ function applyProps(el: HTMLElement, props: any) {
       }
       continue;
     }
+    if (DOM_PROPERTY_PROPS.has(key)) {
+      deferredDomProps.push([key, value]);
+      continue;
+    }
     if (value === true) {
       el.setAttribute(key, '');
       continue;
@@ -85,6 +91,10 @@ function applyProps(el: HTMLElement, props: any) {
   if (children !== undefined) {
     const domChild = toDomChild(children);
     if (domChild) el.appendChild(domChild);
+  }
+
+  for (const [key, value] of deferredDomProps) {
+    (el as unknown as Record<string, unknown>)[key] = value;
   }
 }
 

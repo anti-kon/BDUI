@@ -1,4 +1,5 @@
 import { getWebContext } from './context.js';
+const DOM_PROPERTY_PROPS = new Set(['checked', 'selected', 'value']);
 function toDomChild(value) {
     if (value == null || value === false)
         return null;
@@ -36,6 +37,7 @@ function applyStyle(el, style) {
 function applyProps(el, props) {
     if (!props)
         return;
+    const deferredDomProps = [];
     for (const [key, value] of Object.entries(props)) {
         if (key === 'children' || value === undefined || value === null)
             continue;
@@ -70,6 +72,10 @@ function applyProps(el, props) {
             }
             continue;
         }
+        if (DOM_PROPERTY_PROPS.has(key)) {
+            deferredDomProps.push([key, value]);
+            continue;
+        }
         if (value === true) {
             el.setAttribute(key, '');
             continue;
@@ -85,6 +91,9 @@ function applyProps(el, props) {
         const domChild = toDomChild(children);
         if (domChild)
             el.appendChild(domChild);
+    }
+    for (const [key, value] of deferredDomProps) {
+        el[key] = value;
     }
 }
 function createElement(type, props) {

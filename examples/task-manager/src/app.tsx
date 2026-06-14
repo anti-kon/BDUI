@@ -36,79 +36,79 @@ const dataSources: readonly DataSource[] = [
     id: 'starterCatalog',
     kind: 'static',
     value: {
-      templateName: 'Launch readiness template',
+      templateName: 'Шаблон готовности запуска',
       sections: 7,
-      guardrails: 'Data, Legal, Brand, Rollback',
-      defaultOwner: 'Operations',
+      guardrails: 'Данные, право, бренд, откат',
+      defaultOwner: 'Операции',
     },
   },
 ];
 
 /* ----------------------------- State ----------------------------- */
-export const userName = Session<string>('userName', 'Maya Chen');
-export const userEmail = Session<string>('userEmail', 'maya.chen@example.com');
-export const workspaceName = Session<string>('workspaceName', 'Northstar Ops');
-export const plan = Session<string>('plan', 'scale');
-export const themeMode = Session<string>('themeMode', 'system');
+export const userName = Session<string>('userName', 'Анна Смирнова');
+export const userEmail = Session<string>('userEmail', 'anna.smirnova@example.ru');
+export const workspaceName = Session<string>('workspaceName', 'Северный контур');
+export const plan = Session<string>('plan', 'Рост');
+export const themeMode = Session<string>('themeMode', 'Системная');
 export const notifications = Session<boolean>('notifications', true);
 export const compactMode = Session<boolean>('compactMode', false);
-export const settingsSaved = Session<string>('settingsSaved', 'Not synced yet');
+export const settingsSaved = Session<string>('settingsSaved', 'Ещё не синхронизировано');
 
-export const contractCacheSource = Flow<string>('contractCacheSource', 'network');
+export const contractCacheSource = Flow<string>('contractCacheSource', 'сеть');
 export const statusMessage = Flow<string>('statusMessage', '');
 export const saveError = Flow<string>('saveError', '');
-export const activeView = Flow<string>('activeView', 'Command center');
+export const activeView = Flow<string>('activeView', 'Командный центр');
 
 export const workspaceSnapshot = Flow<Record<string, unknown>>('workspaceSnapshot', {
-  health: 'Not loaded',
+  health: 'Не загружено',
   utilization: 0,
-  risk: 'Unknown',
-  revenue: '$0',
-  sla: 'No data',
-  nextReview: 'No review scheduled',
-  updatedAt: 'never',
+  risk: 'Неизвестно',
+  revenue: '0 ₽',
+  sla: 'Нет данных',
+  nextReview: 'Не запланировано',
+  updatedAt: 'никогда',
   activeProjects: 0,
   blockerCount: 0,
 });
 
 export const starterCatalog = Flow<Record<string, unknown>>('starterCatalog', {
-  templateName: 'Not loaded',
+  templateName: 'Не загружено',
   sections: 0,
-  guardrails: 'Load the catalog to preview guardrails',
-  defaultOwner: 'None',
+  guardrails: 'Загрузите каталог, чтобы увидеть контрольные точки',
+  defaultOwner: 'Не назначен',
 });
 
 export const draftTask = Flow<string>('draftTask', '');
-export const lastTask = Flow<string>('lastTask', 'Review launch readiness dashboard');
+export const lastTask = Flow<string>('lastTask', 'Проверить панель готовности запуска');
 export const taskDone = Flow<boolean>('taskDone', false);
 export const taskCount = Flow<number>('taskCount', 4);
 
-export const requestType = Flow<string>('requestType', 'Launch review');
-export const requestPriority = Flow<string>('requestPriority', 'High');
+export const requestType = Flow<string>('requestType', 'Проверка запуска');
+export const requestPriority = Flow<string>('requestPriority', 'Высокий');
 export const requestSummary = Flow<string>('requestSummary', '');
 export const requestImpact = Flow<string>('requestImpact', '');
 export const requestBudget = Flow<number>('requestBudget', 25000);
 export const requestNeedsDesign = Flow<boolean>('requestNeedsDesign', true);
 export const requestNeedsLegal = Flow<boolean>('requestNeedsLegal', false);
 export const requestTicket = Flow<Record<string, unknown>>('requestTicket', {
-  id: 'Not submitted',
-  owner: 'Unassigned',
-  eta: 'Pending',
+  id: 'Не отправлено',
+  owner: 'Не назначен',
+  eta: 'Ожидает оценки',
 });
-export const requestStatus = Flow<string>('requestStatus', 'Draft');
+export const requestStatus = Flow<string>('requestStatus', 'Черновик');
 export const requestValidationNote = Flow<string>('requestValidationNote', '');
 
 /* --------------------------- Actions ----------------------------- */
 const refreshWorkspace = [
   { fetch: { sourceId: 'workspaceSnapshot', saveTo: bind(workspaceSnapshot) } },
-  { set: [bind(statusMessage), 'Workspace snapshot refreshed from a BDUI data source'] },
-  { toast: ['Workspace snapshot refreshed', { level: 'success' as const }] },
+  { set: [bind(statusMessage), 'Срез рабочего пространства обновлён через источник данных BDUI'] },
+  { toast: ['Данные обновлены', { level: 'success' as const }] },
 ] satisfies readonly ShortAction[];
 
 const loadStarterCatalog = [
   { fetch: { sourceId: 'starterCatalog', saveTo: bind(starterCatalog) } },
-  { set: [bind(statusMessage), 'Static data source loaded into flow state'] },
-  { toast: ['Starter catalog loaded', { level: 'success' as const }] },
+  { set: [bind(statusMessage), 'Статический источник данных загружен во flow-состояние'] },
+  { toast: ['Каталог загружен', { level: 'success' as const }] },
 ] satisfies readonly ShortAction[];
 
 const profileCall = {
@@ -123,7 +123,7 @@ const profileCall = {
       plan: '{{session.plan}}',
     },
     saveTo: bind(settingsSaved),
-    rollback: { set: [bind(saveError), 'Profile could not be synced'] },
+    rollback: { set: [bind(saveError), 'Не удалось синхронизировать профиль'] },
   },
 } satisfies ShortAction;
 
@@ -134,7 +134,7 @@ const taskCall = {
     headers: { 'content-type': 'application/json' },
     body: { title: '{{flow.draftTask}}', workspace: '{{session.workspaceName}}' },
     saveTo: bind(lastTask),
-    rollback: { set: [bind(saveError), 'Task could not be saved'] },
+    rollback: { set: [bind(saveError), 'Не удалось сохранить задачу'] },
   },
 } satisfies ShortAction;
 
@@ -150,7 +150,7 @@ const settingsCall = {
       plan: '{{session.plan}}',
     },
     saveTo: bind(settingsSaved),
-    rollback: { set: [bind(saveError), 'Settings could not be synced'] },
+    rollback: { set: [bind(saveError), 'Не удалось синхронизировать настройки'] },
   },
 } satisfies ShortAction;
 
@@ -169,43 +169,43 @@ const requestCall = {
       legal: '{{flow.requestNeedsLegal}}',
     },
     saveTo: bind(requestTicket),
-    rollback: { set: [bind(saveError), 'Request could not be submitted'] },
+    rollback: { set: [bind(saveError), 'Не удалось отправить заявку'] },
   },
 } satisfies ShortAction;
 
 /* ---------------------------- Styles ----------------------------- */
 const page = {
   minHeight: '100vh',
-  background: '#f3f6fb',
-  color: '#152033',
-  padding: '24px',
-  gap: 20,
+  background: '#fbfcfe',
+  color: '#182230',
+  padding: 0,
+  gap: 0,
 };
 
 const shell = {
   maxWidth: '1180px',
   width: '100%',
   margin: '0 auto',
-  gap: 20,
+  padding: '0 24px 36px',
+  gap: 0,
 };
 
 const topBar = {
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: 16,
-  padding: '14px 16px',
-  background: '#ffffff',
-  border: '1px solid #d8e0ea',
-  borderRadius: 8,
-  boxShadow: '0 10px 30px rgba(19, 32, 51, 0.06)',
+  padding: '20px 0',
+  background: 'transparent',
+  borderBottom: '1px solid #d7dee8',
+  flexWrap: 'wrap',
 };
 
 const brandMark = {
   width: 42,
   height: 42,
-  borderRadius: 8,
-  border: '1px solid #d8e0ea',
-  background: '#2f6fed',
+  borderRadius: 6,
+  border: '1px solid #b8c7d9',
+  background: '#2563eb',
 };
 
 const navRow = {
@@ -214,20 +214,25 @@ const navRow = {
   justifyContent: 'flex-end',
 };
 
+const statusStrip = {
+  gap: 10,
+  flexWrap: 'wrap',
+  padding: '10px 0',
+  borderBottom: '1px solid #e3e8ef',
+};
+
 const panel = {
-  background: '#ffffff',
-  border: '1px solid #d8e0ea',
-  borderRadius: 8,
-  boxShadow: '0 8px 24px rgba(19, 32, 51, 0.05)',
-  padding: 18,
-  gap: 12,
+  background: 'transparent',
+  borderTop: '1px solid #d7dee8',
+  padding: '22px 0',
+  gap: 14,
 };
 
 const quietPanel = {
-  background: '#f8fafc',
-  border: '1px solid #d8e0ea',
-  borderRadius: 8,
-  padding: 14,
+  background: '#ffffff',
+  borderLeft: '3px solid #94a3b8',
+  borderTop: '1px solid #e3e8ef',
+  padding: '12px 14px',
   gap: 8,
 };
 
@@ -244,16 +249,17 @@ const twoColumnGrid = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
   },
-  gap: 16,
+  columnGap: 32,
+  rowGap: 18,
 };
 
-const title = { fontSize: 30, fontWeight: 800, color: '#101827' };
-const subtitle = { color: '#5b677a', lineHeight: 1.55 };
+const title = { fontSize: 34, fontWeight: 800, color: '#0f172a', lineHeight: 1.14 };
+const subtitle = { color: '#5b677a', lineHeight: 1.55, maxWidth: 720 };
 const eyebrow = {
-  color: '#2f6fed',
+  color: '#0f766e',
   fontSize: 12,
   fontWeight: 800,
-  letterSpacing: '0.08em',
+  letterSpacing: 0,
   textTransform: 'uppercase',
 };
 const sectionTitle = { fontSize: 18, fontWeight: 800, color: '#101827' };
@@ -263,11 +269,11 @@ const success = { color: '#047857', fontWeight: 700 };
 const warning = { color: '#b45309', fontWeight: 700 };
 const danger = { color: '#b91c1c', fontWeight: 700 };
 const pill = {
-  border: '1px solid #c8d5e5',
-  borderRadius: 999,
-  padding: '6px 10px',
-  background: '#f8fafc',
-  color: '#334155',
+  borderLeft: '3px solid #0f766e',
+  borderRadius: 0,
+  padding: '5px 10px',
+  background: '#eef7f5',
+  color: '#1f3f3a',
   fontSize: 12,
   fontWeight: 700,
 };
@@ -275,16 +281,37 @@ const fieldGroup = { gap: 6 };
 const inputStyle = {
   width: '100%',
   minHeight: 42,
-  borderRadius: 8,
-  border: '1px solid #c7d2e0',
-  padding: '10px 12px',
+  borderRadius: 4,
+  border: '1px solid #aebccd',
+  padding: '9px 11px',
   background: '#ffffff',
+  color: '#16213a',
 };
-const primaryButton = { variant: 'primary', borderRadius: 8, minHeight: 40 };
-const secondaryButton = { variant: 'secondary', borderRadius: 8, minHeight: 40 };
+const primaryButton = {
+  variant: 'primary',
+  minHeight: 40,
+  borderRadius: 4,
+  border: '1px solid #0f766e',
+  background: '#0f766e',
+  color: '#ffffff',
+  padding: '9px 14px',
+  fontWeight: 800,
+  boxShadow: 'none',
+};
+const secondaryButton = {
+  variant: 'secondary',
+  minHeight: 40,
+  borderRadius: 4,
+  border: '1px solid #aebccd',
+  background: '#ffffff',
+  color: '#16213a',
+  padding: '9px 14px',
+  fontWeight: 800,
+  boxShadow: 'none',
+};
 
 /* --------------------------- Shared UI --------------------------- */
-const CacheBadge = () => <Text modifiers={pill}>Contract cache: {use(contractCacheSource)}</Text>;
+const CacheBadge = () => <Text modifiers={pill}>Кэш контракта: {use(contractCacheSource)}</Text>;
 
 const StatusLine = () => (
   <If condition={E<boolean>('len(flow.statusMessage) > 0')}>
@@ -325,22 +352,22 @@ const TextField = ({
 const Nav = () => (
   <Row modifiers={navRow}>
     <Button
-      title="Dashboard"
+      title="Дашборд"
       modifiers={secondaryButton}
       onAction={[{ navigate: ['dashboard', { mode: 'replace' }] }]}
     />
     <Button
-      title="Requests"
+      title="Заявки"
       modifiers={secondaryButton}
       onAction={[{ navigate: ['requests', { mode: 'replace' }] }]}
     />
     <Button
-      title="Settings"
+      title="Настройки"
       modifiers={secondaryButton}
       onAction={[{ navigate: ['settings', { mode: 'replace' }] }]}
     />
     <Button
-      title="New request"
+      title="Новая заявка"
       modifiers={primaryButton}
       onAction={[{ flowStart: { routeId: 'launch-request' } }]}
     />
@@ -354,18 +381,23 @@ const AppShell = ({ children }: { children: unknown }) => (
         <Row modifiers={{ alignItems: 'center', gap: 12 }}>
           <Image
             src="/brand-mark.svg"
-            alt="Taskly"
+            alt="Операционный пульт"
             width={42}
             height={42}
             fit="cover"
             modifiers={brandMark}
           />
           <Column modifiers={{ gap: 2 }}>
-            <Text modifiers={{ fontSize: 18, fontWeight: 800 }}>Taskly Operations</Text>
+            <Text modifiers={{ fontSize: 18, fontWeight: 800 }}>Операционный пульт</Text>
             <Text modifiers={muted}>{use(workspaceName)}</Text>
           </Column>
         </Row>
         <Nav />
+      </Row>
+      <Row modifiers={statusStrip}>
+        <CacheBadge />
+        <Text modifiers={pill}>Активный раздел: {use(activeView)}</Text>
+        <Text modifiers={pill}>Тариф: {use(plan)}</Text>
       </Row>
       {children}
     </Column>
@@ -383,51 +415,42 @@ const MetricTile = ({ label, value, note }: { label: string; value: unknown; not
 const Hero = () => (
   <Column modifiers={{ ...panel, gap: 16 }}>
     <Row modifiers={{ justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-      <Column modifiers={{ gap: 6, maxWidth: 680 }}>
-        <Text modifiers={eyebrow}>BDUI production showcase</Text>
-        <Text modifiers={title}>A complete operational app delivered as a contract</Text>
+      <Column modifiers={{ gap: 6, maxWidth: 760 }}>
+        <Text modifiers={eyebrow}>BDUI витрина возможностей</Text>
+        <Text modifiers={title}>Продуктовое приложение, собранное из контракта</Text>
         <Text modifiers={subtitle}>
-          This example demonstrates contract caching, server actions, data sources, session
-          persistence, guarded actions, validation, toasts, navigation and multi-step flows.
+          Этот пример показывает кэш контракта, серверные действия, источники данных, сохранение
+          сессии, защитные ветки, валидацию, уведомления, навигацию и многошаговые формы.
         </Text>
-      </Column>
-      <Column modifiers={{ gap: 8, minWidth: 220 }}>
-        <CacheBadge />
-        <Text modifiers={pill}>Active view: {use(activeView)}</Text>
-        <Text modifiers={pill}>Plan: {use(plan)}</Text>
       </Column>
     </Row>
     <Row modifiers={{ gap: 10, flexWrap: 'wrap' }}>
-      <Button title="Refresh data source" modifiers={primaryButton} onAction={refreshWorkspace} />
+      <Button title="Обновить данные" modifiers={primaryButton} onAction={refreshWorkspace} />
+      <Button title="Загрузить каталог" modifiers={secondaryButton} onAction={loadStarterCatalog} />
       <Button
-        title="Load static catalog"
-        modifiers={secondaryButton}
-        onAction={loadStarterCatalog}
-      />
-      <Button
-        title="Prefetch request flow"
+        title="Предзагрузить форму"
         modifiers={secondaryButton}
         onAction={[
           { prefetch: ['launch-request', 'requests'] },
-          { toast: ['Prefetch hook executed'] },
+          { toast: ['Форма предзагружена'] },
         ]}
       />
       <Button
-        title="Open modal brief"
+        title="Открыть описание"
         modifiers={secondaryButton}
         onAction={[{ modalOpen: 'showcase-brief' }]}
       />
     </Row>
     <If condition={false}>
       <Column id="showcase-brief" modifiers={{ ...panel, maxWidth: 520 }}>
-        <Text modifiers={sectionTitle}>BDUI capability brief</Text>
+        <Text modifiers={sectionTitle}>Кратко о возможностях BDUI</Text>
         <Text modifiers={subtitle}>
-          This modal is described inside the same contract tree. The web renderer resolves it by
-          node id, mounts it through the modal host and closes it through a serializable SAL action.
+          Эта модалка описана в том же дереве контракта. Web-renderer находит её по node id,
+          монтирует через modal host и закрывает сериализуемым SAL-действием.
         </Text>
         <Row modifiers={{ gap: 10, justifyContent: 'flex-end' }}>
           <Button
-            title="Close"
+            title="Закрыть"
             modifiers={primaryButton}
             onAction={[{ modalClose: 'showcase-brief' }]}
           />
@@ -442,48 +465,52 @@ const Hero = () => (
 const DashboardMetrics = () => (
   <Column modifiers={grid}>
     <MetricTile
-      label="Workspace health"
+      label="Состояние пространства"
       value={E<string>('flow.workspaceSnapshot.health')}
-      note="REST data source"
+      note="REST-источник"
     />
     <MetricTile
-      label="Utilization"
+      label="Загрузка"
       value={E<string>("concat(flow.workspaceSnapshot.utilization, '%')")}
-      note="Live operations signal"
+      note="Операционный сигнал"
     />
     <MetricTile
-      label="Revenue exposure"
+      label="Финансовый контур"
       value={E<string>('flow.workspaceSnapshot.revenue')}
-      note="Server-calculated"
+      note="Расчёт сервера"
     />
     <MetricTile
-      label="Open blockers"
+      label="Открытые блокеры"
       value={E<number>('flow.workspaceSnapshot.blockerCount')}
-      note="Guarded by workflow"
+      note="Контроль процесса"
     />
   </Column>
 );
 
 const WorkPanel = () => (
   <Column modifiers={panel}>
-    <Text modifiers={sectionTitle}>Today&apos;s operating rhythm</Text>
+    <Text modifiers={sectionTitle}>Операционный ритм на сегодня</Text>
     <Column modifiers={grid}>
       <Column modifiers={quietPanel}>
-        <Text modifiers={muted}>Next review</Text>
+        <Text modifiers={muted}>Следующий разбор</Text>
         <Text modifiers={{ fontWeight: 800 }}>
           {E<string>('flow.workspaceSnapshot.nextReview')}
         </Text>
-        <Text modifiers={muted}>Last sync: {E<string>('flow.workspaceSnapshot.updatedAt')}</Text>
+        <Text modifiers={muted}>
+          Последняя синхронизация: {E<string>('flow.workspaceSnapshot.updatedAt')}
+        </Text>
       </Column>
       <Column modifiers={quietPanel}>
-        <Text modifiers={muted}>Risk posture</Text>
+        <Text modifiers={muted}>Риск-профиль</Text>
         <Text modifiers={{ fontWeight: 800 }}>{E<string>('flow.workspaceSnapshot.risk')}</Text>
         <Text modifiers={muted}>SLA: {E<string>('flow.workspaceSnapshot.sla')}</Text>
       </Column>
       <Column modifiers={quietPanel}>
-        <Text modifiers={muted}>Starter catalog</Text>
+        <Text modifiers={muted}>Стартовый каталог</Text>
         <Text modifiers={{ fontWeight: 800 }}>{E<string>('flow.starterCatalog.templateName')}</Text>
-        <Text modifiers={muted}>Guardrails: {E<string>('flow.starterCatalog.guardrails')}</Text>
+        <Text modifiers={muted}>
+          Контрольные точки: {E<string>('flow.starterCatalog.guardrails')}
+        </Text>
       </Column>
     </Column>
   </Column>
@@ -491,25 +518,25 @@ const WorkPanel = () => (
 
 const TaskPanel = () => (
   <Column modifiers={panel}>
-    <Text modifiers={sectionTitle}>Action capture</Text>
+    <Text modifiers={sectionTitle}>Фиксация действия</Text>
     <Text modifiers={subtitle}>
-      Saves through a server `call`, updates local state in an atomic batch and rolls back the
-      visible error state when the request fails.
+      Сохранение проходит через серверный вызов, локальное состояние обновляется атомарной пачкой, а
+      ошибка откатывается в видимое состояние при сбое запроса.
     </Text>
     <TextField
-      label="Next task"
+      label="Следующая задача"
       binding={bind(draftTask)}
-      placeholder="Write the next operational action"
+      placeholder="Опишите следующее операционное действие"
     />
     <Row modifiers={{ gap: 10, flexWrap: 'wrap' }}>
       <Button
-        title="Save task"
+        title="Сохранить задачу"
         modifiers={primaryButton}
         onAction={[
           {
             when: {
               if: 'len(flow.draftTask) == 0',
-              then: [{ toast: ['Enter a task before saving', { level: 'warning' }] }],
+              then: [{ toast: ['Введите задачу перед сохранением', { level: 'warning' }] }],
               else: [
                 {
                   batch: [
@@ -518,8 +545,8 @@ const TaskPanel = () => (
                     { set: [bind(draftTask), ''] },
                     { set: [bind(taskDone), false] },
                     { inc: bind(taskCount) },
-                    { set: [bind(statusMessage), 'Task saved through the Taskly API'] },
-                    { toast: ['Task saved', { level: 'success' }] },
+                    { set: [bind(statusMessage), 'Задача сохранена через API'] },
+                    { toast: ['Задача сохранена', { level: 'success' }] },
                   ],
                   atomic: true,
                 },
@@ -529,14 +556,14 @@ const TaskPanel = () => (
         ]}
       />
       <Button
-        title="Clear"
+        title="Очистить"
         modifiers={secondaryButton}
         onAction={[{ set: [bind(draftTask), ''] }, { set: [bind(saveError), ''] }]}
       />
     </Row>
     <Divider />
     <Column modifiers={{ gap: 8 }}>
-      <Text modifiers={muted}>Saved tasks: {use(taskCount)}</Text>
+      <Text modifiers={muted}>Сохранённых задач: {use(taskCount)}</Text>
       <Checkbox binding={bind(taskDone)} label={use(lastTask) as unknown as string} />
     </Column>
   </Column>
@@ -558,40 +585,36 @@ const RequestsRoute = () => (
     <Column modifiers={panel}>
       <Row modifiers={{ justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <Column modifiers={{ gap: 6 }}>
-          <Text modifiers={eyebrow}>Multi-step form</Text>
-          <Text modifiers={title}>Launch request desk</Text>
+          <Text modifiers={eyebrow}>Многошаговая форма</Text>
+          <Text modifiers={title}>Стол заявок на запуск</Text>
           <Text modifiers={subtitle}>
-            The flow captures request details, runs a pluggable validator, branches with `when`,
-            submits to the server and returns to this route.
+            Flow собирает детали заявки, запускает подключаемый валидатор, ветвится через условие,
+            отправляет данные на сервер и возвращает пользователя в этот раздел.
           </Text>
         </Column>
         <Button
-          title="Start request"
+          title="Начать заявку"
           modifiers={primaryButton}
           onAction={[{ flowStart: { routeId: 'launch-request' } }]}
         />
       </Row>
     </Column>
     <Column modifiers={grid}>
-      <MetricTile label="Request status" value={use(requestStatus)} note="Flow state" />
+      <MetricTile label="Статус заявки" value={use(requestStatus)} note="Flow-состояние" />
+      <MetricTile label="Тикет" value={E<string>('flow.requestTicket.id')} note="Ответ API" />
       <MetricTile
-        label="Ticket"
-        value={E<string>('flow.requestTicket.id')}
-        note="Saved API response"
-      />
-      <MetricTile
-        label="Owner"
+        label="Ответственный"
         value={E<string>('flow.requestTicket.owner')}
-        note="Server assignment"
+        note="Назначение сервера"
       />
-      <MetricTile label="ETA" value={E<string>('flow.requestTicket.eta')} note="Server SLA" />
+      <MetricTile label="ETA" value={E<string>('flow.requestTicket.eta')} note="SLA сервера" />
     </Column>
     <Column modifiers={panel}>
-      <Text modifiers={sectionTitle}>Last request summary</Text>
-      <Text>Type: {use(requestType)}</Text>
-      <Text>Priority: {use(requestPriority)}</Text>
-      <Text>Summary: {use(requestSummary)}</Text>
-      <Text>Impact: {use(requestImpact)}</Text>
+      <Text modifiers={sectionTitle}>Последняя заявка</Text>
+      <Text>Тип: {use(requestType)}</Text>
+      <Text>Приоритет: {use(requestPriority)}</Text>
+      <Text>Кратко: {use(requestSummary)}</Text>
+      <Text>Влияние: {use(requestImpact)}</Text>
     </Column>
   </AppShell>
 );
@@ -600,44 +623,53 @@ const SettingsRoute = () => (
   <AppShell>
     <Column modifiers={twoColumnGrid}>
       <Column modifiers={panel}>
-        <Text modifiers={sectionTitle}>Profile and workspace</Text>
-        <TextField label="Name" binding={bind(userName)} placeholder="Full name" />
-        <TextField label="Email" binding={bind(userEmail)} placeholder="Email" inputType="email" />
-        <TextField label="Workspace" binding={bind(workspaceName)} placeholder="Workspace name" />
+        <Text modifiers={sectionTitle}>Профиль и пространство</Text>
+        <TextField label="Имя" binding={bind(userName)} placeholder="Полное имя" />
+        <TextField
+          label="Почта"
+          binding={bind(userEmail)}
+          placeholder="email@example.ru"
+          inputType="email"
+        />
+        <TextField
+          label="Пространство"
+          binding={bind(workspaceName)}
+          placeholder="Название пространства"
+        />
         <Column modifiers={fieldGroup}>
-          <FieldLabel label="Plan" />
+          <FieldLabel label="Тариф" />
           <Select
             binding={bind(plan)}
-            placeholder="Plan"
+            placeholder="Тариф"
             modifiers={inputStyle}
             options={[
-              { value: 'starter', label: 'Starter' },
-              { value: 'scale', label: 'Scale' },
-              { value: 'enterprise', label: 'Enterprise' },
+              { value: 'Старт', label: 'Старт' },
+              { value: 'Рост', label: 'Рост' },
+              { value: 'Корпоративный', label: 'Корпоративный' },
             ]}
           />
         </Column>
       </Column>
       <Column modifiers={panel}>
-        <Text modifiers={sectionTitle}>Experience</Text>
+        <Text modifiers={sectionTitle}>Опыт работы</Text>
         <Column modifiers={fieldGroup}>
-          <FieldLabel label="Theme preference" />
+          <FieldLabel label="Тема интерфейса" />
           <Select
             binding={bind(themeMode)}
-            placeholder="Theme"
+            placeholder="Тема"
             modifiers={inputStyle}
             options={[
-              { value: 'system', label: 'Follow system' },
-              { value: 'light', label: 'Light' },
-              { value: 'dark', label: 'Dark' },
+              { value: 'Системная', label: 'Как в системе' },
+              { value: 'Светлая', label: 'Светлая' },
+              { value: 'Тёмная', label: 'Тёмная' },
             ]}
           />
         </Column>
-        <Checkbox binding={bind(notifications)} label="Send operational notifications" />
-        <Checkbox binding={bind(compactMode)} label="Use compact density" />
+        <Checkbox binding={bind(notifications)} label="Отправлять операционные уведомления" />
+        <Checkbox binding={bind(compactMode)} label="Использовать компактную плотность" />
         <Row modifiers={{ gap: 10, flexWrap: 'wrap' }}>
           <Button
-            title="Save settings"
+            title="Сохранить настройки"
             modifiers={primaryButton}
             onAction={[
               {
@@ -647,21 +679,24 @@ const SettingsRoute = () => (
                   profileCall,
                   { sync: {} },
                   {
-                    set: [bind(statusMessage), 'Settings synced and persisted to session storage'],
+                    set: [
+                      bind(statusMessage),
+                      'Настройки синхронизированы и сохранены в session storage',
+                    ],
                   },
-                  { toast: ['Settings synced', { level: 'success' }] },
+                  { toast: ['Настройки сохранены', { level: 'success' }] },
                 ],
                 atomic: true,
               },
             ]}
           />
           <Button
-            title="Refresh workspace"
+            title="Обновить пространство"
             modifiers={secondaryButton}
             onAction={refreshWorkspace}
           />
         </Row>
-        <Text modifiers={muted}>Last saved: {use(settingsSaved)}</Text>
+        <Text modifiers={muted}>Последнее сохранение: {use(settingsSaved)}</Text>
         <StatusLine />
         <ErrorLine />
       </Column>
@@ -683,66 +718,66 @@ export default (
       })}
     />
     <Navigation initialRoute="dashboard" urlSync>
-      <Route id="dashboard" title="Dashboard">
+      <Route id="dashboard" title="Дашборд">
         <Dashboard />
       </Route>
 
-      <Route id="requests" title="Requests">
+      <Route id="requests" title="Заявки">
         <RequestsRoute />
       </Route>
 
-      <Route id="settings" title="Settings">
+      <Route id="settings" title="Настройки">
         <SettingsRoute />
       </Route>
 
       <FlowRoute
         id="launch-request"
-        title="New launch request"
+        title="Новая заявка на запуск"
         startStep="basics"
         persistence={{ mode: 'session' }}
       >
-        <Step id="basics" title="Basics">
+        <Step id="basics" title="Основное">
           <AppShell>
             <Column modifiers={panel}>
-              <Text modifiers={eyebrow}>Step 1 of 3</Text>
-              <Text modifiers={title}>Describe the request</Text>
+              <Text modifiers={eyebrow}>Шаг 1 из 3</Text>
+              <Text modifiers={title}>Опишите заявку</Text>
               <Text modifiers={subtitle}>
-                A pluggable validator writes validation details into local state while guarded
-                actions decide whether the flow can advance.
+                Подключаемый валидатор пишет детали проверки в локальное состояние, а защищённые
+                действия решают, может ли форма перейти дальше.
               </Text>
               <Column modifiers={grid}>
                 <Column modifiers={fieldGroup}>
-                  <FieldLabel label="Request type" />
+                  <FieldLabel label="Тип заявки" />
                   <Select
                     binding={bind(requestType)}
-                    placeholder="Type"
+                    placeholder="Тип"
                     modifiers={inputStyle}
                     options={[
-                      { value: 'Launch review', label: 'Launch review' },
-                      { value: 'Data migration', label: 'Data migration' },
-                      { value: 'Experiment approval', label: 'Experiment approval' },
-                      { value: 'Incident follow-up', label: 'Incident follow-up' },
+                      { value: 'Проверка запуска', label: 'Проверка запуска' },
+                      { value: 'Миграция данных', label: 'Миграция данных' },
+                      { value: 'Согласование эксперимента', label: 'Согласование эксперимента' },
+                      { value: 'Разбор инцидента', label: 'Разбор инцидента' },
                     ]}
                   />
                 </Column>
                 <Column modifiers={fieldGroup}>
-                  <FieldLabel label="Priority" />
+                  <FieldLabel label="Приоритет" />
                   <Select
                     binding={bind(requestPriority)}
-                    placeholder="Priority"
+                    placeholder="Приоритет"
                     modifiers={inputStyle}
                     options={[
-                      { value: 'Normal', label: 'Normal' },
-                      { value: 'High', label: 'High' },
-                      { value: 'Urgent', label: 'Urgent' },
+                      { value: 'Обычный', label: 'Обычный' },
+                      { value: 'Высокий', label: 'Высокий' },
+                      { value: 'Срочный', label: 'Срочный' },
                     ]}
                   />
                 </Column>
               </Column>
               <TextField
-                label="Short summary"
+                label="Краткое описание"
                 binding={bind(requestSummary)}
-                placeholder="Example: Approve billing launch for enterprise pilot"
+                placeholder="Например: согласовать запуск биллинга для пилотной группы"
               />
               <If condition={E<boolean>('local.__validation.requestIntake.ok == false')}>
                 <Text modifiers={danger}>
@@ -754,12 +789,12 @@ export default (
               </If>
               <Row modifiers={{ gap: 10, flexWrap: 'wrap' }}>
                 <Button
-                  title="Cancel"
+                  title="Отмена"
                   modifiers={secondaryButton}
                   onAction={[{ flowAbort: { reason: 'cancelled' } }, { navigate: ['requests'] }]}
                 />
                 <Button
-                  title="Continue"
+                  title="Продолжить"
                   modifiers={primaryButton}
                   onAction={[
                     { validate: ['requestIntake', bind(requestSummary)] },
@@ -770,10 +805,10 @@ export default (
                           {
                             set: [
                               bind(requestValidationNote),
-                              'Add at least 12 characters so reviewers can triage the request.',
+                              'Добавьте минимум 12 символов, чтобы ревьюеры смогли разобрать заявку.',
                             ],
                           },
-                          { toast: ['Summary is too short', { level: 'warning' }] },
+                          { toast: ['Описание слишком короткое', { level: 'warning' }] },
                         ],
                         else: [
                           { set: [bind(requestValidationNote), ''] },
@@ -788,34 +823,34 @@ export default (
           </AppShell>
         </Step>
 
-        <Step id="impact" title="Impact">
+        <Step id="impact" title="Влияние">
           <AppShell>
             <Column modifiers={panel}>
-              <Text modifiers={eyebrow}>Step 2 of 3</Text>
-              <Text modifiers={title}>Add impact and guardrails</Text>
+              <Text modifiers={eyebrow}>Шаг 2 из 3</Text>
+              <Text modifiers={title}>Добавьте влияние и контрольные точки</Text>
               <TextField
-                label="Expected impact"
+                label="Ожидаемое влияние"
                 binding={bind(requestImpact)}
-                placeholder="Who is affected, what changes, and how risk is reduced"
+                placeholder="Кого затронет изменение, что меняется и как снижается риск"
               />
               <TextField
-                label="Budget exposure"
+                label="Бюджетный контур"
                 binding={bind(requestBudget)}
                 placeholder="25000"
                 inputType="number"
               />
               <Column modifiers={quietPanel}>
-                <Checkbox binding={bind(requestNeedsDesign)} label="Design review required" />
-                <Checkbox binding={bind(requestNeedsLegal)} label="Legal review required" />
+                <Checkbox binding={bind(requestNeedsDesign)} label="Нужен дизайн-ревью" />
+                <Checkbox binding={bind(requestNeedsLegal)} label="Нужен юридический ревью" />
               </Column>
               <Row modifiers={{ gap: 10, flexWrap: 'wrap' }}>
                 <Button
-                  title="Back"
+                  title="Назад"
                   modifiers={secondaryButton}
                   onAction={[{ flowGoTo: { stepId: 'basics' } }]}
                 />
                 <Button
-                  title="Review"
+                  title="На проверку"
                   modifiers={primaryButton}
                   onAction={[
                     {
@@ -825,10 +860,10 @@ export default (
                           {
                             set: [
                               bind(requestValidationNote),
-                              'Add a clearer impact statement before review.',
+                              'Добавьте более ясное описание влияния перед проверкой.',
                             ],
                           },
-                          { toast: ['Impact statement is too short', { level: 'warning' }] },
+                          { toast: ['Описание влияния слишком короткое', { level: 'warning' }] },
                         ],
                         else: [
                           { set: [bind(requestValidationNote), ''] },
@@ -846,52 +881,52 @@ export default (
           </AppShell>
         </Step>
 
-        <Step id="confirm" title="Confirm">
+        <Step id="confirm" title="Подтверждение">
           <AppShell>
             <Column modifiers={panel}>
-              <Text modifiers={eyebrow}>Step 3 of 3</Text>
-              <Text modifiers={title}>Confirm and submit</Text>
+              <Text modifiers={eyebrow}>Шаг 3 из 3</Text>
+              <Text modifiers={title}>Проверьте и отправьте</Text>
               <Column modifiers={grid}>
-                <MetricTile label="Type" value={use(requestType)} note="Selected in step 1" />
-                <MetricTile label="Priority" value={use(requestPriority)} note="Routing signal" />
+                <MetricTile label="Тип" value={use(requestType)} note="Выбрано на шаге 1" />
+                <MetricTile label="Приоритет" value={use(requestPriority)} note="Маршрутизация" />
                 <MetricTile
-                  label="Budget"
-                  value={E<string>("concat('$', flow.requestBudget)")}
-                  note="Exposure"
+                  label="Бюджет"
+                  value={E<string>("concat(flow.requestBudget, ' ₽')")}
+                  note="Контур"
                 />
                 <MetricTile
-                  label="Design review"
-                  value={E<string>("flow.requestNeedsDesign ? 'Required' : 'Not needed'")}
-                  note="Guardrail"
+                  label="Дизайн-ревью"
+                  value={E<string>("flow.requestNeedsDesign ? 'Нужно' : 'Не нужно'")}
+                  note="Контроль"
                 />
               </Column>
               <Column modifiers={quietPanel}>
-                <Text modifiers={sectionTitle}>Summary</Text>
+                <Text modifiers={sectionTitle}>Кратко</Text>
                 <Text>{use(requestSummary)}</Text>
-                <Text modifiers={sectionTitle}>Impact</Text>
+                <Text modifiers={sectionTitle}>Влияние</Text>
                 <Text>{use(requestImpact)}</Text>
               </Column>
               <Row modifiers={{ gap: 10, flexWrap: 'wrap' }}>
                 <Button
-                  title="Back"
+                  title="Назад"
                   modifiers={secondaryButton}
                   onAction={[{ flowGoTo: { stepId: 'impact' } }]}
                 />
                 <Button
-                  title="Submit request"
+                  title="Отправить заявку"
                   modifiers={primaryButton}
                   onAction={[
                     {
                       batch: [
                         { set: [bind(saveError), ''] },
                         requestCall,
-                        { set: [bind(requestStatus), 'Submitted'] },
+                        { set: [bind(requestStatus), 'Отправлена'] },
                         {
-                          set: [bind(statusMessage), 'Launch request submitted to the Taskly API'],
+                          set: [bind(statusMessage), 'Заявка на запуск отправлена через API'],
                         },
                         { flowComplete: true },
                         { navigate: ['requests'] },
-                        { toast: ['Request submitted', { level: 'success' }] },
+                        { toast: ['Заявка отправлена', { level: 'success' }] },
                       ],
                       atomic: true,
                     },

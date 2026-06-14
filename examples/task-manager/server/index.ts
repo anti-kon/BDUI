@@ -85,40 +85,40 @@ function shortId(prefix: string): string {
 
 function planSnapshot(plan: string) {
   const now = new Date().toISOString();
-  const normalizedPlan = plan || 'scale';
-  if (normalizedPlan === 'enterprise') {
+  const normalizedPlan = plan || 'Рост';
+  if (normalizedPlan === 'Корпоративный') {
     return {
-      health: 'Excellent',
+      health: 'Отлично',
       utilization: 88,
-      risk: 'Low',
-      revenue: '$2.4M',
+      risk: 'Низкий',
+      revenue: '2,4 млн ₽',
       sla: '99.98%',
-      nextReview: 'Today 16:30',
+      nextReview: 'Сегодня 16:30',
       updatedAt: now,
       activeProjects: 18,
       blockerCount: 1,
     };
   }
-  if (normalizedPlan === 'starter') {
+  if (normalizedPlan === 'Старт') {
     return {
-      health: 'Stable',
+      health: 'Стабильно',
       utilization: 61,
-      risk: 'Medium',
-      revenue: '$180K',
+      risk: 'Средний',
+      revenue: '18 млн ₽',
       sla: '99.5%',
-      nextReview: 'Tomorrow 10:00',
+      nextReview: 'Завтра 10:00',
       updatedAt: now,
       activeProjects: 5,
       blockerCount: 3,
     };
   }
   return {
-    health: 'Operational',
+    health: 'В работе',
     utilization: 76,
-    risk: 'Managed',
-    revenue: '$820K',
+    risk: 'Под контролем',
+    revenue: '82 млн ₽',
     sla: '99.9%',
-    nextReview: 'Today 14:00',
+    nextReview: 'Сегодня 14:00',
     updatedAt: now,
     activeProjects: 11,
     blockerCount: 2,
@@ -148,10 +148,10 @@ async function start(): Promise<void> {
     const body = (request.body ?? {}) as ProfileBody;
     const name = stringValue(body.name);
     const email = stringValue(body.email);
-    const workspace = stringValue(body.workspace, 'Taskly Ops');
-    const plan = stringValue(body.plan, 'scale');
+    const workspace = stringValue(body.workspace, 'Операционный пульт');
+    const plan = stringValue(body.plan, 'Рост');
     if (!name || !email) {
-      return reply.code(400).send({ error: 'name and email are required' });
+      return reply.code(400).send({ error: 'нужно указать имя и email' });
     }
     const key = email.toLowerCase();
     const record = { name, email, workspace, plan, updatedAt: new Date().toISOString() };
@@ -162,9 +162,9 @@ async function start(): Promise<void> {
   app.post<{ Body: TaskBody }>('/api/task', async (request, reply) => {
     const body = (request.body ?? {}) as TaskBody;
     const title = stringValue(body.title);
-    const workspace = stringValue(body.workspace, 'Taskly Ops');
+    const workspace = stringValue(body.workspace, 'Операционный пульт');
     if (!title) {
-      return reply.code(400).send({ error: 'title is required' });
+      return reply.code(400).send({ error: 'нужно указать задачу' });
     }
     const task = { id: randomUUID(), title, workspace, createdAt: new Date().toISOString() };
     tasks.push(task);
@@ -173,10 +173,10 @@ async function start(): Promise<void> {
 
   app.post<{ Body: SettingsBody }>('/api/settings', async (request) => {
     const body = (request.body ?? {}) as SettingsBody;
-    const theme = stringValue(body.theme, 'system');
+    const theme = stringValue(body.theme, 'Системная');
     const notifications = boolValue(body.notifications);
     const compact = boolValue(body.compact);
-    const plan = stringValue(body.plan, 'scale');
+    const plan = stringValue(body.plan, 'Рост');
     const updatedAt = new Date().toISOString();
     settings.set('default', { theme, notifications, compact, plan, updatedAt });
     return updatedAt;
@@ -187,18 +187,18 @@ async function start(): Promise<void> {
     const summary = stringValue(body.summary);
     const impact = stringValue(body.impact);
     if (summary.length < 12 || impact.length < 20) {
-      return reply.code(400).send({ error: 'request summary and impact are required' });
+      return reply.code(400).send({ error: 'нужно заполнить описание и влияние заявки' });
     }
-    const priority = stringValue(body.priority, 'Normal');
+    const priority = stringValue(body.priority, 'Обычный');
     const requestRecord = {
       id: shortId('REQ'),
-      type: stringValue(body.type, 'Launch review'),
+      type: stringValue(body.type, 'Проверка запуска'),
       priority,
       summary,
       impact,
       budget: numberValue(body.budget, 0),
-      owner: priority === 'Urgent' ? 'Executive operations' : 'Launch desk',
-      eta: priority === 'Urgent' ? '4 business hours' : '2 business days',
+      owner: priority === 'Срочный' ? 'Штаб запуска' : 'Операционный стол',
+      eta: priority === 'Срочный' ? '4 рабочих часа' : '2 рабочих дня',
       createdAt: new Date().toISOString(),
     };
     requests.push(requestRecord);
@@ -211,7 +211,7 @@ async function start(): Promise<void> {
 
   try {
     await app.listen({ port, host });
-    app.log.info(`Taskly is up on http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`);
+    app.log.info(`BDUI demo is up on http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`);
   } catch (error) {
     app.log.error(error);
     process.exitCode = 1;
@@ -219,6 +219,6 @@ async function start(): Promise<void> {
 }
 
 start().catch((error) => {
-  console.error('Taskly failed to start:', error);
+  console.error('BDUI demo failed to start:', error);
   process.exitCode = 1;
 });
