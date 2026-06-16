@@ -5,7 +5,7 @@
   "description": "Операционный пульт — демо-приложение BDUI на базе @bdui/* пакетов.",
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "build:contract": "node ../../packages/cli/dist/bin.js build src/app.tsx -o public/contract.json --mode prod",
@@ -32,7 +32,7 @@
     "@bdui/registry": "file:../../packages/registry",
     "@bdui/schema": "file:../../packages/schema",
     "@bdui/transpiler": "file:../../packages/transpiler",
-    "@types/node": "^22.7.5",
+    "@types/node": "^24.13.2",
     "esbuild": "^0.28.1",
     "typescript": "^5.6.3"
   }

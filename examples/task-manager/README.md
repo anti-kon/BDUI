@@ -40,7 +40,7 @@ examples/task-manager/
 
 ## Требования
 
-- Node.js 22 или новее.
+- Node.js 24 или новее.
 - Собранный BDUI workspace из корня репозитория:
 
 ```bash

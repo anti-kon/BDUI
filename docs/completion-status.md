@@ -1,6 +1,6 @@
 # BDUI completion status
 
-Status date: 2026-06-14.
+Status date: 2026-06-16.
 
 This checklist maps the requirements from `НИР Конопелькин АЕ.docx`, chapter 2,
 to repository evidence and verification commands.
@@ -19,7 +19,7 @@ to repository evidence and verification commands.
 | SAL client/server/flow actions                                      | Complete                                          | typed `Action` union, DSL shorthands, runtime action runner, `fetch`, `call`, `validate`, flow actions                                                |
 | Modular layered architecture                                        | Complete                                          | workspace package split, `docs/architecture.md`, `npm run build:full`                                                                                 |
 | Reliability and diagnostics                                         | Complete                                          | schema validation, typed errors, renderer fallback behaviour, registry error bodies                                                                   |
-| Security                                                            | Complete locally                                  | safe expression interpreter, no `eval`/`new Function`, registry bearer auth/CORS controls, `npm run audit:all`                                        |
+| Security                                                            | Complete locally                                  | safe expression interpreter, no `eval`/`new Function`, registry bearer auth/CORS controls, `npm run audit:prod`                                       |
 | External APIs and SDK                                               | Complete                                          | `docs/registry-api.md`, `@bdui/sdk`, CLI registry options                                                                                             |
 | Developer interfaces                                                | Complete                                          | TSX DSL, CLI, package READMEs, getting started guide                                                                                                  |
 | Documentation set                                                   | Complete                                          | `README.md`, `docs/spec.md`, `docs/actions.md`, `docs/expr.md`, `docs/registry-api.md`, `docs/native-renderers.md`, `CONTRIBUTING.md`, `CHANGELOG.md` |
@@ -34,7 +34,7 @@ npm run verify:all
 
 This command covers generation/build, type checking, linting, formatting, unit
 and integration tests, coverage thresholds, contract synchronization, native
-contract coverage and dependency audit.
+contract coverage and production dependency audit.
 
 The standalone production-style Taskly acceptance smoke is:
 
@@ -45,6 +45,15 @@ npm run verify:taskly-browser
 It starts the compiled Fastify app on a free local port and verifies contract
 cache state, modal open/close, REST data source refresh, static catalog loading
 and the three-step request flow through a real Chromium page.
+
+Diploma screenshots and the defense scenario are prepared with:
+
+```bash
+npm run capture:defense-screenshots
+```
+
+The command writes reproducible images to `docs/assets/`. The speaking plan is
+tracked in `docs/defense-demo.md`.
 
 ## External acceptance gates
 
@@ -61,3 +70,12 @@ what was actually executed in this workspace.
 Until CI is run on GitHub and mobile device/simulator smoke is performed,
 repository-local implementation is complete while hardware/runtime acceptance
 remains environment-bound.
+
+## Dependency audit policy
+
+`npm run verify:all` uses `npm run audit:prod`, because the release toolchain
+currently pulls a known moderate `js-yaml` advisory through `@changesets/cli`.
+That dependency is development-only and is not bundled into BDUI runtime
+packages or the Taskly production application. The broader `npm run audit:dev`
+command is intentionally available for maintainers and should be revisited when
+Changesets/Manypkg publishes a compatible fix.

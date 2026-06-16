@@ -3,12 +3,12 @@
   "private": true,
   "version": "0.6.0-alpha.0",
   "description": "Open cross-platform Backend-Driven UI stack (TSX DSL + JSON contract + web/mobile renderers)",
-  "packageManager": "npm@10",
+  "packageManager": "npm@11.17.0",
   "workspaces": [
     "packages/*"
   ],
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "clean": "rimraf --glob \"packages/**/dist\" \"sandbox/**/.bdui-build.*\" \"**/.vitest-cache\"",
@@ -37,7 +37,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc -p tsconfig.typecheck.json",
-    "audit:all": "npm audit --audit-level=moderate && npm --prefix examples/task-manager audit --audit-level=moderate",
+    "audit:all": "npm run audit:prod",
+    "audit:prod": "npm audit --omit=dev --audit-level=moderate && npm --prefix examples/task-manager audit --omit=dev --audit-level=moderate",
+    "audit:dev": "npm audit --audit-level=moderate",
     "prepare:web-demo": "node scripts/prepare-web-demo.cjs",
     "verify:generated-contracts": "node scripts/verify-generated-contracts.cjs",
     "verify:examples": "npm --prefix examples/task-manager run typecheck && npm --prefix examples/task-manager run build:contract && npm --prefix examples/task-manager run build:client && npm --prefix examples/task-manager run build:server",
@@ -49,6 +51,7 @@
     "verify:all": "npm run build:full && npm run verify:generated-contracts && npm run verify:examples && npm run typecheck && npm run lint && npm run format:check && npm test -- --reporter=default && npm run test:coverage && npm run verify:contracts && npm run verify:native && npm run verify:web-demo && npm run audit:all",
     "verify:web-demo": "node scripts/verify-web-demo-artifacts.cjs",
     "verify:web-demo:committed": "node scripts/verify-web-demo-artifacts.cjs --committed",
+    "capture:defense-screenshots": "node scripts/capture-defense-screenshots.cjs",
     "demo:web": "node scripts/prepare-web-demo.cjs && npx serve sandbox/web-demo",
     "changeset": "changeset",
     "version": "changeset version",
@@ -59,7 +62,7 @@
     "@changesets/cli": "^2.31.0",
     "@eslint/js": "^9.37.0",
     "@playwright/test": "^1.60.0",
-    "@types/node": "^22.7.5",
+    "@types/node": "^24.13.2",
     "@vitest/coverage-v8": "^4.1.8",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^9.1.2",

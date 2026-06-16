@@ -23,6 +23,8 @@ iOS SwiftUI prototypes.
 
 ## Quickstart
 
+Requirements: Node.js 24 or newer and npm 11.
+
 ```bash
 npm install
 npm run build:full
@@ -84,8 +86,9 @@ See [`docs/getting-started.md`](docs/getting-started.md) for a walkthrough,
 - `npm run build:contracts` — rebuild tracked sandbox/example/native contract
   artifacts from TSX sources.
 - `npm run test:coverage` — enforce the repository coverage gate.
-- `npm run audit:all` — run dependency audits for the workspace and standalone
-  Taskly example.
+- `npm run audit:prod` — run production dependency audits for the workspace and
+  standalone Taskly example.
+- `npm run audit:dev` — run the broader development-tooling audit separately.
 - `npm run verify:generated-contracts` — ensure tracked contracts match their
   TSX sources.
 - `npm run verify:examples` — typecheck and bundle the standalone Taskly app.
@@ -103,6 +106,8 @@ See [`docs/getting-started.md`](docs/getting-started.md) for a walkthrough,
 - `npm run verify:web-demo` — rebuild vendored web-demo packages and fail if
   tracked demo artifacts are stale.
 - `npm run verify:all` — run the full local acceptance suite.
+- `npm run capture:defense-screenshots` — rebuild demo artifacts and capture
+  Taskly/web-demo screenshots into `docs/assets/` for the diploma.
 - `npm run changeset` — author a changeset that CI will publish.
 
 ## Release process

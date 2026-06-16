@@ -11,7 +11,7 @@ BDUI-powered screen.
 
 ## 1. Prerequisites
 
-- Node.js 22 or newer
+- Node.js 24 or newer
 - npm 10 or newer
 - A Unix-like shell (macOS, Linux, WSL) or PowerShell on Windows
 

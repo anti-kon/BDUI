@@ -23,7 +23,7 @@
     "@bdui/runtime": "0.6.0-alpha.0"
   },
   "devDependencies": {
-    "@types/node": "^22.7.5",
+    "@types/node": "^24.13.2",
     "rimraf": "^6.0.1",
     "typescript": "^5.6.3"
   }
