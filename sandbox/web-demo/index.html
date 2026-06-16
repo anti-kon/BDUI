@@ -13,17 +13,56 @@
           Roboto,
           sans-serif;
         margin: 0;
-        background: #fafafa;
+        background: #f5f7fb;
+        color: #0f172a;
       }
       header {
-        padding: 12px 16px;
+        align-items: center;
         background: #111827;
         color: #fff;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        padding: 12px 16px;
+      }
+      .demo-title {
+        font-weight: 750;
+      }
+      .demo-switch {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+      }
+      .demo-switch span {
+        color: #cbd5e1;
+        font-size: 13px;
+      }
+      .demo-switch select {
+        appearance: none;
+        background: #1f2937;
+        border: 1px solid #475569;
+        border-radius: 8px;
+        color: #fff;
+        font: inherit;
+        min-height: 34px;
+        padding: 6px 32px 6px 10px;
+      }
+      .demo-switch::after {
+        color: #cbd5e1;
+        content: '⌄';
+        margin-left: -30px;
+        pointer-events: none;
       }
       #app {
         padding: 16px;
-        max-width: 800px;
+        max-width: 1120px;
         margin: 0 auto;
+      }
+      @media (max-width: 640px) {
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
       }
     </style>
     <script type="importmap">
@@ -41,22 +80,52 @@
     </script>
   </head>
   <body>
-    <header>BDUI Web Renderer Demo</header>
+    <header>
+      <div class="demo-title">BDUI Web Renderer Demo</div>
+      <label class="demo-switch">
+        <span>Пример</span>
+        <select id="demo-picker" aria-label="Пример">
+          <option value="campus">Кампус</option>
+          <option value="retail">Luma Market</option>
+        </select>
+      </label>
+    </header>
     <div id="app"></div>
 
     <script type="module">
       import { mount } from './renderer-web/index.js';
 
       const appEl = document.getElementById('app');
+      const picker = document.getElementById('demo-picker');
+      const demos = {
+        campus: './contract.json',
+        retail: './retail.contract.json',
+      };
+
+      function currentDemo() {
+        const params = new URLSearchParams(window.location.search);
+        const value = params.get('demo');
+        return value && demos[value] ? value : 'campus';
+      }
 
       async function loadContract() {
-        const res = await fetch('./contract.json');
+        const demo = currentDemo();
+        picker.value = demo;
+        const res = await fetch(demos[demo]);
         if (!res.ok) {
-          appEl.textContent = 'Place contract.json next to this page (build one from sandbox).';
+          appEl.textContent = `Place ${demos[demo]} next to this page.`;
           return null;
         }
         return await res.json();
       }
+
+      picker.addEventListener('change', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (picker.value === 'campus') params.delete('demo');
+        else params.set('demo', picker.value);
+        const query = params.toString();
+        window.location.href = `${window.location.pathname}${query ? `?${query}` : ''}`;
+      });
 
       (async () => {
         const contract = await loadContract();

@@ -12,6 +12,7 @@ const contractArtifacts = [
   ['sandbox/flow/src/entry.tsx', 'sandbox/flow/contract.json'],
   ['sandbox/full-app/src/entry.tsx', 'sandbox/full-app/contract.json'],
   ['examples/ops-control/src/app.tsx', 'examples/ops-control/contract.json'],
+  ['examples/retail-commerce/src/app.tsx', 'examples/retail-commerce/contract.json'],
 ];
 
 function normalize(value) {

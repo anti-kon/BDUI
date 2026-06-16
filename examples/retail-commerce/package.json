@@ -1,0 +1,16 @@
+{
+  "name": "retail-commerce-bdui-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:contract": "bdui build src/app.tsx -o contract.json --mode prod",
+    "validate": "bdui validate contract.json"
+  },
+  "dependencies": {
+    "@bdui/cli": "file:../../packages/cli",
+    "@bdui/dsl": "file:../../packages/dsl"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

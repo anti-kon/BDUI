@@ -13,6 +13,7 @@ const contractArtifacts = [
   ['sandbox/full-app/src/entry.tsx', 'sandbox/full-app/contract.json'],
   ['examples/task-manager/src/app.tsx', 'examples/task-manager/public/contract.json'],
   ['examples/ops-control/src/app.tsx', 'examples/ops-control/contract.json'],
+  ['examples/retail-commerce/src/app.tsx', 'examples/retail-commerce/contract.json'],
 ];
 
 const campusSource = 'examples/ops-control/contract.json';
@@ -24,6 +25,13 @@ const campusCopies = [
 
 const campusAssetCopies = [
   ['examples/ops-control/public/campus-mark.svg', 'sandbox/web-demo/campus-mark.svg'],
+];
+
+const retailSource = 'examples/retail-commerce/contract.json';
+const retailCopies = ['sandbox/web-demo/retail.contract.json'];
+
+const retailAssetCopies = [
+  ['examples/retail-commerce/public/market-mark.svg', 'sandbox/web-demo/market-mark.svg'],
 ];
 
 async function main() {
@@ -46,7 +54,17 @@ async function main() {
     console.log(`synced ${copy}`);
   }
 
+  for (const copy of retailCopies) {
+    copyFileSync(resolve(root, retailSource), resolve(root, copy));
+    console.log(`synced ${copy}`);
+  }
+
   for (const [source, copy] of campusAssetCopies) {
+    copyFileSync(resolve(root, source), resolve(root, copy));
+    console.log(`synced ${copy}`);
+  }
+
+  for (const [source, copy] of retailAssetCopies) {
     copyFileSync(resolve(root, source), resolve(root, copy));
     console.log(`synced ${copy}`);
   }

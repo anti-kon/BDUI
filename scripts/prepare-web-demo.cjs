@@ -9,6 +9,8 @@ const demoDir = path.join(rootDir, 'sandbox', 'web-demo');
 const vendorDir = path.join(demoDir, 'vendor');
 const campusAsset = path.join(rootDir, 'examples', 'ops-control', 'public', 'campus-mark.svg');
 const demoCampusAsset = path.join(demoDir, 'campus-mark.svg');
+const retailAsset = path.join(rootDir, 'examples', 'retail-commerce', 'public', 'market-mark.svg');
+const demoRetailAsset = path.join(demoDir, 'market-mark.svg');
 
 const packagesToVendor = [
   { name: '@bdui/core', dir: 'core' },
@@ -56,5 +58,6 @@ for (const pkg of packagesToVendor) {
 }
 
 fs.copyFileSync(campusAsset, demoCampusAsset);
+fs.copyFileSync(retailAsset, demoRetailAsset);
 
 console.log(`✔ BDUI web-demo is prepared in ${vendorDir}`);

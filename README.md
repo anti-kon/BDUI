@@ -68,6 +68,9 @@ See [`docs/getting-started.md`](docs/getting-started.md) for a walkthrough,
 - [`examples/ops-control`](examples/ops-control) - Кампус, a Russian
   production-like student mobile cabinet rendered by the native Android Compose
   and iOS SwiftUI prototypes in [`native/`](native).
+- [`examples/retail-commerce`](examples/retail-commerce) - Luma Market, a
+  commercial e-commerce flow with storefront, catalog filters, cart totals and
+  checkout steps. The web demo can switch to this contract with `?demo=retail`.
 
 ## Native renderers
 

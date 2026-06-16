@@ -11,6 +11,7 @@ examples/**/public/client.js.map
 examples/**/public/contract.json
 examples/**/contract.json
 sandbox/**/contract.json
+sandbox/**/*.contract.json
 native/**/campus.contract.json
 
 

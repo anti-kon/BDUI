@@ -14,6 +14,58 @@ const CSS_CONTENT = `
   box-shadow: none;
 }
 
+.bdui-input,
+.bdui-select {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.35;
+  padding: 9px 12px;
+  outline: none;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.bdui-select {
+  cursor: pointer;
+  padding-right: 36px;
+}
+
+.bdui-input::placeholder {
+  color: #94a3b8;
+}
+
+.bdui-input:hover,
+.bdui-select:hover {
+  border-color: #94a3b8;
+}
+
+.bdui-input:focus,
+.bdui-select:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+}
+
+.bdui-input:disabled,
+.bdui-select:disabled,
+.bdui-input[readonly] {
+  cursor: not-allowed;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.bdui-input[readonly] {
+  cursor: default;
+}
+
 .bdui-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;

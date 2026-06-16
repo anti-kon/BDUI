@@ -104,7 +104,22 @@ async function smoke(browserName, browserType) {
       controls: document.querySelectorAll('#app input, #app select').length,
       route: window._bdui?.runtime?.navigation?.currentRoute ?? null,
       textLength: document.querySelector('#app')?.textContent?.length ?? 0,
+      inputHeight: getComputedStyle(document.querySelector('#app input')).minHeight,
+      inputRadius: getComputedStyle(document.querySelector('#app input')).borderRadius,
+      selectHeight: getComputedStyle(document.querySelector('#app select')).minHeight,
+      selectRadius: getComputedStyle(document.querySelector('#app select')).borderRadius,
     }));
+
+    if (
+      afterHashNavigation.inputHeight !== '42px' ||
+      afterHashNavigation.inputRadius !== '8px' ||
+      afterHashNavigation.selectHeight !== '42px' ||
+      afterHashNavigation.selectRadius !== '8px'
+    ) {
+      throw new Error(
+        `Campus form controls are not using the polished style: ${JSON.stringify(afterHashNavigation)}`,
+      );
+    }
 
     const screenshot = await page.screenshot({ fullPage: true });
     const digest = createHash('sha256').update(screenshot).digest('hex');
@@ -125,6 +140,71 @@ async function smoke(browserName, browserType) {
           afterHashNavigation,
           screenshotBytes: screenshot.length,
           screenshotSha256: digest,
+        },
+        null,
+        2,
+      ),
+    );
+
+    await page.goto(`http://127.0.0.1:${port}/?demo=retail`, { waitUntil: 'networkidle' });
+    await page.waitForFunction(
+      () =>
+        window._bdui?.runtime?.navigation?.currentRoute === 'storefront' &&
+        document.querySelector('#app')?.textContent?.includes('Luma Market'),
+      null,
+      { timeout: 10_000 },
+    );
+
+    const retailInitial = await page.evaluate(() => ({
+      picker: document.querySelector('#demo-picker')?.value ?? null,
+      route: window._bdui?.runtime?.navigation?.currentRoute ?? null,
+      textLength: document.querySelector('#app')?.textContent?.length ?? 0,
+    }));
+
+    if (retailInitial.picker !== 'retail' || retailInitial.route !== 'storefront') {
+      throw new Error(`Retail demo did not load correctly: ${JSON.stringify(retailInitial)}`);
+    }
+
+    await page.evaluate(() => {
+      window.location.hash = 'checkout';
+    });
+    await page.waitForFunction(
+      () =>
+        window._bdui?.runtime?.navigation?.currentRoute === 'checkout' &&
+        document.querySelectorAll('#app input, #app select').length >= 5,
+      null,
+      { timeout: 10_000 },
+    );
+
+    const retailCheckout = await page.evaluate(() => {
+      const input = document.querySelector('#app input');
+      const select = document.querySelector('#app select');
+      const inputStyle = input ? getComputedStyle(input) : null;
+      const selectStyle = select ? getComputedStyle(select) : null;
+      return {
+        controls: document.querySelectorAll('#app input, #app select').length,
+        route: window._bdui?.runtime?.navigation?.currentRoute ?? null,
+        inputHeight: inputStyle?.minHeight ?? null,
+        inputRadius: inputStyle?.borderRadius ?? null,
+        selectHeight: selectStyle?.minHeight ?? null,
+      };
+    });
+
+    if (
+      retailCheckout.route !== 'checkout' ||
+      retailCheckout.controls < 5 ||
+      retailCheckout.inputHeight !== '42px' ||
+      retailCheckout.inputRadius !== '8px'
+    ) {
+      throw new Error(`Retail checkout form looks incomplete: ${JSON.stringify(retailCheckout)}`);
+    }
+
+    console.log(
+      JSON.stringify(
+        {
+          browser: browserName,
+          retailInitial,
+          retailCheckout,
         },
         null,
         2,
