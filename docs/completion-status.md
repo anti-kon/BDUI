@@ -55,17 +55,31 @@ npm run capture:defense-screenshots
 The command writes reproducible images to `docs/assets/`. The speaking plan is
 tracked in `docs/defense-demo.md`.
 
+The current diploma DOCX deliverable is:
+
+```text
+reports/vkr-part-2-bdui-konopelkin-2026.docx
+```
+
+It is generated from `docs/vkr-part-2.md` by
+`scripts/build-diploma-docx.py`, then updated through Microsoft Word automation
+so the table of contents and page fields are materialized. The latest local
+structural check confirmed 80 pages in Word, 4 embedded figures, 34 listing
+captions, 19 sources, 3 appendices, populated table-of-contents entries with
+page numbers, and no `ХХ`/page-count placeholder text.
+
 ## External acceptance gates
 
 These gates require tools that are not fully available in the current Windows
 sandbox. They are now represented as CI jobs, and the local status below records
 what was actually executed in this workspace.
 
-| Gate                                           | Status                                                                                    | Command or action                                                                                                      |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Android native build and emulator/device smoke | CI Android assemble job configured; local Gradle/Android SDK unavailable                  | CI runs `gradle -p native/android :app:assembleDebug`; device/emulator smoke remains a hardware/runtime acceptance     |
-| iOS native build and simulator/device smoke    | CI iOS Swift typecheck job configured; local Xcode unavailable                            | CI runs `xcrun swiftc -typecheck` for iOS simulator; full Xcode app launch remains a macOS simulator/device acceptance |
-| Cross-browser visual smoke                     | Chromium passed locally; Firefox launch is blocked by this Windows sandbox graphics stack | CI installs Playwright browsers and runs `npm run verify:browsers`                                                     |
+| Gate                                           | Status                                                                                    | Command or action                                                                                                          |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Android native build and emulator/device smoke | CI Android assemble job configured; local Gradle/Android SDK unavailable                  | CI runs `gradle -p native/android :app:assembleDebug`; device/emulator smoke remains a hardware/runtime acceptance         |
+| iOS native build and simulator/device smoke    | CI iOS Swift typecheck job configured; local Xcode unavailable                            | CI runs `xcrun swiftc -typecheck` for iOS simulator; full Xcode app launch remains a macOS simulator/device acceptance     |
+| Cross-browser visual smoke                     | Chromium passed locally; Firefox launch is blocked by this Windows sandbox graphics stack | CI installs Playwright browsers and runs `npm run verify:browsers`                                                         |
+| DOCX visual render QA                          | Structurally verified locally; PNG/PDF render unavailable in this Windows environment     | LibreOffice `soffice` is missing; Word COM updates fields and counts pages, but Word PDF export hangs even on a smoke DOCX |
 
 Until CI is run on GitHub and mobile device/simulator smoke is performed,
 repository-local implementation is complete while hardware/runtime acceptance
