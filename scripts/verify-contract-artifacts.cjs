@@ -29,9 +29,40 @@ const sharedCopies = [
 ];
 const sharedRetailContract = 'examples/retail-commerce/contract.json';
 const sharedRetailCopies = ['sandbox/web-demo/retail.contract.json'];
+const sharedRetailAssets = [
+  ['examples/retail-commerce/public/market-mark.svg', ['sandbox/web-demo/market-mark.svg']],
+  [
+    'examples/retail-commerce/public/products/espresso-machine.png',
+    ['sandbox/web-demo/products/espresso-machine.png'],
+  ],
+  [
+    'examples/retail-commerce/public/products/desk-chair.png',
+    ['sandbox/web-demo/products/desk-chair.png'],
+  ],
+  [
+    'examples/retail-commerce/public/products/desk-lamp.png',
+    ['sandbox/web-demo/products/desk-lamp.png'],
+  ],
+  [
+    'examples/retail-commerce/public/products/robot-vacuum.png',
+    ['sandbox/web-demo/products/robot-vacuum.png'],
+  ],
+  [
+    'examples/retail-commerce/public/products/air-humidifier.png',
+    ['sandbox/web-demo/products/air-humidifier.png'],
+  ],
+  [
+    'examples/retail-commerce/public/products/laptop-backpack.png',
+    ['sandbox/web-demo/products/laptop-backpack.png'],
+  ],
+];
 
 function readJsonFile(relativePath) {
   return readFileSync(resolve(root, relativePath), 'utf8').replace(/\r\n/g, '\n');
+}
+
+function readBinaryFile(relativePath) {
+  return readFileSync(resolve(root, relativePath));
 }
 
 function runValidation(relativePath) {
@@ -58,6 +89,15 @@ for (const copy of sharedRetailCopies) {
   const copyContent = readJsonFile(copy);
   if (copyContent !== canonicalRetail) {
     throw new Error(`${copy} is out of sync with ${sharedRetailContract}`);
+  }
+}
+
+for (const [source, copies] of sharedRetailAssets) {
+  const canonicalAsset = readBinaryFile(source);
+  for (const copy of copies) {
+    if (!readBinaryFile(copy).equals(canonicalAsset)) {
+      throw new Error(`${copy} is out of sync with ${source}`);
+    }
   }
 }
 

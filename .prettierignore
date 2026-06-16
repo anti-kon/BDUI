@@ -3,6 +3,7 @@ coverage/
 sandbox/web-demo/vendor/
 **/dist/**
 **/.bdui-build.*
+**/.bdui-build-*
 package-lock.json
 examples/**/node_modules/**
 examples/**/dist/**

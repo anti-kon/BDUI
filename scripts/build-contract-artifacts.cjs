@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const { copyFileSync, writeFileSync } = require('node:fs');
-const { resolve } = require('node:path');
+const { copyFileSync, mkdirSync, writeFileSync } = require('node:fs');
+const { dirname, resolve } = require('node:path');
 const { pathToFileURL } = require('node:url');
 
 const root = resolve(__dirname, '..');
@@ -32,6 +32,30 @@ const retailCopies = ['sandbox/web-demo/retail.contract.json'];
 
 const retailAssetCopies = [
   ['examples/retail-commerce/public/market-mark.svg', 'sandbox/web-demo/market-mark.svg'],
+  [
+    'examples/retail-commerce/public/products/espresso-machine.png',
+    'sandbox/web-demo/products/espresso-machine.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/desk-chair.png',
+    'sandbox/web-demo/products/desk-chair.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/desk-lamp.png',
+    'sandbox/web-demo/products/desk-lamp.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/robot-vacuum.png',
+    'sandbox/web-demo/products/robot-vacuum.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/air-humidifier.png',
+    'sandbox/web-demo/products/air-humidifier.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/laptop-backpack.png',
+    'sandbox/web-demo/products/laptop-backpack.png',
+  ],
 ];
 
 async function main() {
@@ -60,12 +84,16 @@ async function main() {
   }
 
   for (const [source, copy] of campusAssetCopies) {
-    copyFileSync(resolve(root, source), resolve(root, copy));
+    const target = resolve(root, copy);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(resolve(root, source), target);
     console.log(`synced ${copy}`);
   }
 
   for (const [source, copy] of retailAssetCopies) {
-    copyFileSync(resolve(root, source), resolve(root, copy));
+    const target = resolve(root, copy);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(resolve(root, source), target);
     console.log(`synced ${copy}`);
   }
 }

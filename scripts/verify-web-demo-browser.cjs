@@ -166,6 +166,40 @@ async function smoke(browserName, browserType) {
     }
 
     await page.evaluate(() => {
+      window.location.hash = 'catalog';
+    });
+    await page.waitForFunction(
+      () =>
+        window._bdui?.runtime?.navigation?.currentRoute === 'catalog' &&
+        document.querySelectorAll('#app img[src*="products/"]').length >= 6,
+      null,
+      { timeout: 10_000 },
+    );
+
+    const retailCatalog = await page.evaluate(() => {
+      const productImages = Array.from(document.querySelectorAll('#app img[src*="products/"]'));
+      const loadedProductImages = productImages.filter(
+        (image) => image.complete && image.naturalWidth >= 200 && image.naturalHeight >= 160,
+      );
+      return {
+        route: window._bdui?.runtime?.navigation?.currentRoute ?? null,
+        productImages: productImages.length,
+        loadedProductImages: loadedProductImages.length,
+        filters: document.querySelectorAll('#app select').length,
+        textLength: document.querySelector('#app')?.textContent?.length ?? 0,
+      };
+    });
+
+    if (
+      retailCatalog.route !== 'catalog' ||
+      retailCatalog.productImages < 6 ||
+      retailCatalog.loadedProductImages < 6 ||
+      retailCatalog.filters < 2
+    ) {
+      throw new Error(`Retail catalog visuals are incomplete: ${JSON.stringify(retailCatalog)}`);
+    }
+
+    await page.evaluate(() => {
       window.location.hash = 'checkout';
     });
     await page.waitForFunction(
@@ -204,6 +238,7 @@ async function smoke(browserName, browserType) {
         {
           browser: browserName,
           retailInitial,
+          retailCatalog,
           retailCheckout,
         },
         null,

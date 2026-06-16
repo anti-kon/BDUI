@@ -29,80 +29,187 @@ export const preferredSlot = Session<string>('preferredSlot', 'Сегодня, 1
 export const paymentMethod = Session<string>('paymentMethod', 'Карта онлайн');
 export const marketingConsent = Session<boolean>('marketingConsent', true);
 
-export const selectedCategory = Flow<string>('selectedCategory', 'Популярное');
-export const sortMode = Flow<string>('sortMode', 'По рекомендации');
-export const featuredProduct = Flow<string>('featuredProduct', 'Набор для домашнего кофе');
+export const selectedCategory = Flow<string>('selectedCategory', 'Домашний офис');
+export const sortMode = Flow<string>('sortMode', 'Сначала популярные');
+export const featuredProduct = Flow<string>('featuredProduct', 'Кофемашина Barista One');
 export const cartItems = Flow<number>('cartItems', 2);
-export const cartSubtotal = Flow<number>('cartSubtotal', 4980);
-export const deliveryPrice = Flow<number>('deliveryPrice', 290);
-export const discount = Flow<number>('discount', 600);
+export const cartSubtotal = Flow<number>('cartSubtotal', 29980);
+export const deliveryPrice = Flow<number>('deliveryPrice', 0);
+export const discount = Flow<number>('discount', 1500);
 export const orderNumber = Flow<string>('orderNumber', 'LM-2026-1048');
 export const orderStatus = Flow<string>('orderStatus', 'Корзина готова');
 export const loyaltyLevel = Flow<string>('loyaltyLevel', 'Plus');
-export const promoCode = Flow<string>('promoCode', 'WELCOME600');
+export const promoCode = Flow<string>('promoCode', 'HOME1500');
 export const validationError = Flow<string>('validationError', '');
 export const statusMessage = Flow<string>('statusMessage', '');
 
-const page = { gap: 18, margin: '0 auto', maxWidth: '1040px', padding: 22 };
+const page = {
+  gap: 22,
+  margin: '0 auto',
+  maxWidth: '1120px',
+  padding: '22px 18px 34px',
+};
+
+const headerPanel = {
+  alignItems: 'center',
+  background: '#171717',
+  borderRadius: 22,
+  color: '#fff7ed',
+  gap: 14,
+  justifyContent: 'space-between',
+  padding: 18,
+};
+
+const navButton = {
+  background: 'rgba(255, 255, 255, 0.08)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  borderRadius: 999,
+  color: '#fff7ed',
+  minHeight: 40,
+  padding: '9px 16px',
+};
+
+const primaryButton = {
+  background: '#111827',
+  border: '1px solid #111827',
+  borderRadius: 999,
+  color: '#ffffff',
+  minHeight: 44,
+  padding: '11px 18px',
+};
+
+const secondaryButton = {
+  background: '#ffffff',
+  border: '1px solid #d6d3d1',
+  borderRadius: 999,
+  color: '#292524',
+  minHeight: 44,
+  padding: '11px 18px',
+};
+
+const heroPanel = {
+  background: '#fff7ed',
+  border: '1px solid #fed7aa',
+  borderRadius: 24,
+  boxShadow: '0 18px 50px rgba(120, 53, 15, 0.10)',
+  display: 'grid',
+  gap: 18,
+  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+  overflow: 'hidden',
+  padding: 24,
+};
+
 const card = {
   background: '#ffffff',
-  border: '1px solid #d7e0ea',
-  borderRadius: 8,
-  boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)',
+  border: '1px solid #e7e5e4',
+  borderRadius: 18,
+  boxShadow: '0 10px 28px rgba(41, 37, 36, 0.07)',
   gap: 12,
   padding: 18,
 };
-const compactCard = {
+
+const flatPanel = {
+  background: '#ffffff',
+  border: '1px solid #e7e5e4',
+  borderRadius: 18,
+  gap: 12,
+  padding: 18,
+};
+
+const productGrid = {
+  display: 'grid',
+  gap: 18,
+  gridTemplateColumns: 'repeat(auto-fit, minmax(245px, 1fr))',
+};
+
+const productCard = {
   ...card,
-  boxShadow: '0 4px 14px rgba(15, 23, 42, 0.05)',
+  justifyContent: 'space-between',
+  minWidth: 0,
+  overflow: 'hidden',
   padding: 14,
 };
-const title = { color: '#102033', fontSize: 30, fontWeight: 800 };
-const sectionTitle = { color: '#102033', fontSize: 19, fontWeight: 800 };
-const muted = { color: '#64748b' };
-const accent = { color: '#047857', fontWeight: 800 };
-const warning = { color: '#b45309', fontWeight: 800 };
-const danger = { color: '#b91c1c', fontWeight: 800 };
-const price = { color: '#0f766e', fontSize: 22, fontWeight: 900 };
-const pill = {
+
+const imageFrame = {
+  background: '#f5f5f4',
+  border: '1px solid #e7e5e4',
+  borderRadius: 16,
+  overflow: 'hidden',
+};
+
+const title = { color: '#fff7ed', fontSize: 32, fontWeight: 900, lineHeight: 1.05 };
+const heroTitle = { color: '#1c1917', fontSize: 30, fontWeight: 900, lineHeight: 1.15 };
+const sectionTitle = { color: '#1c1917', fontSize: 20, fontWeight: 850, lineHeight: 1.2 };
+const productTitle = { color: '#1c1917', fontSize: 18, fontWeight: 850, lineHeight: 1.25 };
+const muted = { color: '#6b7280', lineHeight: 1.45 };
+const lightMuted = { color: '#fed7aa', lineHeight: 1.35 };
+const accent = { color: '#047857', fontWeight: 850 };
+const warning = { color: '#b45309', fontWeight: 850 };
+const danger = { color: '#b91c1c', fontWeight: 850 };
+const price = { color: '#111827', fontSize: 24, fontWeight: 950 };
+const small = { color: '#78716c', fontSize: 13 };
+const badge = {
   background: '#ecfdf5',
-  border: '1px solid #bbf7d0',
+  border: '1px solid #a7f3d0',
   borderRadius: 999,
   color: '#047857',
-  fontWeight: 800,
-  padding: '4px 10px',
+  fontSize: 13,
+  fontWeight: 850,
+  padding: '5px 10px',
+};
+const warmBadge = {
+  background: '#ffedd5',
+  border: '1px solid #fed7aa',
+  borderRadius: 999,
+  color: '#9a3412',
+  fontSize: 13,
+  fontWeight: 850,
+  padding: '5px 10px',
 };
 
 const Header = () => (
-  <Row modifiers={{ alignItems: 'center', gap: 12 }}>
-    <Image
-      src="market-mark.svg"
-      alt="Market"
-      width={48}
-      height={48}
-      modifiers={{ borderRadius: 14 }}
-    />
-    <Column modifiers={{ gap: 5 }}>
-      <Text modifiers={title}>Luma Market</Text>
-      <Text modifiers={muted}>Коммерческий checkout, корзина и персональные предложения.</Text>
-    </Column>
-  </Row>
-);
-
-const Nav = () => (
-  <Row modifiers={{ flexWrap: 'wrap', gap: 8, padding: 0 }}>
-    <Button title="Витрина" onAction={[{ navigate: ['storefront', { mode: 'replace' }] }]} />
-    <Button title="Каталог" onAction={[{ navigate: ['catalog', { mode: 'replace' }] }]} />
-    <Button title="Корзина" onAction={[{ navigate: ['cart', { mode: 'replace' }] }]} />
-    <Button title="Заказы" onAction={[{ navigate: ['orders', { mode: 'replace' }] }]} />
+  <Row modifiers={headerPanel}>
+    <Row modifiers={{ alignItems: 'center', flexWrap: 'wrap', gap: 14, minWidth: 0 }}>
+      <Image
+        src="market-mark.svg"
+        alt="Luma Market"
+        width={54}
+        height={54}
+        modifiers={{ background: '#ecfccb', borderRadius: 18, flex: '0 0 auto' }}
+      />
+      <Column modifiers={{ gap: 5, minWidth: 230 }}>
+        <Text modifiers={title}>Luma Market</Text>
+        <Text modifiers={lightMuted}>Товары для дома, работы и быстрый checkout.</Text>
+      </Column>
+    </Row>
+    <Row modifiers={{ flexWrap: 'wrap', gap: 8, justifyContent: 'flex-end' }}>
+      <Button
+        title="Витрина"
+        modifiers={navButton}
+        onAction={[{ navigate: ['storefront', { mode: 'replace' }] }]}
+      />
+      <Button
+        title="Каталог"
+        modifiers={navButton}
+        onAction={[{ navigate: ['catalog', { mode: 'replace' }] }]}
+      />
+      <Button
+        title="Корзина"
+        modifiers={navButton}
+        onAction={[{ navigate: ['cart', { mode: 'replace' }] }]}
+      />
+      <Button
+        title="Заказы"
+        modifiers={navButton}
+        onAction={[{ navigate: ['orders', { mode: 'replace' }] }]}
+      />
+    </Row>
   </Row>
 );
 
 const Shell = ({ children }: { children: unknown }) => (
   <Column modifiers={page}>
     <Header />
-    <Nav />
-    <Divider />
     {children}
   </Column>
 );
@@ -120,12 +227,15 @@ const ErrorLine = () => (
 );
 
 const OrderTotals = () => (
-  <Column modifiers={compactCard}>
+  <Column modifiers={flatPanel}>
     <Text modifiers={sectionTitle}>Итого</Text>
     <Text>Товары: {use(cartSubtotal)} ₽</Text>
     <Text>Доставка: {use(deliveryPrice)} ₽</Text>
     <Text>Промокод: -{use(discount)} ₽</Text>
-    <Text modifiers={price}>К оплате: 4670 ₽</Text>
+    <Divider />
+    <Text modifiers={price}>
+      К оплате: {E<number>('flow.cartSubtotal + flow.deliveryPrice - flow.discount')} ₽
+    </Text>
   </Column>
 );
 
@@ -133,20 +243,51 @@ const ProductCard = ({
   name,
   description,
   cost,
+  image,
+  tag,
+  stock,
   actionMessage,
 }: {
   name: string;
   description: string;
   cost: string;
+  image: string;
+  tag: string;
+  stock: string;
   actionMessage: string;
 }) => (
-  <Column modifiers={{ ...compactCard, minWidth: 230 }}>
-    <Text modifiers={sectionTitle}>{name}</Text>
-    <Text modifiers={muted}>{description}</Text>
-    <Text modifiers={price}>{cost}</Text>
+  <Column modifiers={productCard}>
+    <Column modifiers={imageFrame}>
+      <Image
+        src={image}
+        alt={name}
+        width="100%"
+        height={208}
+        fit="cover"
+        modifiers={{ display: 'block' }}
+      />
+    </Column>
+    <Row
+      modifiers={{
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 8,
+        justifyContent: 'space-between',
+      }}
+    >
+      <Text modifiers={badge}>{tag}</Text>
+      <Text modifiers={small}>{stock}</Text>
+    </Row>
+    <Column modifiers={{ gap: 7 }}>
+      <Text modifiers={productTitle}>{name}</Text>
+      <Text modifiers={muted}>{description}</Text>
+    </Column>
+    <Row modifiers={{ alignItems: 'center', gap: 10, justifyContent: 'space-between' }}>
+      <Text modifiers={price}>{cost}</Text>
+    </Row>
     <Button
-      title="Добавить"
-      modifiers={{ variant: 'primary' }}
+      title="В корзину"
+      modifiers={primaryButton}
       onAction={[
         { inc: bind(cartItems) },
         { set: [bind(featuredProduct), name] },
@@ -158,8 +299,67 @@ const ProductCard = ({
   </Column>
 );
 
+const ProductGrid = () => (
+  <Column modifiers={productGrid}>
+    <ProductCard
+      name="Кофемашина Barista One"
+      description="Компактная рожковая кофемашина для эспрессо и капучино дома."
+      cost="23 990 ₽"
+      image="products/espresso-machine.png"
+      tag="Кухня"
+      stock="12 шт."
+      actionMessage="Кофемашина добавлена"
+    />
+    <ProductCard
+      name="Кресло ErgoFlex Mesh"
+      description="Сетчатая спинка, регулируемые подлокотники и поддержка поясницы."
+      cost="18 490 ₽"
+      image="products/desk-chair.png"
+      tag="Офис"
+      stock="7 шт."
+      actionMessage="Кресло добавлено"
+    />
+    <ProductCard
+      name="Лампа Beam Desk"
+      description="LED-лампа с тёплым и холодным светом для рабочего стола."
+      cost="5 990 ₽"
+      image="products/desk-lamp.png"
+      tag="Свет"
+      stock="24 шт."
+      actionMessage="Лампа добавлена"
+    />
+    <ProductCard
+      name="Робот-пылесос CleanBot R7"
+      description="Лидарная навигация, влажная уборка и уборка по расписанию."
+      cost="31 990 ₽"
+      image="products/robot-vacuum.png"
+      tag="Умный дом"
+      stock="5 шт."
+      actionMessage="Робот-пылесос добавлен"
+    />
+    <ProductCard
+      name="Увлажнитель AirPure Mini"
+      description="Тихая работа, резервуар 4 л и автоматический ночной режим."
+      cost="6 490 ₽"
+      image="products/air-humidifier.png"
+      tag="Климат"
+      stock="18 шт."
+      actionMessage="Увлажнитель добавлен"
+    />
+    <ProductCard
+      name="Рюкзак CityPack Pro 22"
+      description="Отделение для ноутбука 15'', защита от дождя и USB-вывод."
+      cost="7 290 ₽"
+      image="products/laptop-backpack.png"
+      tag="Аксессуары"
+      stock="15 шт."
+      actionMessage="Рюкзак добавлен"
+    />
+  </Column>
+);
+
 const CustomerCard = () => (
-  <Column modifiers={card}>
+  <Column modifiers={flatPanel}>
     <Text modifiers={sectionTitle}>Покупатель</Text>
     <Text>{use(customerName)}</Text>
     <Text>{use(customerPhone)}</Text>
@@ -173,136 +373,131 @@ const CustomerCard = () => (
 
 export default (
   <Contract meta={meta}>
-    <Theme.Simple primary="#16a34a" background="#f8fafc" darkBackground="#111827" />
+    <Theme.Simple primary="#111827" background="#f4f7f3" darkBackground="#111827" />
     <Navigation initialRoute="storefront" urlSync>
-      <Route id="storefront" title="Витрина">
+      <Route id="storefront">
         <Shell>
-          <Row modifiers={{ alignItems: 'stretch', flexWrap: 'wrap', gap: 14 }}>
-            <Column modifiers={{ ...card, flex: 2, minWidth: 320 }}>
-              <Text modifiers={pill}>Уровень клиента: {use(loyaltyLevel)}</Text>
-              <Text modifiers={{ color: '#102033', fontSize: 26, fontWeight: 900 }}>
-                Быстрый заказ товаров для дома и работы
-              </Text>
+          <Column modifiers={heroPanel}>
+            <Column modifiers={{ gap: 14, justifyContent: 'center' }}>
+              <Row modifiers={{ flexWrap: 'wrap', gap: 8 }}>
+                <Text modifiers={warmBadge}>Скидка 1 500 ₽ по промокоду HOME1500</Text>
+                <Text modifiers={badge}>Уровень клиента: {use(loyaltyLevel)}</Text>
+              </Row>
+              <Text modifiers={heroTitle}>Магазин товаров для квартиры и рабочего места</Text>
               <Text modifiers={muted}>
                 Каталог, корзина, промокод, доставка и оформление заказа собраны в одном BDUI
-                контракте.
+                контракте. Экран выглядит как коммерческая витрина, а не административная панель.
               </Text>
               <Row modifiers={{ flexWrap: 'wrap', gap: 10 }}>
                 <Button
                   title="Открыть каталог"
-                  modifiers={{ variant: 'primary' }}
+                  modifiers={primaryButton}
                   onAction={[{ navigate: ['catalog'] }]}
                 />
-                <Button title="Перейти в корзину" onAction={[{ navigate: ['cart'] }]} />
+                <Button
+                  title="Перейти в корзину"
+                  modifiers={secondaryButton}
+                  onAction={[{ navigate: ['cart'] }]}
+                />
               </Row>
             </Column>
-            <Column modifiers={{ ...card, flex: 1, minWidth: 260 }}>
+            <Column modifiers={{ ...flatPanel, background: '#ffffffcc' }}>
               <Text modifiers={sectionTitle}>Текущий заказ</Text>
-              <Text>Позиции: {use(cartItems)}</Text>
-              <Text>Выбранный товар: {use(featuredProduct)}</Text>
+              <Text>Позиций: {use(cartItems)}</Text>
+              <Text>Последний товар: {use(featuredProduct)}</Text>
               <Text>Промокод: {use(promoCode)}</Text>
               <Text modifiers={accent}>{use(orderStatus)}</Text>
             </Column>
+          </Column>
+
+          <Row
+            modifiers={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Column modifiers={{ gap: 4 }}>
+              <Text modifiers={sectionTitle}>Популярное сейчас</Text>
+              <Text modifiers={muted}>
+                Шесть реальных категорий для домашнего офиса и умного дома.
+              </Text>
+            </Column>
+            <Button
+              title="Весь каталог"
+              modifiers={secondaryButton}
+              onAction={[{ navigate: ['catalog'] }]}
+            />
           </Row>
 
-          <Row modifiers={{ alignItems: 'stretch', flexWrap: 'wrap', gap: 14 }}>
-            <ProductCard
-              name="Набор для домашнего кофе"
-              description="AeroPress, фильтры и свежеобжаренный зерновой кофе."
-              cost="4 980 ₽"
-              actionMessage="Кофейный набор добавлен"
-            />
-            <ProductCard
-              name="Подписка Fresh Box"
-              description="Еженедельная коробка полезных продуктов с доставкой."
-              cost="2 490 ₽"
-              actionMessage="Подписка добавлена"
-            />
-            <ProductCard
-              name="Офисный стартовый набор"
-              description="Канцелярия, зарядные устройства и органайзеры."
-              cost="6 300 ₽"
-              actionMessage="Офисный набор добавлен"
-            />
-          </Row>
+          <ProductGrid />
           <StatusLine />
         </Shell>
       </Route>
 
-      <Route id="catalog" title="Каталог">
+      <Route id="catalog">
         <Shell>
-          <Column modifiers={card}>
-            <Text modifiers={sectionTitle}>Фильтры каталога</Text>
+          <Column modifiers={flatPanel}>
+            <Text modifiers={sectionTitle}>Каталог</Text>
             <Row modifiers={{ alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <Select
-                binding={bind(selectedCategory)}
-                placeholder="Категория"
-                options={[
-                  { label: 'Популярное', value: 'Популярное' },
-                  { label: 'Дом', value: 'Дом' },
-                  { label: 'Офис', value: 'Офис' },
-                  { label: 'Подписки', value: 'Подписки' },
-                ]}
-              />
-              <Select
-                binding={bind(sortMode)}
-                placeholder="Сортировка"
-                options={[
-                  { label: 'По рекомендации', value: 'По рекомендации' },
-                  { label: 'Сначала дешевле', value: 'Сначала дешевле' },
-                  { label: 'Сначала новинки', value: 'Сначала новинки' },
-                ]}
-              />
+              <Column modifiers={{ flex: 1, minWidth: 230 }}>
+                <Select
+                  binding={bind(selectedCategory)}
+                  placeholder="Категория"
+                  options={[
+                    { label: 'Домашний офис', value: 'Домашний офис' },
+                    { label: 'Кухня', value: 'Кухня' },
+                    { label: 'Умный дом', value: 'Умный дом' },
+                    { label: 'Климат', value: 'Климат' },
+                    { label: 'Аксессуары', value: 'Аксессуары' },
+                  ]}
+                />
+              </Column>
+              <Column modifiers={{ flex: 1, minWidth: 230 }}>
+                <Select
+                  binding={bind(sortMode)}
+                  placeholder="Сортировка"
+                  options={[
+                    { label: 'Сначала популярные', value: 'Сначала популярные' },
+                    { label: 'Сначала дешевле', value: 'Сначала дешевле' },
+                    { label: 'Сначала новинки', value: 'Сначала новинки' },
+                  ]}
+                />
+              </Column>
             </Row>
-            <Text>
+            <Text modifiers={muted}>
               Сейчас показано: {use(selectedCategory)}, {use(sortMode)}
             </Text>
           </Column>
 
-          <Row modifiers={{ alignItems: 'stretch', flexWrap: 'wrap', gap: 14 }}>
-            <ProductCard
-              name="Набор для домашнего кофе"
-              description="Самый популярный товар недели."
-              cost="4 980 ₽"
-              actionMessage="Кофейный набор добавлен"
-            />
-            <ProductCard
-              name="Подписка Fresh Box"
-              description="Коммерческий сценарий регулярной покупки."
-              cost="2 490 ₽"
-              actionMessage="Подписка добавлена"
-            />
-            <ProductCard
-              name="Офисный стартовый набор"
-              description="B2B-заказ для небольшой команды."
-              cost="6 300 ₽"
-              actionMessage="Офисный набор добавлен"
-            />
-          </Row>
+          <ProductGrid />
           <StatusLine />
         </Shell>
       </Route>
 
-      <Route id="cart" title="Корзина">
+      <Route id="cart">
         <Shell>
-          <Row modifiers={{ alignItems: 'stretch', flexWrap: 'wrap', gap: 14 }}>
-            <Column modifiers={{ ...card, flex: 2, minWidth: 320 }}>
+          <Row modifiers={{ alignItems: 'stretch', flexWrap: 'wrap', gap: 16 }}>
+            <Column modifiers={{ ...flatPanel, flex: 2, minWidth: 280 }}>
               <Text modifiers={sectionTitle}>Корзина</Text>
-              <Text>Позиции: {use(cartItems)}</Text>
-              <Text>Основной товар: {use(featuredProduct)}</Text>
+              <Text>Позиций: {use(cartItems)}</Text>
+              <Text>Последний добавленный товар: {use(featuredProduct)}</Text>
               <Text>Статус: {use(orderStatus)}</Text>
               <Input binding={bind(promoCode)} placeholder="Промокод" inputType="text" />
               <Row modifiers={{ flexWrap: 'wrap', gap: 10 }}>
                 <Button
                   title="Применить промокод"
+                  modifiers={primaryButton}
                   onAction={[
-                    { set: [bind(discount), 600] },
+                    { set: [bind(discount), 1500] },
                     { set: [bind(statusMessage), 'Промокод применён'] },
                     { toast: ['Промокод применён', { level: 'success' }] },
                   ]}
                 />
                 <Button
                   title="Очистить корзину"
+                  modifiers={secondaryButton}
                   onAction={[
                     { set: [bind(cartItems), 0] },
                     { set: [bind(cartSubtotal), 0] },
@@ -312,43 +507,53 @@ export default (
                 />
               </Row>
             </Column>
-            <OrderTotals />
+            <Column modifiers={{ flex: 1, minWidth: 260 }}>
+              <OrderTotals />
+            </Column>
           </Row>
           <Button
             title="Оформить заказ"
-            modifiers={{ variant: 'primary' }}
+            modifiers={primaryButton}
             onAction={[{ flowStart: { routeId: 'checkout' } }]}
           />
           <StatusLine />
         </Shell>
       </Route>
 
-      <Route id="orders" title="Заказы">
+      <Route id="orders">
         <Shell>
-          <CustomerCard />
-          <Column modifiers={card}>
-            <Text modifiers={sectionTitle}>Заказ {use(orderNumber)}</Text>
-            <Text>Статус: {use(orderStatus)}</Text>
-            <Text>Оплата: {use(paymentMethod)}</Text>
-            <Text>Слот доставки: {use(preferredSlot)}</Text>
-            <If condition={E<boolean>("flow.orderStatus == 'Передан в доставку'")}>
-              <Text modifiers={accent}>Курьер уже получил маршрут.</Text>
-            </If>
-            <If condition={E<boolean>("flow.orderStatus != 'Передан в доставку'")}>
-              <Text modifiers={warning}>Заказ ожидает подтверждения.</Text>
-            </If>
-          </Column>
+          <Row modifiers={{ alignItems: 'stretch', flexWrap: 'wrap', gap: 16 }}>
+            <Column modifiers={{ flex: 1, minWidth: 280 }}>
+              <CustomerCard />
+            </Column>
+            <Column modifiers={{ ...flatPanel, flex: 1, minWidth: 280 }}>
+              <Text modifiers={sectionTitle}>Заказ {use(orderNumber)}</Text>
+              <Text>Статус: {use(orderStatus)}</Text>
+              <Text>Оплата: {use(paymentMethod)}</Text>
+              <Text>Слот доставки: {use(preferredSlot)}</Text>
+              <If condition={E<boolean>("flow.orderStatus == 'Передан в доставку'")}>
+                <Text modifiers={accent}>Курьер уже получил маршрут.</Text>
+              </If>
+              <If condition={E<boolean>("flow.orderStatus != 'Передан в доставку'")}>
+                <Text modifiers={warning}>Заказ ожидает подтверждения.</Text>
+              </If>
+            </Column>
+          </Row>
           <Row modifiers={{ flexWrap: 'wrap', gap: 10 }}>
             <Button
               title="Передать в доставку"
-              modifiers={{ variant: 'primary' }}
+              modifiers={primaryButton}
               onAction={[
                 { set: [bind(orderStatus), 'Передан в доставку'] },
                 { set: [bind(statusMessage), 'Статус доставки обновлён'] },
                 { toast: ['Статус доставки обновлён'] },
               ]}
             />
-            <Button title="Вернуться в каталог" onAction={[{ navigate: ['catalog'] }]} />
+            <Button
+              title="Вернуться в каталог"
+              modifiers={secondaryButton}
+              onAction={[{ navigate: ['catalog'] }]}
+            />
           </Row>
           <StatusLine />
         </Shell>
@@ -357,9 +562,9 @@ export default (
       <FlowRoute id="checkout" title="Оформление заказа" startStep="contacts">
         <Step id="contacts" title="Контакты">
           <Column modifiers={page}>
-            <Text modifiers={title}>Контакты покупателя</Text>
-            <Text modifiers={muted}>Шаг 1 из 3. Контактные данные и адрес доставки.</Text>
-            <Column modifiers={card}>
+            <Column modifiers={flatPanel}>
+              <Text modifiers={sectionTitle}>Контактные данные</Text>
+              <Text modifiers={muted}>Шаг 1 из 3. Получатель и адрес доставки.</Text>
               <Input binding={bind(customerName)} placeholder="Имя получателя" inputType="text" />
               <Input binding={bind(customerPhone)} placeholder="Телефон" inputType="tel" />
               <Input binding={bind(customerEmail)} placeholder="Email" inputType="email" />
@@ -370,11 +575,12 @@ export default (
             <Row modifiers={{ flexWrap: 'wrap', gap: 10 }}>
               <Button
                 title="Отмена"
+                modifiers={secondaryButton}
                 onAction={[{ flowAbort: { reason: 'cancelled' } }, { navigate: ['cart'] }]}
               />
               <Button
                 title="Далее"
-                modifiers={{ variant: 'primary' }}
+                modifiers={primaryButton}
                 onAction={[
                   {
                     when: {
@@ -397,9 +603,9 @@ export default (
 
         <Step id="delivery" title="Доставка и оплата">
           <Column modifiers={page}>
-            <Text modifiers={title}>Доставка и оплата</Text>
-            <Text modifiers={muted}>Шаг 2 из 3. Выберите удобный слот и способ оплаты.</Text>
-            <Column modifiers={card}>
+            <Column modifiers={flatPanel}>
+              <Text modifiers={sectionTitle}>Доставка и оплата</Text>
+              <Text modifiers={muted}>Шаг 2 из 3. Выберите удобный слот и способ оплаты.</Text>
               <Select
                 binding={bind(preferredSlot)}
                 placeholder="Слот доставки"
@@ -424,10 +630,14 @@ export default (
               />
             </Column>
             <Row modifiers={{ flexWrap: 'wrap', gap: 10 }}>
-              <Button title="Назад" onAction={[{ flowGoTo: { stepId: 'contacts' } }]} />
+              <Button
+                title="Назад"
+                modifiers={secondaryButton}
+                onAction={[{ flowGoTo: { stepId: 'contacts' } }]}
+              />
               <Button
                 title="Далее"
-                modifiers={{ variant: 'primary' }}
+                modifiers={primaryButton}
                 onAction={[{ flowGoTo: { stepId: 'confirm' } }]}
               />
             </Row>
@@ -436,15 +646,25 @@ export default (
 
         <Step id="confirm" title="Подтверждение">
           <Column modifiers={page}>
-            <Text modifiers={title}>Подтверждение заказа</Text>
+            <Text modifiers={heroTitle}>Подтверждение заказа</Text>
             <Text modifiers={muted}>Шаг 3 из 3. Проверьте заказ перед оплатой.</Text>
-            <CustomerCard />
-            <OrderTotals />
+            <Row modifiers={{ alignItems: 'stretch', flexWrap: 'wrap', gap: 16 }}>
+              <Column modifiers={{ flex: 1, minWidth: 280 }}>
+                <CustomerCard />
+              </Column>
+              <Column modifiers={{ flex: 1, minWidth: 260 }}>
+                <OrderTotals />
+              </Column>
+            </Row>
             <Row modifiers={{ flexWrap: 'wrap', gap: 10 }}>
-              <Button title="Назад" onAction={[{ flowGoTo: { stepId: 'delivery' } }]} />
+              <Button
+                title="Назад"
+                modifiers={secondaryButton}
+                onAction={[{ flowGoTo: { stepId: 'delivery' } }]}
+              />
               <Button
                 title="Подтвердить заказ"
-                modifiers={{ variant: 'primary' }}
+                modifiers={primaryButton}
                 onAction={[
                   {
                     batch: [
