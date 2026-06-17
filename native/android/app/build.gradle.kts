@@ -17,12 +17,29 @@ android {
   }
 
   buildFeatures {
+    buildConfig = true
     compose = true
   }
 
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+  }
+
+  flavorDimensions += "demo"
+  productFlavors {
+    create("campus") {
+      dimension = "demo"
+      applicationId = "dev.bdui.campus"
+      resValue("string", "app_name", "Кампус")
+      buildConfigField("String", "BDUI_CONTRACT", "\"campus.contract.json\"")
+    }
+    create("retail") {
+      dimension = "demo"
+      applicationId = "dev.bdui.lumamarket"
+      resValue("string", "app_name", "Luma Market")
+      buildConfigField("String", "BDUI_CONTRACT", "\"retail.contract.json\"")
+    }
   }
 }
 

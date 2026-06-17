@@ -43,7 +43,10 @@ export const promoCode = Flow<string>('promoCode', 'HOME1500');
 export const validationError = Flow<string>('validationError', '');
 export const statusMessage = Flow<string>('statusMessage', '');
 
+const retailFont = '"Segoe UI", "Noto Sans", "Roboto", Arial, sans-serif';
+
 const page = {
+  fontFamily: retailFont,
   gap: 22,
   margin: '0 auto',
   maxWidth: '1120px',
@@ -55,6 +58,7 @@ const headerPanel = {
   background: '#171717',
   borderRadius: 22,
   color: '#fff7ed',
+  flexWrap: 'wrap',
   gap: 14,
   justifyContent: 'space-between',
   padding: 18,
@@ -171,7 +175,7 @@ const Header = () => (
   <Row modifiers={headerPanel}>
     <Row modifiers={{ alignItems: 'center', flexWrap: 'wrap', gap: 14, minWidth: 0 }}>
       <Image
-        src="market-mark.svg"
+        src="market-mark.png"
         alt="Luma Market"
         width={54}
         height={54}

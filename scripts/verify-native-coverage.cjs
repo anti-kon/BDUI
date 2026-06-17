@@ -4,8 +4,10 @@ const { readFileSync } = require('node:fs');
 const { resolve } = require('node:path');
 
 const root = resolve(__dirname, '..');
-const contractPath = resolve(root, 'examples', 'ops-control', 'contract.json');
-const contract = JSON.parse(readFileSync(contractPath, 'utf8'));
+const contracts = [
+  ['Campus', resolve(root, 'examples', 'ops-control', 'contract.json')],
+  ['Luma Market', resolve(root, 'examples', 'retail-commerce', 'contract.json')],
+];
 
 const actionTypes = new Set([
   'navigate',
@@ -73,13 +75,10 @@ const nativeActions = new Set([
   'call',
 ]);
 
-const usedComponents = new Set();
-const usedActions = new Set();
-
-function visit(value) {
+function collectUsage(value, usedComponents, usedActions) {
   if (Array.isArray(value)) {
     for (const item of value) {
-      visit(item);
+      collectUsage(item, usedComponents, usedActions);
     }
     return;
   }
@@ -100,28 +99,34 @@ function visit(value) {
   }
 
   for (const child of Object.values(value)) {
-    visit(child);
+    collectUsage(child, usedComponents, usedActions);
   }
 }
 
-visit(contract.navigation);
+for (const [name, contractPath] of contracts) {
+  const contract = JSON.parse(readFileSync(contractPath, 'utf8'));
+  const usedComponents = new Set();
+  const usedActions = new Set();
 
-const unsupportedComponents = [...usedComponents].filter((type) => !nativeComponents.has(type));
-const unsupportedActions = [...usedActions].filter((type) => !nativeActions.has(type));
+  collectUsage(contract.navigation, usedComponents, usedActions);
 
-if (unsupportedComponents.length > 0 || unsupportedActions.length > 0) {
-  const details = [
-    unsupportedComponents.length > 0
-      ? `unsupported native components: ${unsupportedComponents.join(', ')}`
-      : undefined,
-    unsupportedActions.length > 0
-      ? `unsupported native actions: ${unsupportedActions.join(', ')}`
-      : undefined,
-  ]
-    .filter(Boolean)
-    .join('; ');
-  throw new Error(`Native renderer prototypes do not cover the Campus contract: ${details}`);
+  const unsupportedComponents = [...usedComponents].filter((type) => !nativeComponents.has(type));
+  const unsupportedActions = [...usedActions].filter((type) => !nativeActions.has(type));
+
+  if (unsupportedComponents.length > 0 || unsupportedActions.length > 0) {
+    const details = [
+      unsupportedComponents.length > 0
+        ? `unsupported native components: ${unsupportedComponents.join(', ')}`
+        : undefined,
+      unsupportedActions.length > 0
+        ? `unsupported native actions: ${unsupportedActions.join(', ')}`
+        : undefined,
+    ]
+      .filter(Boolean)
+      .join('; ');
+    throw new Error(`Native renderer prototypes do not cover the ${name} contract: ${details}`);
+  }
+
+  console.log(`${name} native component coverage: ${[...usedComponents].sort().join(', ')}`);
+  console.log(`${name} native action coverage: ${[...usedActions].sort().join(', ')}`);
 }
-
-console.log(`Native component coverage: ${[...usedComponents].sort().join(', ')}`);
-console.log(`Native action coverage: ${[...usedActions].sort().join(', ')}`);

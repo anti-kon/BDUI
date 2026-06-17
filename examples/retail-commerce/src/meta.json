@@ -8,6 +8,7 @@
   "features": {
     "language": "ru",
     "domain": "commerce",
+    "nativeRenderers": ["android-compose", "ios-swiftui"],
     "screens": ["storefront", "catalog", "cart", "orders", "checkout"]
   }
 }

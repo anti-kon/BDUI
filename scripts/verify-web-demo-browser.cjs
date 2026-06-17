@@ -156,6 +156,10 @@ async function smoke(browserName, browserType) {
     );
 
     const retailInitial = await page.evaluate(() => ({
+      fontFamily: getComputedStyle(
+        document.querySelector('#app [style*="font-family"]') ?? document.querySelector('#app'),
+      ).fontFamily,
+      logo: document.querySelector('#app img[src*="market-mark.png"]')?.getAttribute('src') ?? null,
       picker: document.querySelector('#demo-picker')?.value ?? null,
       route: window._bdui?.runtime?.navigation?.currentRoute ?? null,
       textLength: document.querySelector('#app')?.textContent?.length ?? 0,
@@ -163,6 +167,14 @@ async function smoke(browserName, browserType) {
 
     if (retailInitial.picker !== 'retail' || retailInitial.route !== 'storefront') {
       throw new Error(`Retail demo did not load correctly: ${JSON.stringify(retailInitial)}`);
+    }
+    if (
+      !retailInitial.logo ||
+      !retailInitial.fontFamily.includes('Segoe UI') ||
+      !retailInitial.fontFamily.includes('Noto Sans') ||
+      !retailInitial.fontFamily.includes('Roboto')
+    ) {
+      throw new Error(`Retail branding/font stack is incomplete: ${JSON.stringify(retailInitial)}`);
     }
 
     await page.evaluate(() => {

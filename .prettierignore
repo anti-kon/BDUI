@@ -14,5 +14,10 @@ examples/**/contract.json
 sandbox/**/contract.json
 sandbox/**/*.contract.json
 native/**/campus.contract.json
+native/**/*.contract.json
+native/android/.gradle/
+native/android/.idea/
+native/android/**/build/
+.tmp-screens/
 
 

@@ -28,33 +28,102 @@ const campusAssetCopies = [
 ];
 
 const retailSource = 'examples/retail-commerce/contract.json';
-const retailCopies = ['sandbox/web-demo/retail.contract.json'];
+const retailCopies = [
+  'sandbox/web-demo/retail.contract.json',
+  'native/android/app/src/main/assets/retail.contract.json',
+  'native/ios/OpsControl/Resources/retail.contract.json',
+];
 
 const retailAssetCopies = [
   ['examples/retail-commerce/public/market-mark.svg', 'sandbox/web-demo/market-mark.svg'],
   [
+    'examples/retail-commerce/public/market-mark.svg',
+    'native/android/app/src/main/assets/market-mark.svg',
+  ],
+  [
+    'examples/retail-commerce/public/market-mark.svg',
+    'native/ios/OpsControl/Resources/market-mark.svg',
+  ],
+  ['examples/retail-commerce/public/market-mark.png', 'sandbox/web-demo/market-mark.png'],
+  [
+    'examples/retail-commerce/public/market-mark.png',
+    'native/android/app/src/main/assets/market-mark.png',
+  ],
+  [
+    'examples/retail-commerce/public/market-mark.png',
+    'native/ios/OpsControl/Resources/market-mark.png',
+  ],
+  [
     'examples/retail-commerce/public/products/espresso-machine.png',
     'sandbox/web-demo/products/espresso-machine.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/espresso-machine.png',
+    'native/android/app/src/main/assets/products/espresso-machine.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/espresso-machine.png',
+    'native/ios/OpsControl/Resources/products/espresso-machine.png',
   ],
   [
     'examples/retail-commerce/public/products/desk-chair.png',
     'sandbox/web-demo/products/desk-chair.png',
   ],
   [
+    'examples/retail-commerce/public/products/desk-chair.png',
+    'native/android/app/src/main/assets/products/desk-chair.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/desk-chair.png',
+    'native/ios/OpsControl/Resources/products/desk-chair.png',
+  ],
+  [
     'examples/retail-commerce/public/products/desk-lamp.png',
     'sandbox/web-demo/products/desk-lamp.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/desk-lamp.png',
+    'native/android/app/src/main/assets/products/desk-lamp.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/desk-lamp.png',
+    'native/ios/OpsControl/Resources/products/desk-lamp.png',
   ],
   [
     'examples/retail-commerce/public/products/robot-vacuum.png',
     'sandbox/web-demo/products/robot-vacuum.png',
   ],
   [
+    'examples/retail-commerce/public/products/robot-vacuum.png',
+    'native/android/app/src/main/assets/products/robot-vacuum.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/robot-vacuum.png',
+    'native/ios/OpsControl/Resources/products/robot-vacuum.png',
+  ],
+  [
     'examples/retail-commerce/public/products/air-humidifier.png',
     'sandbox/web-demo/products/air-humidifier.png',
   ],
   [
+    'examples/retail-commerce/public/products/air-humidifier.png',
+    'native/android/app/src/main/assets/products/air-humidifier.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/air-humidifier.png',
+    'native/ios/OpsControl/Resources/products/air-humidifier.png',
+  ],
+  [
     'examples/retail-commerce/public/products/laptop-backpack.png',
     'sandbox/web-demo/products/laptop-backpack.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/laptop-backpack.png',
+    'native/android/app/src/main/assets/products/laptop-backpack.png',
+  ],
+  [
+    'examples/retail-commerce/public/products/laptop-backpack.png',
+    'native/ios/OpsControl/Resources/products/laptop-backpack.png',
   ],
 ];
 
