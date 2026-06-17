@@ -242,7 +242,7 @@ private class BduiState(contract: JSONObject) {
 }
 
 private object BduiExpression {
-  private val interpolation = Regex("\\{\\{([^}]+)}}")
+  private val interpolation = Regex("\\{\\{([^}]+)\\}\\}")
 
   fun interpolate(value: Any?, state: BduiState): String {
     val raw = resolve(value, state)
