@@ -11,7 +11,7 @@ import { runGen } from './commands/gen.js';
 import { runRegistry } from './commands/registry.js';
 import { runWatch } from './commands/watch.js';
 
-const CLI_VERSION = '0.6.0-alpha.0';
+const CLI_VERSION = '1.0.0';
 
 const program = new Command();
 program.name('bdui').description('BDUI command-line interface').version(CLI_VERSION);

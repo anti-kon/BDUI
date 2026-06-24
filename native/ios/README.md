@@ -1,25 +1,42 @@
-# iOS SwiftUI BDUI Renderer
+# iOS SwiftUI BDUI-рендерер
 
-`OpsControl/` contains a complete SwiftUI source set for the Russian Campus
-native application. The resource folder also contains `retail.contract.json` for
-the Luma Market mobile demo. The renderer interprets the BDUI tree and executes
-the same core SAL subset as the Android renderer.
+`Campus.xcodeproj` содержит iOS-приложение для SwiftUI-рендерера BDUI.
 
-The renderer consumes the shared `modifiers` object for portable spacing,
-padding, text roles and button variants. Web-only CSS escape hatches are ignored.
+Приложение по умолчанию загружает
+`OpsControl/Resources/campus.contract.json` и отображает мобильный личный
+кабинет студента Campus. Контракт `retail.contract.json` и PNG-ресурсы Luma
+Market также включены в bundle приложения. Для запуска Luma Market необходимо
+заменить имя контракта в `OpsControl/OpsControlApp.swift` с `campus.contract`
+на `retail.contract`.
 
-To run Campus in Xcode:
+## Запуск
 
-1. Create a new iOS App project named `Campus`.
-2. Add the Swift files from `native/ios/OpsControl/`.
-3. Add `Resources/campus.contract.json` to the app target.
-4. Run on iOS 16 or newer.
+Для запуска необходимо открыть `native/ios/Campus.xcodeproj` в Xcode 15 или
+новее, выбрать общую схему `Campus`, указать симулятор iOS 16+ или
+подключенное устройство и выполнить запуск схемы.
 
-To create a Luma Market target, add `Resources/retail.contract.json` and the
-`Resources/products/*.png` assets to the app target, then load the retail
-contract instead of `campus.contract.json`.
+Сборка из командной строки на macOS:
 
-Refresh the shared contracts after editing the TSX apps:
+```bash
+xcodebuild -project native/ios/Campus.xcodeproj -scheme Campus -destination 'platform=iOS Simulator,name=iPhone 15' build
+```
+
+## Покрытие рендерера
+
+SwiftUI-рендерер поддерживает набор компонентов и действий, используемый
+контрактами Campus и Luma Market:
+
+- компоненты: `Column`, `Row`, `Text`, `Button`, `Input`, `Checkbox`,
+  `Select`, `Image`, `If`, `Divider`;
+- области состояния: `flow`, `session`, `local`;
+- выражения: интерполяция, булевы условия, арифметика, `len`, `max`, `min`,
+  `abs`, `round`, `floor`, `ceil`, `not`, `isEmpty`, `coalesce`;
+- действия: навигация, изменение состояния, счетчики, переключатели, `batch`,
+  `when`, уведомления и переходы между шагами flow;
+- переносимые модификаторы: расстояния, отступы, размер/начертание/цвет
+  текста, фон, граница, радиус, перенос строк и локальные PNG-изображения.
+
+После изменения TSX-приложений необходимо обновить общие контракты и ресурсы:
 
 ```powershell
 npm.cmd run build:contracts

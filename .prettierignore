@@ -18,6 +18,14 @@ native/**/*.contract.json
 native/android/.gradle/
 native/android/.idea/
 native/android/**/build/
+native/ios/**/*.xcodeproj/
+native/ios/**/*.xcworkspace/
+native/ios/**/*.xcuserdata/
 .tmp-screens/
+outputs/
+reports/source_extracts/
+reports/tools/
+reports/*_render*/
+reports/vkr_render*/
 
 

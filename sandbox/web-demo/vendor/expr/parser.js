@@ -1,33 +1,8 @@
 import { ExpressionError } from '@bdui/core';
+import { enforceLimits } from './enforce-limits.js';
 import { tokenize } from './lexer.js';
-import { DEFAULT_LIMITS, FORBIDDEN_IDENTIFIERS } from './limits.js';
-function peek(state) {
-    const t = state.tokens[state.index];
-    if (!t)
-        throw new ExpressionError('Unexpected end of input');
-    return t;
-}
-function consume(state) {
-    const t = peek(state);
-    state.index++;
-    return t;
-}
-function match(state, type, value) {
-    const t = peek(state);
-    if (t.type !== type)
-        return false;
-    if (value !== undefined && t.value !== value)
-        return false;
-    return true;
-}
-function expect(state, type, value) {
-    if (!match(state, type, value)) {
-        const t = peek(state);
-        const want = value ?? type;
-        throw new ExpressionError(`Expected "${want}" but got "${t.value}" (${t.type}) at position ${t.position}`, { position: t.position, expected: want, actualType: t.type, actualValue: t.value });
-    }
-    return consume(state);
-}
+import { DEFAULT_LIMITS } from './limits.js';
+import { assertIdentAllowed, consume, expect, match, peek, } from './token-cursor.js';
 export function parse(source, limits = DEFAULT_LIMITS) {
     if (typeof source !== 'string') {
         throw new ExpressionError('Source must be a string');
@@ -46,54 +21,6 @@ export function parse(source, limits = DEFAULT_LIMITS) {
     }
     enforceLimits(node, limits);
     return node;
-}
-function enforceLimits(root, limits) {
-    let count = 0;
-    const walk = (node, depth) => {
-        count++;
-        if (count > limits.maxNodes) {
-            throw new ExpressionError(`Expression node count exceeds limit (${limits.maxNodes})`);
-        }
-        if (depth > limits.maxDepth) {
-            throw new ExpressionError(`Expression depth exceeds limit (${limits.maxDepth})`);
-        }
-        switch (node.kind) {
-            case 'Array':
-                for (const el of node.elements)
-                    walk(el, depth + 1);
-                return;
-            case 'Object':
-                for (const { value } of node.entries)
-                    walk(value, depth + 1);
-                return;
-            case 'Member':
-            case 'Index':
-                walk(node.object, depth + 1);
-                if (node.kind === 'Index')
-                    walk(node.index, depth + 1);
-                return;
-            case 'Unary':
-                walk(node.argument, depth + 1);
-                return;
-            case 'Binary':
-            case 'Logical':
-                walk(node.left, depth + 1);
-                walk(node.right, depth + 1);
-                return;
-            case 'Ternary':
-                walk(node.test, depth + 1);
-                walk(node.consequent, depth + 1);
-                walk(node.alternate, depth + 1);
-                return;
-            case 'Call':
-                for (const a of node.args)
-                    walk(a, depth + 1);
-                return;
-            default:
-                return;
-        }
-    };
-    walk(root, 0);
 }
 function parseTernary(state) {
     const test = parseNullishCoalescing(state);
@@ -291,10 +218,5 @@ function parseObjectEntry(state) {
     expect(state, 'punct', ':');
     const value = parseTernary(state);
     return { key, value };
-}
-function assertIdentAllowed(name, position) {
-    if (FORBIDDEN_IDENTIFIERS.includes(name)) {
-        throw new ExpressionError(`Identifier "${name}" is not allowed`, { position, name });
-    }
 }
 //# sourceMappingURL=parser.js.map

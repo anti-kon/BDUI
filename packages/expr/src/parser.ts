@@ -7,44 +7,17 @@ import type {
   ObjectEntry,
   UnaryOperator,
 } from './ast.js';
-import { type Token, tokenize } from './lexer.js';
-import { DEFAULT_LIMITS, type ExprLimits, FORBIDDEN_IDENTIFIERS } from './limits.js';
-
-interface ParserState {
-  readonly tokens: readonly Token[];
-  index: number;
-}
-
-function peek(state: ParserState): Token {
-  const t = state.tokens[state.index];
-  if (!t) throw new ExpressionError('Unexpected end of input');
-  return t;
-}
-
-function consume(state: ParserState): Token {
-  const t = peek(state);
-  state.index++;
-  return t;
-}
-
-function match(state: ParserState, type: Token['type'], value?: string): boolean {
-  const t = peek(state);
-  if (t.type !== type) return false;
-  if (value !== undefined && t.value !== value) return false;
-  return true;
-}
-
-function expect(state: ParserState, type: Token['type'], value?: string): Token {
-  if (!match(state, type, value)) {
-    const t = peek(state);
-    const want = value ?? type;
-    throw new ExpressionError(
-      `Expected "${want}" but got "${t.value}" (${t.type}) at position ${t.position}`,
-      { position: t.position, expected: want, actualType: t.type, actualValue: t.value },
-    );
-  }
-  return consume(state);
-}
+import { enforceLimits } from './enforce-limits.js';
+import { tokenize } from './lexer.js';
+import { DEFAULT_LIMITS, type ExprLimits } from './limits.js';
+import {
+  assertIdentAllowed,
+  consume,
+  expect,
+  match,
+  type ParserState,
+  peek,
+} from './token-cursor.js';
 
 export function parse(source: string, limits: ExprLimits = DEFAULT_LIMITS): ExprNode {
   if (typeof source !== 'string') {
@@ -69,51 +42,6 @@ export function parse(source: string, limits: ExprLimits = DEFAULT_LIMITS): Expr
 
   enforceLimits(node, limits);
   return node;
-}
-
-function enforceLimits(root: ExprNode, limits: ExprLimits): void {
-  let count = 0;
-  const walk = (node: ExprNode, depth: number): void => {
-    count++;
-    if (count > limits.maxNodes) {
-      throw new ExpressionError(`Expression node count exceeds limit (${limits.maxNodes})`);
-    }
-    if (depth > limits.maxDepth) {
-      throw new ExpressionError(`Expression depth exceeds limit (${limits.maxDepth})`);
-    }
-    switch (node.kind) {
-      case 'Array':
-        for (const el of node.elements) walk(el, depth + 1);
-        return;
-      case 'Object':
-        for (const { value } of node.entries) walk(value, depth + 1);
-        return;
-      case 'Member':
-      case 'Index':
-        walk(node.object, depth + 1);
-        if (node.kind === 'Index') walk(node.index, depth + 1);
-        return;
-      case 'Unary':
-        walk(node.argument, depth + 1);
-        return;
-      case 'Binary':
-      case 'Logical':
-        walk(node.left, depth + 1);
-        walk(node.right, depth + 1);
-        return;
-      case 'Ternary':
-        walk(node.test, depth + 1);
-        walk(node.consequent, depth + 1);
-        walk(node.alternate, depth + 1);
-        return;
-      case 'Call':
-        for (const a of node.args) walk(a, depth + 1);
-        return;
-      default:
-        return;
-    }
-  };
-  walk(root, 0);
 }
 
 function parseTernary(state: ParserState): ExprNode {
@@ -328,10 +256,4 @@ function parseObjectEntry(state: ParserState): ObjectEntry {
   expect(state, 'punct', ':');
   const value = parseTernary(state);
   return { key, value };
-}
-
-function assertIdentAllowed(name: string, position: number): void {
-  if ((FORBIDDEN_IDENTIFIERS as readonly string[]).includes(name)) {
-    throw new ExpressionError(`Identifier "${name}" is not allowed`, { position, name });
-  }
 }

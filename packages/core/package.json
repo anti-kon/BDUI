@@ -1,6 +1,6 @@
 {
   "name": "@bdui/core",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI core: pure domain types (nodes, actions, contracts, flows, navigation, state, expressions). No IO.",
   "type": "module",
   "exports": {

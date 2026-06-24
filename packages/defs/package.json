@@ -1,6 +1,6 @@
 {
   "name": "@bdui/defs",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI component manifests and web renderers",
   "type": "module",
   "exports": {
@@ -45,7 +45,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "0.6.0-alpha.0"
+    "@bdui/core": "1.0.0"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

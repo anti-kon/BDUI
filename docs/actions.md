@@ -1,73 +1,73 @@
 # Server Action Language (SAL)
 
-SAL is the discriminated union used for every event handler in a BDUI
-contract. Authors use short forms in TSX; the DSL normalises them into
-the canonical `Action` shape at build time.
+SAL - discriminated union, используемый для всех обработчиков событий в
+BDUI-контракте. Автор приложения может использовать короткие формы в TSX; DSL
+нормализует их в канонический вид `Action` во время сборки.
 
-## Cheat sheet
+## Краткий справочник
 
-| Canonical type               | Short form example                             | Meaning                                   |
-| ---------------------------- | ---------------------------------------------- | ----------------------------------------- |
-| `navigate`                   | `{ navigate: ['home', { mode: 'replace' }] }`  | Go to another route                       |
-| `back`                       | `{ back: true }`                               | Pop the navigation stack                  |
-| `popToRoot`                  | `{ popToRoot: true }`                          | Reset to `initialRoute`                   |
-| `replace`                    | `{ replace: 'home' }`                          | Replace current route                     |
-| `set`                        | `{ set: ['flow.name', 'Ann'] }`                | Set state at a target                     |
-| `reset`                      | `{ reset: ['flow.x', 0] }`                     | Reset state to a value                    |
-| `update.inc`                 | `{ inc: 'flow.x' }` / `{ inc: ['flow.x', 2] }` | Increment a number                        |
-| `update.dec`                 | `{ dec: 'flow.x' }`                            | Decrement a number                        |
-| `update.toggle`              | `{ toggle: 'flow.isOpen' }`                    | Toggle a boolean                          |
-| `update.append`              | `{ append: ['flow.items', 'a'] }`              | Push to an array                          |
-| `update.merge`               | `{ merge: ['flow.obj', { a: 1 }] }`            | Shallow-merge an object                   |
-| `fetch`                      | `{ fetch: { sourceId, saveTo } }`              | Run a named data source                   |
-| `call`                       | `{ call: { url, method, saveTo, rollback } }`  | Typed HTTP call with optional rollback    |
-| `toast`                      | `{ toast: ['Saved'] }`                         | Show a toast notification                 |
-| `modal.open` / `modal.close` | `{ modalOpen: 'confirm' }`                     | Control modals by id                      |
-| `sync`                       | `{ sync: {} }`                                 | Force re-render / state sync              |
-| `validate`                   | `{ validate: ['schema/x', 'flow.data'] }`      | Validate state against a named schema     |
-| `prefetchScreens`            | `{ prefetch: ['checkout'] }`                   | Warm up routes                            |
-| `batch`                      | `{ batch: [...], atomic: true }`               | Run nested actions, optionally atomically |
-| `when`                       | `{ when: { if, then, else } }`                 | Conditional branch                        |
-| `flow.start`                 | `{ flowStart: { routeId, params? } }`          | Begin a flow                              |
-| `flow.advance`               | `{ flowAdvance: true }`                        | Evaluate transitions and move forward     |
-| `flow.goTo`                  | `{ flowGoTo: { stepId } }`                     | Jump to a flow step                       |
-| `flow.resume`                | `{ flowResume: true }`                         | Re-enter an interrupted flow              |
-| `flow.abort`                 | `{ flowAbort: { reason? } }`                   | Cancel a flow                             |
-| `flow.complete`              | `{ flowComplete: true }`                       | Mark flow complete                        |
+| Канонический тип           | Пример короткой формы                          | Значение                                 |
+| -------------------------- | ---------------------------------------------- | ---------------------------------------- |
+| `navigate`                 | `{ navigate: ['home', { mode: 'replace' }] }`  | Переход на другой маршрут                |
+| `back`                     | `{ back: true }`                               | Возврат по navigation stack              |
+| `popToRoot`                | `{ popToRoot: true }`                          | Сброс к `initialRoute`                   |
+| `replace`                  | `{ replace: 'home' }`                          | Замена текущего маршрута                 |
+| `set`                      | `{ set: ['flow.name', 'Ann'] }`                | Запись значения в состояние              |
+| `reset`                    | `{ reset: ['flow.x', 0] }`                     | Сброс состояния к значению               |
+| `update.inc`               | `{ inc: 'flow.x' }` / `{ inc: ['flow.x', 2] }` | Увеличение числа                         |
+| `update.dec`               | `{ dec: 'flow.x' }`                            | Уменьшение числа                         |
+| `update.toggle`            | `{ toggle: 'flow.isOpen' }`                    | Переключение boolean                     |
+| `update.append`            | `{ append: ['flow.items', 'a'] }`              | Добавление элемента в массив             |
+| `update.merge`             | `{ merge: ['flow.obj', { a: 1 }] }`            | Поверхностное слияние объекта            |
+| `fetch`                    | `{ fetch: { sourceId, saveTo } }`              | Выполнение именованного источника данных |
+| `call`                     | `{ call: { url, method, saveTo, rollback } }`  | Типизированный HTTP-вызов с rollback     |
+| `toast`                    | `{ toast: ['Saved'] }`                         | Отображение уведомления                  |
+| `modal.open`/`modal.close` | `{ modalOpen: 'confirm' }`                     | Управление модальными окнами по id       |
+| `sync`                     | `{ sync: {} }`                                 | Принудительная синхронизация состояния   |
+| `validate`                 | `{ validate: ['schema/x', 'flow.data'] }`      | Проверка состояния по именованной схеме  |
+| `prefetchScreens`          | `{ prefetch: ['checkout'] }`                   | Предзагрузка маршрутов                   |
+| `batch`                    | `{ batch: [...], atomic: true }`               | Выполнение вложенных действий            |
+| `when`                     | `{ when: { if, then, else } }`                 | Условное ветвление                       |
+| `flow.start`               | `{ flowStart: { routeId, params? } }`          | Начало flow                              |
+| `flow.advance`             | `{ flowAdvance: true }`                        | Проверка переходов и переход вперед      |
+| `flow.goTo`                | `{ flowGoTo: { stepId } }`                     | Переход к шагу flow                      |
+| `flow.resume`              | `{ flowResume: true }`                         | Возврат в прерванный flow                |
+| `flow.abort`               | `{ flowAbort: { reason? } }`                   | Отмена flow                              |
+| `flow.complete`            | `{ flowComplete: true }`                       | Завершение flow                          |
 
-## Targets
+## Цели состояния
 
-Any action that touches state accepts one of three target forms:
+Любое действие, изменяющее состояние, принимает одну из трех форм цели:
 
-- A string path — `"flow.counter"`, `"session.user.name"`.
-- A `{ scope, path }` object.
-- A `StateVar` handle produced by `Flow()`, `Session()`, or `Local()`.
+- строковый путь: `"flow.counter"`, `"session.user.name"`;
+- объект `{ scope, path }`;
+- дескриптор `StateVar`, созданный через `Flow()`, `Session()` или `Local()`.
 
-## Atomic batches and rollbacks
+## Atomic batch и rollback
 
-- `batch` with `atomic: true` rolls back _already-applied state writes_ if any
-  nested action throws.
-- `call` with a `rollback` field compensates previously applied state changes
-  if the HTTP request fails.
+- `batch` с `atomic: true` откатывает уже примененные записи в состояние, если
+  одно из вложенных действий завершилось ошибкой.
+- `call` с полем `rollback` компенсирует ранее примененные изменения состояния
+  при ошибке HTTP-запроса.
 
-## Data sources and validation
+## Источники данных и валидация
 
-- `fetch` resolves `contract.dataSources[]` entries by `sourceId`.
-- `static` data sources are resolved locally; `rest` and `graphql` sources use
-  the runtime `HttpClient`.
-- `fetch.saveTo` stores the result in a state target. When omitted, the runtime
-  writes to `local.dataSources.<sourceId>`.
-- `validate` calls a validator registered in `createRuntime({ validators })` or
-  `createActionRunner({ validators })`. Results are stored in
-  `local.__validation[schemaRef]`; failed validation also emits an `error`
-  event.
+- `fetch` находит запись в `contract.dataSources[]` по `sourceId`.
+- Источники типа `static` вычисляются локально; `rest` и `graphql` используют
+  runtime `HttpClient`.
+- `fetch.saveTo` сохраняет результат в цель состояния. Если поле не указано,
+  runtime записывает результат в `local.dataSources.<sourceId>`.
+- `validate` вызывает валидатор, зарегистрированный в
+  `createRuntime({ validators })` или `createActionRunner({ validators })`.
+  Результаты сохраняются в `local.__validation[schemaRef]`; неуспешная проверка
+  также публикует событие `error`.
 
-## Guard expressions in `when`
+## Guard-выражения в `when`
 
-The `if` field accepts either a raw string or an `ExprRef`. The string form is
-automatically wrapped by the DSL.
+Поле `if` принимает строку или `ExprRef`. Строковая форма автоматически
+оборачивается DSL.
 
-## Safety
+## Безопасность
 
-Actions never contain executable JavaScript. Expressions run through
-`@bdui/expr` with a strict allow-list of identifiers and built-ins.
+Действия не содержат исполняемый JavaScript. Выражения выполняются через
+`@bdui/expr` со строгим allow-list идентификаторов и встроенных функций.

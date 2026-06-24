@@ -1,104 +1,11 @@
-import type { Action, ExprRef, HttpMethod, Scope, StateTarget, ToastLevel } from '@bdui/core';
-import { exprRef, isExprRef } from '@bdui/core';
+import type { Action, ExprRef, HttpMethod, ToastLevel } from '@bdui/core';
 
-import { isStateVar, type StateVar } from './state.js';
+import type { ShortAction } from './short-action.js';
+import { ensureExprRef, parseTarget, type Target } from './target.js';
 
-/** Targetable reference — string like "flow.counter", StateVar, or explicit. */
-export type Target = string | StateTarget | StateVar<unknown>;
-
-const SCOPES: readonly Scope[] = ['local', 'session', 'flow'];
-
-function isScope(v: unknown): v is Scope {
-  return typeof v === 'string' && (SCOPES as readonly string[]).includes(v);
-}
-
-function ensurePath(path: unknown): string {
-  if (typeof path !== 'string' || !path.trim()) {
-    throw new Error('Target path must be a non-empty string');
-  }
-  return path;
-}
-
-export function parseTarget(target: Target): StateTarget {
-  if (typeof target === 'string') {
-    const idx = target.indexOf('.');
-    if (idx < 0) throw new Error(`Invalid string target: "${target}"`);
-    const scope = target.slice(0, idx);
-    const path = target.slice(idx + 1);
-    if (!isScope(scope)) throw new Error(`Unsupported scope: "${scope}"`);
-    return { scope, path: ensurePath(path) };
-  }
-  if (isStateVar(target)) {
-    return { scope: target.scope, path: target.path };
-  }
-  const scope = (target as { scope?: unknown }).scope;
-  const path = (target as { path?: unknown }).path;
-  if (!isScope(scope)) throw new Error(`Unsupported scope: "${String(scope)}"`);
-  return { scope, path: ensurePath(path) };
-}
-
-function ensureExprRef(value: unknown): ExprRef {
-  if (isExprRef(value)) return value;
-  if (typeof value === 'string') return exprRef(value);
-  throw new Error('Expected an expression reference or a string expression');
-}
-
-export type ShortAction =
-  | Action
-  | { readonly set: readonly [Target, unknown] }
-  | { readonly reset: readonly [Target, unknown?] }
-  | { readonly inc: Target | readonly [Target, number | ExprRef] }
-  | { readonly dec: Target | readonly [Target, number | ExprRef] }
-  | { readonly toggle: Target }
-  | { readonly append: readonly [Target, unknown] }
-  | { readonly merge: readonly [Target, Record<string, unknown> | ExprRef] }
-  | {
-      readonly navigate: readonly [
-        string,
-        { mode?: 'push' | 'replace' | 'popToRoot'; params?: Record<string, unknown> }?,
-      ];
-    }
-  | { readonly back: true }
-  | { readonly replace: string }
-  | { readonly popToRoot: true }
-  | {
-      readonly fetch:
-        | string
-        | { sourceId: string; params?: Record<string, unknown>; saveTo?: Target };
-    }
-  | {
-      readonly call: {
-        url: string | ExprRef;
-        method: HttpMethod;
-        headers?: Record<string, string>;
-        body?: unknown;
-        saveTo?: Target;
-        timeoutMs?: number;
-        rollback?: ShortAction;
-      };
-    }
-  | {
-      readonly toast: readonly [string, { level?: ToastLevel; durationMs?: number }?];
-    }
-  | { readonly sync: Record<string, unknown> | undefined }
-  | { readonly validate: readonly [string, Target] }
-  | { readonly modalOpen: string }
-  | { readonly modalClose: string }
-  | { readonly prefetch: readonly string[] }
-  | { readonly batch: readonly ShortAction[]; readonly atomic?: boolean }
-  | {
-      readonly when: {
-        if: ExprRef | string;
-        then: readonly ShortAction[];
-        else?: readonly ShortAction[];
-      };
-    }
-  | { readonly flowStart: { routeId: string; params?: Record<string, unknown> } }
-  | { readonly flowAdvance: { routeId?: string } | true }
-  | { readonly flowGoTo: { stepId: string; routeId?: string } }
-  | { readonly flowResume: { routeId?: string } | true }
-  | { readonly flowAbort: { reason?: string; routeId?: string } | true }
-  | { readonly flowComplete: { routeId?: string } | true };
+export type { ShortAction } from './short-action.js';
+export type { Target } from './target.js';
+export { parseTarget } from './target.js';
 
 function isFullAction(a: unknown): a is Action {
   return Boolean(a) && typeof a === 'object' && typeof (a as { type?: unknown }).type === 'string';

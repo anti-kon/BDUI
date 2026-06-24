@@ -1,127 +1,188 @@
-# BDUI — Backend-Driven UI Stack
+# BDUI
 
-BDUI is an open cross-platform SDUI framework. Authors write UI in TSX using
-a strongly-typed DSL, the transpiler turns it into a canonical JSON contract,
-and renderer plugins display the same contract on web, Android Compose, and
-iOS SwiftUI prototypes.
+BDUI - монорепозиторий платформы Backend-Driven UI. Интерфейсы описываются в
+TSX DSL, компилируются в канонические JSON-контракты и отображаются в вебе,
+Android-приложении на Jetpack Compose и iOS-приложении на SwiftUI.
 
-## Packages
+Текущая версия: `1.0.0`.
 
-| Package              | Description                                                      |
-| -------------------- | ---------------------------------------------------------------- |
-| `@bdui/core`         | Types, `Action` union, `Expression<T>`, navigation primitives    |
-| `@bdui/expr`         | Safe expression language (lexer/parser/interpreter)              |
-| `@bdui/defs`         | Component manifests + renderer extension points                  |
-| `@bdui/schema`       | Strict JSON Schema generator + Ajv 2020 validator                |
-| `@bdui/dsl`          | TSX DSL, builders, SAL shorthands, state handles                 |
-| `@bdui/transpiler`   | TSX → canonical JSON contract (esbuild + source maps)            |
-| `@bdui/runtime`      | Platform-agnostic runtime (state/nav/actions/flow/loader)        |
-| `@bdui/renderer-web` | DOM renderer plugin                                              |
-| `@bdui/registry`     | Fastify-based contract registry (pluggable storage, SemVer/auth) |
-| `@bdui/sdk`          | `RegistryClient` + Fastify/Express adapters                      |
-| `@bdui/cli`          | `bdui build`, `watch`, `gen`, `validate`, `registry`             |
+## Состав
 
-## Quickstart
+| Пакет                | Назначение                                                                 |
+| -------------------- | -------------------------------------------------------------------------- |
+| `@bdui/core`         | Доменные типы контракта, компонентов, действий, состояния и навигации      |
+| `@bdui/expr`         | Безопасный язык выражений без `eval` и `new Function`                      |
+| `@bdui/defs`         | Описания компонентов и правила проверки дерева интерфейса                  |
+| `@bdui/dsl`          | TSX DSL, построители, ссылки на состояние и сокращенная запись действий    |
+| `@bdui/schema`       | Генерация JSON Schema и проверка контрактов во время выполнения            |
+| `@bdui/transpiler`   | Компиляция TSX в канонический JSON-контракт                                |
+| `@bdui/runtime`      | Платформенно-независимый runtime для состояния, навигации, flow и действий |
+| `@bdui/renderer-web` | DOM-рендерер поверх `@bdui/runtime`                                        |
+| `@bdui/registry`     | HTTP-реестр контрактов с SemVer, ETag, авторизацией и адаптерами хранения  |
+| `@bdui/sdk`          | Клиент реестра и адаптеры для Fastify/Express                              |
+| `@bdui/cli`          | CLI-команды `build`, `watch`, `gen`, `validate` и `registry`               |
 
-Requirements: Node.js 24 or newer and npm 11.
+## Приложения
+
+- `examples/task-manager` - Taskly, самостоятельное веб-приложение с Fastify
+  API, кешированием контрактов, источниками данных и многошаговым сценарием.
+- `examples/ops-control` - Campus, мобильный личный кабинет студента,
+  отображаемый в web preview, Android и iOS из общего контракта.
+- `examples/retail-commerce` - Luma Market, сценарий интернет-магазина с
+  каталогом, корзиной, промокодом и оформлением заказа.
+- `sandbox/web-demo` - статический веб-просмотр контрактов Campus и Luma
+  Market.
+
+## Общие контракты
+
+Campus и Luma Market используют единый канонический формат BDUI-контракта для
+веба и мобильных платформ. Источником является TSX-описание приложения, из
+которого формируется JSON-контракт; затем этот контракт копируется в ресурсы
+web preview, Android и iOS.
+
+Campus:
+
+- исходник: `examples/ops-control/src/app.tsx`;
+- основной контракт: `examples/ops-control/contract.json`;
+- web preview: `sandbox/web-demo/contract.json`;
+- Android: `native/android/app/src/main/assets/campus.contract.json`;
+- iOS: `native/ios/OpsControl/Resources/campus.contract.json`.
+
+Luma Market:
+
+- исходник: `examples/retail-commerce/src/app.tsx`;
+- основной контракт: `examples/retail-commerce/contract.json`;
+- web preview: `sandbox/web-demo/retail.contract.json`;
+- Android: `native/android/app/src/main/assets/retail.contract.json`;
+- iOS: `native/ios/OpsControl/Resources/retail.contract.json`.
+
+Taskly является отдельным веб-приложением. Оно использует тот же формат
+BDUI-контракта и общие runtime-пакеты, но его контракт формируется из
+`examples/task-manager/src/app.tsx` и обслуживается Fastify-приложением Taskly.
+
+Обновление контрактов и платформенных копий выполняется командой:
+
+```bash
+npm run build:contracts
+```
+
+## Требования
+
+- Node.js `24+`
+- npm `11+`
+- Android Studio, JDK 17 и Android SDK 35 для Android-приложения
+- macOS, Xcode 15+ и симулятор или устройство с iOS 16+ для iOS-приложения
+
+## Установка
 
 ```bash
 npm install
 npm run build:full
-
-# Author a contract in TSX, compile it, and render it:
-npm run bdui -- build sandbox/counter/src/entry.tsx -o sandbox/counter/contract.json --mode dev
-
-# Or run the registry server:
-npm run bdui -- registry --port 4000 --data-dir ./data
+npm run build:contracts
 ```
 
-See [`docs/getting-started.md`](docs/getting-started.md) for a walkthrough,
-[`docs/architecture.md`](docs/architecture.md) for the big picture, and
-[`CONTRIBUTING.md`](CONTRIBUTING.md) for local development tips.
+Сборка и проверка контракта из TSX:
 
-## Highlights
+```bash
+npm run bdui -- build examples/ops-control/src/app.tsx -o examples/ops-control/contract.json --mode prod
+npm run bdui -- validate examples/ops-control/contract.json
+```
 
-- **No `new Function` ever** — expressions run through a strict mini-language.
-- **Deterministic JSON** — stable keys/ordering and stripped `undefined`s make
-  contract hashes reproducible.
-- **One source of truth** — the JSON Schema is generated from TypeScript, so
-  adding an action or component is a single-file change.
-- **Pluggable storage and HTTP** — both client-side and registry-side.
-- **RendererPlugin** — renderers only need to care about drawing; state,
-  navigation, flows, toasts and HTTP live in `@bdui/runtime`.
+Сборка и запуск Taskly:
 
-## Sandbox examples
+```bash
+npm --prefix examples/task-manager run build
+npm --prefix examples/task-manager start
+```
 
-- `sandbox/counter` — minimal counter with `inc`/`dec`/`set`.
-- `sandbox/state` — the four scopes (`flow`, `session`, `local`) in action.
-- `sandbox/flow` — multi-step flow with `FlowRoute`/`Step` and guards.
-- `sandbox/full-app` — full showcase: `Input`, `Select`, `Checkbox`, `Divider`,
-  `If`, `when`, `batch` + `atomic`, `call` with `rollback`.
+Taskly доступен по адресу `http://localhost:4000`.
 
-## Standalone applications
+## Веб-просмотр
 
-- [`examples/task-manager`](examples/task-manager) — Taskly, a full standalone
-  BDUI app (TSX contract + Fastify server + browser bundle) that installs the
-  `@bdui/*` packages as regular dependencies. Use it as a template for your
-  own projects.
-- [`examples/ops-control`](examples/ops-control) - Кампус, a Russian
-  production-like student mobile cabinet rendered by the native Android Compose
-  and iOS SwiftUI prototypes in [`native/`](native).
-- [`examples/retail-commerce`](examples/retail-commerce) - Luma Market, a
-  commercial e-commerce flow with storefront, catalog filters, cart totals and
-  checkout steps. The web demo can switch to this contract with `?demo=retail`.
+```bash
+npm run prepare:web-demo
+npx serve sandbox/web-demo
+```
 
-## Native renderers
+Campus загружается по умолчанию. Luma Market доступен через параметр
+`?demo=retail` при запуске preview через локальный статический сервер.
 
-- [`native/android`](native/android) - Jetpack Compose renderer prototype.
-- [`native/ios`](native/ios) - SwiftUI renderer prototype.
-- [`docs/native-renderers.md`](docs/native-renderers.md) - shared contract and
-  renderer notes.
+## Android
 
-## Scripts
+Проект Android расположен в каталоге `native/android`. Для запуска в Android
+Studio необходимо открыть этот каталог как Android-проект и выбрать вариант
+сборки приложения:
 
-- `npm test` — 130+ vitest cases across the workspace.
-- `npm run typecheck` — strict TypeScript check.
-- `npm run lint` / `npm run format` — ESLint and Prettier.
-- `npm run gen` — regenerate schema and DSL glue.
-- `npm run build` — full workspace build.
-- `npm run build:contracts` — rebuild tracked sandbox/example/native contract
-  artifacts from TSX sources.
-- `npm run test:coverage` — enforce the repository coverage gate.
-- `npm run audit:prod` — run production dependency audits for the workspace and
-  standalone Taskly example.
-- `npm run audit:dev` — run the broader development-tooling audit separately.
-- `npm run verify:generated-contracts` — ensure tracked contracts match their
-  TSX sources.
-- `npm run verify:examples` — typecheck and bundle the standalone Taskly app.
-- `npm run verify:contracts` — validate example/native contracts and ensure
-  shared copies stay synchronized.
-- `npm run verify:browser` — run a real-browser smoke of `sandbox/web-demo`
-  with Playwright (`BDUI_BROWSER=chromium|firefox|webkit`).
-- `npm run verify:browsers` — run the same smoke sequentially in Chromium,
-  Firefox and WebKit.
-- `npm run verify:taskly-browser` — build and launch the standalone Taskly
-  app, then verify contract caching, modal actions, data sources, static
-  catalog loading and the three-step request flow in Chromium.
-- `npm run verify:native` — ensure the native prototypes cover every component
-  and action used by the Campus contract.
-- `npm run verify:web-demo` — rebuild vendored web-demo packages and fail if
-  tracked demo artifacts are stale.
-- `npm run verify:all` — run the full local acceptance suite.
-- `npm run capture:defense-screenshots` — rebuild demo artifacts and capture
-  Taskly/web-demo screenshots into `docs/assets/` for the diploma.
-- `npm run changeset` — author a changeset that CI will publish.
+- `campusDebug` - приложение Campus;
+- `retailDebug` - приложение Luma Market.
 
-## Release process
+Сборка из командной строки:
 
-Each package publishable change lives in a changeset under `.changeset/`.
-`.github/workflows/ci.yml` runs lint, typecheck, build, tests, browser smoke
-checks and native prototype checks on every push or pull request to the main
-branches. The release job is intentionally manual (`workflow_dispatch`) and
-uses [changesets/action](https://github.com/changesets/action) to open a
-versioning PR or publish when `NPM_TOKEN` is available.
+```powershell
+gradle -p native/android assembleCampusDebug
+gradle -p native/android assembleRetailDebug
+```
 
-## License
+## iOS
 
-Released under the Apache 2.0 license (see `LICENSE`).
+Проект iOS расположен по пути:
+
+```text
+native/ios/Campus.xcodeproj
+```
+
+Для запуска в Xcode необходимо открыть проект, выбрать общую схему `Campus`,
+указать симулятор iOS или подключенное устройство и выполнить запуск схемы.
+
+Сборка из командной строки на macOS:
+
+```bash
+xcodebuild -project native/ios/Campus.xcodeproj -scheme Campus -destination 'platform=iOS Simulator,name=iPhone 15' build
+```
+
+iOS-приложение по умолчанию загружает `campus.contract.json`. Контракт и
+PNG-ресурсы Luma Market также входят в bundle приложения. Для запуска Luma
+Market необходимо указать `retail.contract` в
+`native/ios/OpsControl/OpsControlApp.swift`.
+
+## Проверка
+
+Базовые локальные проверки:
+
+```bash
+npm run verify:generated-contracts
+npm run verify:examples
+npm run typecheck
+npm run lint
+npm test
+npm run verify:contracts
+npm run verify:native
+```
+
+Полная локальная проверка:
+
+```bash
+npm run verify:all
+```
+
+Browser smoke-тесты требуют установленного runtime браузеров Playwright:
+
+```bash
+npm run verify:browser
+npm run verify:taskly-browser
+```
+
+## Документация
+
+- `docs/architecture.md` - архитектура платформы
+- `docs/spec.md` - формат JSON-контракта
+- `docs/actions.md` - язык действий SAL
+- `docs/expr.md` - безопасные выражения
+- `docs/registry-api.md` - HTTP API реестра контрактов
+- `docs/native-renderers.md` - Android- и iOS-рендереры
+- `CONTRIBUTING.md` - процесс внесения изменений
+- `CHANGELOG.md` - журнал изменений
+
+## Лицензия
+
+Apache-2.0. См. `LICENSE`.

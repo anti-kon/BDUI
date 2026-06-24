@@ -23,8 +23,12 @@ final class BDUIRuntime: ObservableObject {
         session = initial?["session"] as? [String: Any] ?? [:]
     }
 
-    static func loadBundledContract() -> BDUIRuntime {
-        guard let url = Bundle.main.url(forResource: "campus.contract", withExtension: "json"),
+    static func loadBundledContract(named resourceName: String = "campus.contract") -> BDUIRuntime {
+        let nsName = resourceName as NSString
+        let ext = nsName.pathExtension.isEmpty ? "json" : nsName.pathExtension
+        let base = nsName.pathExtension.isEmpty ? resourceName : nsName.deletingPathExtension
+
+        guard let url = Bundle.main.url(forResource: base, withExtension: ext),
               let data = try? Data(contentsOf: url),
               let object = try? JSONSerialization.jsonObject(with: data),
               let contract = object as? [String: Any] else {
@@ -193,124 +197,5 @@ final class BDUIRuntime: ObservableObject {
         let navigation = contract["navigation"] as? [String: Any]
         let routes = navigation?["routes"] as? [[String: Any]] ?? []
         return routes.first { $0["id"] as? String == id }
-    }
-}
-
-enum BDUIExpression {
-    static func interpolate(_ value: Any?, runtime: BDUIRuntime) -> String {
-        let resolved = resolve(value, runtime: runtime)
-        guard let raw = resolved as? String else { return resolved.map { "\($0)" } ?? "" }
-        return replaceExpressions(in: raw) { code in
-            evalScalar(code, runtime: runtime).map { "\($0)" } ?? ""
-        }
-    }
-
-    static func resolve(_ value: Any?, runtime: BDUIRuntime) -> Any? {
-        if let dict = value as? [String: Any], dict["__bduiExpr"] as? Bool == true {
-            return evalScalar(dict["code"] as? String ?? "", runtime: runtime)
-        }
-        if let string = value as? String, let code = wholeExpressionCode(string) {
-            return evalScalar(code, runtime: runtime)
-        }
-        if value is NSNull { return nil }
-        return value
-    }
-
-    static func evalBool(_ value: Any?, runtime: BDUIRuntime) -> Bool {
-        guard let code = expressionCode(value) else { return false }
-        return code.components(separatedBy: "||").contains { part in
-            part.components(separatedBy: "&&").allSatisfy { evalComparison($0, runtime: runtime) }
-        }
-    }
-
-    static func asDouble(_ value: Any?, defaultValue: Double = 0) -> Double {
-        if let number = value as? NSNumber { return number.doubleValue }
-        if let double = value as? Double { return double }
-        if let int = value as? Int { return Double(int) }
-        if let string = value as? String, let double = Double(string) { return double }
-        return defaultValue
-    }
-
-    private static func evalComparison(_ raw: String, runtime: BDUIRuntime) -> Bool {
-        let code = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        for op in ["==", "!=", ">=", "<=", ">", "<"] {
-            if let range = code.range(of: op) {
-                let left = evalScalar(String(code[..<range.lowerBound]), runtime: runtime)
-                let right = evalScalar(String(code[range.upperBound...]), runtime: runtime)
-                return compare(left, right, op)
-            }
-        }
-        return truthy(evalScalar(code, runtime: runtime))
-    }
-
-    private static func evalScalar(_ raw: String, runtime: BDUIRuntime) -> Any? {
-        let code = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        if code == "true" { return true }
-        if code == "false" { return false }
-        if code == "null" { return nil }
-        if let number = Double(code) { return number }
-        if (code.hasPrefix("'") && code.hasSuffix("'")) || (code.hasPrefix("\"") && code.hasSuffix("\"")) {
-            return String(code.dropFirst().dropLast())
-        }
-        if code.hasPrefix("len("), code.hasSuffix(")") {
-            let inner = String(code.dropFirst(4).dropLast())
-            return "\(evalScalar(inner, runtime: runtime) ?? "")".count
-        }
-        let pieces = code.split(separator: ".", maxSplits: 1).map(String.init)
-        if pieces.count == 2 {
-            return runtime.read(scope: pieces[0], path: pieces[1])
-        }
-        return code
-    }
-
-    private static func compare(_ left: Any?, _ right: Any?, _ op: String) -> Bool {
-        let lnum = asDouble(left, defaultValue: .nan)
-        let rnum = asDouble(right, defaultValue: .nan)
-        let numeric = !lnum.isNaN && !rnum.isNaN
-        switch op {
-        case "==": return "\(left ?? "")" == "\(right ?? "")" || (numeric && lnum == rnum)
-        case "!=": return "\(left ?? "")" != "\(right ?? "")" && (!numeric || lnum != rnum)
-        case ">": return numeric && lnum > rnum
-        case "<": return numeric && lnum < rnum
-        case ">=": return numeric && lnum >= rnum
-        case "<=": return numeric && lnum <= rnum
-        default: return false
-        }
-    }
-
-    private static func truthy(_ value: Any?) -> Bool {
-        if value == nil || value is NSNull { return false }
-        if let bool = value as? Bool { return bool }
-        if let number = value as? NSNumber { return number.doubleValue != 0 }
-        if let string = value as? String { return !string.isEmpty }
-        return true
-    }
-
-    private static func expressionCode(_ value: Any?) -> String? {
-        if let dict = value as? [String: Any], dict["__bduiExpr"] as? Bool == true {
-            return dict["code"] as? String
-        }
-        if let string = value as? String {
-            return wholeExpressionCode(string) ?? string
-        }
-        return nil
-    }
-
-    private static func wholeExpressionCode(_ string: String) -> String? {
-        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.hasPrefix("{{"), trimmed.hasSuffix("}}") else { return nil }
-        return String(trimmed.dropFirst(2).dropLast(2)).trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private static func replaceExpressions(in string: String, transform: (String) -> String) -> String {
-        var output = ""
-        var rest = string[...]
-        while let start = rest.range(of: "{{"), let end = rest[start.upperBound...].range(of: "}}") {
-            output += String(rest[..<start.lowerBound])
-            output += transform(String(rest[start.upperBound..<end.lowerBound]))
-            rest = rest[end.upperBound...]
-        }
-        output += String(rest)
-        return output
     }
 }

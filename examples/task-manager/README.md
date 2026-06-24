@@ -1,24 +1,24 @@
-# Операционный пульт
+# Taskly
 
-Операционный пульт — production-style пример BDUI-приложения. Он намеренно
-оставлен отдельным npm-проектом, чтобы показать, как внешний продукт подключает
-публичные пакеты `@bdui/*`.
+Taskly is a production-style BDUI web application. It is kept as a standalone
+npm project to show how an external product consumes the public `@bdui/*`
+packages.
 
-## Что Демонстрирует
+## Capabilities
 
-| Область            | Возможность BDUI                                                      |
-| ------------------ | --------------------------------------------------------------------- |
-| Доставка контракта | `createContractLoader`, stale-while-revalidate кэш и ETag             |
-| Загрузка данных    | Contract-level `dataSources`, REST-источники и статические источники  |
-| Серверные эффекты  | `call` actions, rollback handlers и атомарный `batch`                 |
-| Состояние          | `Flow` state для экранных данных и `Session` state с persistence      |
-| Формы              | Трёхшаговый `FlowRoute` с `flow.goTo`, `flow.complete`, `flow.abort`  |
-| Валидация          | Подключаемые renderer validators, вызываемые через `validate`         |
-| Оверлеи            | Modal descriptor внутри контракта, открытие и закрытие через SAL      |
-| UX-обратная связь  | `toast`, guarded `when` branches, статусные строки и route navigation |
-| Кастомизация       | Platform modifiers и web escape hatch через `modifiers.style`         |
+| Area              | BDUI capability                                                        |
+| ----------------- | ---------------------------------------------------------------------- |
+| Contract delivery | `createContractLoader`, stale-while-revalidate cache and ETag          |
+| Data loading      | Contract-level `dataSources`, REST sources and static sources          |
+| Server effects    | `call` actions, rollback handlers and atomic `batch` execution         |
+| State             | `Flow` screen state and persistent `Session` state                     |
+| Forms             | Three-step `FlowRoute` with `flow.goTo`, `flow.complete`, `flow.abort` |
+| Validation        | Renderer validators invoked through `validate`                         |
+| Overlays          | Contract-defined modal descriptor opened and closed through SAL        |
+| Feedback          | `toast`, guarded `when` branches, status rows and route navigation     |
+| Customization     | Platform modifiers and a web escape hatch through `modifiers.style`    |
 
-## Структура
+## Structure
 
 ```text
 examples/task-manager/
@@ -31,24 +31,24 @@ examples/task-manager/
     contract.json      # generated
     client.js          # generated
   src/
-    app.tsx            # исходник BDUI-контракта
+    app.tsx            # BDUI contract source
     client.ts          # bootstrap, cache loader, mount
     meta.json
   server/
-    index.ts           # Fastify static server + mock API
+    index.ts           # Fastify static server and mock API
 ```
 
-## Требования
+## Requirements
 
-- Node.js 24 или новее.
-- Собранный BDUI workspace из корня репозитория:
+- Node.js 24 or newer.
+- Built BDUI workspace from the repository root:
 
 ```bash
 npm install
 npm run build:full
 ```
 
-## Сборка
+## Build
 
 ```bash
 cd examples/task-manager
@@ -56,7 +56,7 @@ npm install
 npm run build
 ```
 
-Команда собирает контракт, клиентский bundle и сервер:
+The build command compiles the contract, client bundle and server:
 
 ```bash
 npm run build:contract
@@ -64,48 +64,50 @@ npm run build:client
 npm run build:server
 ```
 
-## Запуск
+## Run
 
 ```bash
 npm start
 ```
 
-Откройте `http://localhost:4000`.
+Open `http://localhost:4000`.
 
-Рекомендуемый сценарий проверки:
+Suggested smoke scenario:
 
-1. Откройте дашборд и нажмите **Обновить данные**.
-2. Нажмите **Загрузить каталог**.
-3. Сохраните задачу, чтобы проверить `call`, `batch` и обновление state.
-4. Откройте **Новая заявка**, поменяйте значения в select и пройдите три шага формы.
-5. Откройте **Настройки**, измените профиль, тариф и тему, затем сохраните.
-6. Обновите страницу и проверьте статус источника контракта: `network`, `cache` или `stale`.
+1. Open the dashboard and select **Refresh data**.
+2. Select **Load catalog**.
+3. Save a task to verify `call`, `batch` and state updates.
+4. Open **New request**, change select values and complete the three-step form.
+5. Open **Settings**, update profile, plan and theme values, then save.
+6. Reload the page and check the contract source status: `network`, `cache` or
+   `stale`.
 
 ## API Endpoints
 
-| Endpoint                      | Назначение                   |
-| ----------------------------- | ---------------------------- |
-| `GET /healthz`                | Проверка живости сервера     |
-| `GET /api/workspace?plan=...` | Срез рабочего пространства   |
-| `POST /api/profile`           | Синхронизация профиля        |
-| `POST /api/task`              | Сохранение задачи            |
-| `POST /api/settings`          | Синхронизация настроек       |
-| `POST /api/request`           | Отправка многошаговой заявки |
+| Endpoint                      | Purpose                       |
+| ----------------------------- | ----------------------------- |
+| `GET /healthz`                | Server health check           |
+| `GET /api/workspace?plan=...` | Workspace snapshot            |
+| `POST /api/profile`           | Profile synchronization       |
+| `POST /api/task`              | Task persistence              |
+| `POST /api/settings`          | Settings synchronization      |
+| `POST /api/request`           | Multi-step request submission |
 
-## Скрипты
+## Scripts
 
-| Скрипт                   | Описание                                       |
-| ------------------------ | ---------------------------------------------- |
-| `npm run build`          | Собрать контракт, клиентский bundle и сервер   |
-| `npm start`              | Запустить предварительно собранный сервер      |
-| `npm run dev`            | Собрать и запустить одной командой             |
-| `npm run typecheck`      | Проверить типы клиента, DSL и сервера          |
-| `npm run build:contract` | Собрать `src/app.tsx` в `public/contract.json` |
-| `npm run build:client`   | Собрать `src/client.ts` в `public/client.js`   |
-| `npm run build:server`   | Скомпилировать Fastify-сервер                  |
+| Script                   | Description                                     |
+| ------------------------ | ----------------------------------------------- |
+| `npm run build`          | Build the contract, client bundle and server    |
+| `npm start`              | Start the previously built server               |
+| `npm run dev`            | Build and start in one command                  |
+| `npm run typecheck`      | Type-check the client, DSL and server           |
+| `npm run build:contract` | Compile `src/app.tsx` to `public/contract.json` |
+| `npm run build:client`   | Compile `src/client.ts` to `public/client.js`   |
+| `npm run build:server`   | Compile the Fastify server                      |
 
-## После Публикации Пакетов
+## Package Versions
 
-Когда BDUI-пакеты будут опубликованы, замените локальные `file:` dependencies в
-`package.json` на semver-диапазоны вроде `^0.6.0`. Исходный код приложения менять
-не потребуется.
+The example currently uses local workspace package links. When the BDUI packages
+are consumed from a registry, replace the local `file:` dependencies in
+`package.json` with semver ranges such as `^1.0.0`. The application source does
+not require changes.

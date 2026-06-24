@@ -1,70 +1,69 @@
-# Native Renderer Prototypes
+# Нативные рендереры
 
-The mobile extension adds native BDUI renderer prototypes for Android and iOS.
-Both platforms render one shared contract from `examples/ops-control`.
+BDUI включает рендереры для Android и iOS. Обе платформы отображают те же
+канонические контрактные артефакты, которые используются веб-просмотром.
 
-## Shared Application
+## Общее приложение
 
-`examples/ops-control/src/app.tsx` defines Campus, a Russian production-like
-student mobile cabinet implemented entirely as a BDUI contract. The contract
-contains:
+`examples/ops-control/src/app.tsx` описывает Campus - мобильный личный кабинет
+студента, реализованный как BDUI-контракт. Контракт содержит:
 
-- `home`, `schedule`, `assignments`, `deanery`, `pass` and `settings` screen
-  routes;
-- a `deanery-request` flow route with three request-submission steps;
-- `flow` state for timetable, assignment checklist, deanery request and pass
-  data;
-- `session` state for student profile, campus and notification settings;
-- validation, conditional hints, route navigation, local state updates and
-  toast feedback.
+- маршруты экранов `home`, `schedule`, `assignments`, `deanery`, `pass` и
+  `settings`;
+- flow-маршрут `deanery-request` с тремя шагами отправки заявления;
+- состояние `flow` для расписания, списка заданий, заявления в деканат и
+  пропуска;
+- состояние `session` для профиля студента, кампуса и настроек уведомлений;
+- валидацию, условные подсказки, навигацию, обновление локального состояния и
+  уведомления.
 
-Build and validate the canonical JSON:
+Сборка и проверка канонического JSON:
 
 ```bash
 npm run bdui -- build examples/ops-control/src/app.tsx -o examples/ops-control/contract.json --mode prod
 npm run bdui -- validate examples/ops-control/contract.json
 ```
 
-## Android Renderer
+## Android-рендерер
 
-`native/android` is a Jetpack Compose application. It loads
-`app/src/main/assets/campus.contract.json`, keeps runtime state in Compose state
-maps, resolves `{{scope.path}}` expressions and renders the core component set:
+`native/android` содержит Jetpack Compose приложение. Оно загружает
+`app/src/main/assets/campus.contract.json`, хранит runtime-состояние в Compose
+state map, вычисляет выражения `{{scope.path}}` и отображает основной набор
+компонентов:
 
 - `Column`, `Row`, `Text`, `Button`;
-- `Image` with a local fallback mark renderer;
+- `Image` с локальным fallback-отображением;
 - `Input`, `Checkbox`, `Select`;
 - `If`, `Divider`.
 
-The Android action runner supports the practical SAL subset required by Campus:
-navigation, state mutation, counters, toggles, batches, conditions, toasts and
-flow step transitions.
+Исполнитель действий Android поддерживает практический набор SAL, необходимый
+для Campus: навигацию, изменение состояния, счетчики, переключатели, batch,
+условия, уведомления и переходы между шагами flow.
 
-## iOS Renderer
+## iOS-рендерер
 
-`native/ios/OpsControl` is a SwiftUI source set with the same renderer contract.
-It loads `Resources/campus.contract.json`, stores state in an `ObservableObject`
-runtime and renders the same component/action subset using native SwiftUI views:
-`VStack`, `HStack`, `Text`, `TextField`, `Toggle`, `Picker` and `Button`.
+`native/ios/Campus.xcodeproj` содержит SwiftUI-приложение. Оно загружает
+`OpsControl/Resources/campus.contract.json`, хранит состояние в
+`ObservableObject` runtime и отображает тот же набор компонентов и действий
+через нативные SwiftUI-представления: `VStack`, строки с переносом, `Text`,
+`TextField`, `Toggle`, `Picker`, `Button` и локальные PNG-изображения.
 
-## Modifiers
+## Модификаторы
 
-Both native prototypes consume the same `modifiers` object as web contracts, but
-they intentionally implement a portable subset: spacing, padding, text roles
-and button variants. Web-only CSS escape hatches such as nested
-`modifiers.style` are ignored by native renderers. This keeps the contract shape
-shared while avoiding a false promise that arbitrary CSS can be rendered
-identically on Compose and SwiftUI.
+Оба нативных рендерера используют тот же объект `modifiers`, что и веб-контракт,
+но реализуют переносимое подмножество: расстояния, отступы, текстовые параметры,
+цвета, границы, скругленные контейнеры и варианты кнопок. Веб-специфичные
+CSS-вставки, например вложенный `modifiers.style`, нативными рендерами
+игнорируются. Это сохраняет общую форму контракта и не создает ожидания, что
+произвольный CSS будет одинаково отображаться в Compose и SwiftUI.
 
-## Contract Refresh
+## Обновление контрактов
 
-After changing the TSX contract, regenerate and copy the JSON:
+После изменения TSX-описаний необходимо заново сформировать JSON-артефакты и
+скопировать их в платформенные каталоги:
 
 ```powershell
-npm.cmd run bdui -- build examples/ops-control/src/app.tsx -o examples/ops-control/contract.json --mode prod
-Copy-Item examples/ops-control/contract.json native/android/app/src/main/assets/campus.contract.json -Force
-Copy-Item examples/ops-control/contract.json native/ios/OpsControl/Resources/campus.contract.json -Force
-Copy-Item examples/ops-control/contract.json sandbox/web-demo/contract.json -Force
+npm.cmd run build:contracts
 ```
 
-This keeps Android, iOS and the web preview tied to the same source of truth.
+Команда сохраняет общий источник данных для Android, iOS и web preview.

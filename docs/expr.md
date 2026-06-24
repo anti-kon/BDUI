@@ -1,21 +1,21 @@
-# Expression Language (`@bdui/expr`)
+# Язык выражений (`@bdui/expr`)
 
-BDUI expressions are written inside `{{ … }}` and look intentionally similar
-to JavaScript. Under the hood they are tokenised, parsed into an AST, and
-interpreted with a strict allow-list — no `new Function`, no `eval`.
+Выражения BDUI записываются внутри `{{ ... }}` и намеренно похожи на
+JavaScript. Внутри они токенизируются, разбираются в AST и интерпретируются со
+строгим allow-list: без `new Function` и без `eval`.
 
-## Evaluation modes
+## Режимы вычисления
 
-- `evalExpression(source, state)` — compile + run once.
-- `compile(source)` — produces a memoised `{ evaluate(state) }` handle.
-- `evalExprRef(ref, state)` — evaluates an `ExprRef` directly.
-- `interpolate(template, state)` — resolves every `{{ … }}` inside a string.
-- `resolveValue(value, state)` — returns the string unchanged if it has no
-  placeholders, otherwise delegates to `interpolate`.
+- `evalExpression(source, state)` - компиляция и однократное выполнение.
+- `compile(source)` - создание мемоизированного `{ evaluate(state) }`.
+- `evalExprRef(ref, state)` - прямое вычисление `ExprRef`.
+- `interpolate(template, state)` - разрешение всех `{{ ... }}` внутри строки.
+- `resolveValue(value, state)` - возврат строки без изменений, если в ней нет
+  placeholders; иначе делегирование в `interpolate`.
 
-## Grammar (informal)
+## Грамматика
 
-```
+```text
 Expression   = Ternary
 Ternary      = Or ('?' Expression ':' Expression)?
 Or           = And ('||' And)*
@@ -29,43 +29,47 @@ Postfix      = Primary ( MemberAccess | Index | Call )*
 Primary      = Number | String | Boolean | Null | Identifier | '(' Expression ')'
 ```
 
-## Allowed identifiers
+## Разрешенные идентификаторы
 
-- Top-level: `flow`, `session`, `local`, `params` — standard state scopes.
-- Inside those scopes: any user-defined path (`flow.counter`, `session.user.id`).
-- Forbidden: `globalThis`, `window`, `process`, `eval`, `Function`, …
-  (see `FORBIDDEN_IDENTIFIERS`).
+- Верхний уровень: `flow`, `session`, `local`, `params` - стандартные области
+  состояния.
+- Внутри этих областей: любой пользовательский путь, например `flow.counter`
+  или `session.user.id`.
+- Запрещены: `globalThis`, `window`, `process`, `eval`, `Function` и другие
+  идентификаторы из `FORBIDDEN_IDENTIFIERS`.
 
-## Built-in functions
+## Встроенные функции
 
-Pure, side-effect-free functions defined in `packages/expr/src/builtins.ts`:
+Чистые функции без побочных эффектов определены в
+`packages/expr/src/builtins.ts`:
 
-| Function                           | Example                              | Notes                          |
-| ---------------------------------- | ------------------------------------ | ------------------------------ |
-| `len(x)`                           | `len("abc") == 3`                    | length of string/array/object  |
-| `has(obj, key)`                    | `has(flow.data, "id")`               | own-property check             |
-| `includes(h, n)`                   | `includes(flow.tags, "new")`         | array or substring             |
-| `min`, `max`                       | `min(flow.a, flow.b, 0)`             | variadic                       |
-| `abs` / `round` / `floor` / `ceil` |                                      | numeric helpers                |
-| `lower`, `upper`, `trim`           |                                      | string helpers                 |
-| `coalesce(...)`                    | `coalesce(flow.x, 0)`                | first non-null argument        |
-| `not(x)`                           | `not(flow.enabled)`                  | logical negation               |
-| `isEmpty(x)`                       | `isEmpty(flow.items)`                | empty string/array/object/null |
-| `concat(...)`                      | `concat(flow.first, " ", flow.last)` | string concatenation           |
+| Функция                            | Пример                               | Назначение                             |
+| ---------------------------------- | ------------------------------------ | -------------------------------------- |
+| `len(x)`                           | `len("abc") == 3`                    | длина строки, массива или объекта      |
+| `has(obj, key)`                    | `has(flow.data, "id")`               | проверка собственного свойства         |
+| `includes(h, n)`                   | `includes(flow.tags, "new")`         | поиск в массиве или подстроке          |
+| `min`, `max`                       | `min(flow.a, flow.b, 0)`             | функции с переменным числом аргументов |
+| `abs` / `round` / `floor` / `ceil` |                                      | числовые helpers                       |
+| `lower`, `upper`, `trim`           |                                      | строковые helpers                      |
+| `coalesce(...)`                    | `coalesce(flow.x, 0)`                | первый non-null аргумент               |
+| `not(x)`                           | `not(flow.enabled)`                  | логическое отрицание                   |
+| `isEmpty(x)`                       | `isEmpty(flow.items)`                | пустая строка, массив, объект или null |
+| `concat(...)`                      | `concat(flow.first, " ", flow.last)` | конкатенация строк                     |
 
-## Limits and safety
+## Лимиты и безопасность
 
-Each compilation is bounded by `DEFAULT_LIMITS`:
+Каждая компиляция ограничена `DEFAULT_LIMITS`:
 
-- Maximum AST depth.
-- Maximum number of nodes.
-- Maximum expression length.
+- максимальная глубина AST;
+- максимальное число узлов;
+- максимальная длина выражения.
 
-Violations throw `ExpressionError` at parse time, preventing pathological
-inputs from causing catastrophic backtracking.
+Нарушения приводят к `ExpressionError` во время разбора, что предотвращает
+патологические входные данные и неконтролируемую нагрузку.
 
-## Errors
+## Ошибки
 
-Anything that fails to parse, references a forbidden identifier, or calls an
-unknown function throws `ExpressionError`. Consumers like `ActionRunner` and
-`resolveFlowStep` catch these to avoid crashing the renderer.
+Ошибка разбора, обращение к запрещенному идентификатору или вызов неизвестной
+функции приводят к `ExpressionError`. Потребители, например `ActionRunner` и
+`resolveFlowStep`, перехватывают эти ошибки, чтобы не завершать работу
+рендерера аварийно.

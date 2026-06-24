@@ -1,31 +1,33 @@
-# Registry HTTP API
+# HTTP API реестра
 
-The `@bdui/registry` package exposes a small Fastify-based HTTP API for
-publishing, resolving, and listing BDUI contracts. The same API is reachable
-through the `@bdui/sdk` `RegistryClient`.
+Пакет `@bdui/registry` предоставляет небольшой Fastify-based HTTP API для
+публикации, разрешения и просмотра BDUI-контрактов. Тот же API доступен через
+`RegistryClient` из `@bdui/sdk`.
 
-## Conventions
+## Соглашения
 
-- All endpoints speak `application/json`.
-- Responses include an `ETag` header for cache-friendly clients.
-- `If-None-Match` is supported; matching requests return `304` with no body.
-- Errors follow the shape `{ "error": { "code", "message", "details? } }`.
-- Supported error codes: `BAD_REQUEST` (400), `UNAUTHORIZED` (401), `NOT_FOUND` (404),
-  `CONFLICT` (409), `VALIDATION_FAILED` (422), `INTERNAL` (500).
-- CORS is disabled by default. Enable it explicitly through
-  `createRegistryServer({ cors: { origin: "https://app.example" } })` or the CLI
-  `--cors-origin` option.
-- Bearer-token authentication can be enabled through
-  `createRegistryServer({ auth: { token } })`, the CLI `--auth-token` option, or
-  `BDUI_REGISTRY_TOKEN`.
+- Все endpoints используют `application/json`.
+- Ответы включают заголовок `ETag` для клиентского кеширования.
+- Поддерживается `If-None-Match`; при совпадении сервер возвращает `304` без
+  тела ответа.
+- Ошибки имеют форму `{ "error": { "code", "message", "details? } }`.
+- Поддерживаемые коды ошибок: `BAD_REQUEST` (400), `UNAUTHORIZED` (401),
+  `NOT_FOUND` (404), `CONFLICT` (409), `VALIDATION_FAILED` (422),
+  `INTERNAL` (500).
+- CORS по умолчанию отключен. Его необходимо включать явно через
+  `createRegistryServer({ cors: { origin: "https://app.example" } })` или CLI
+  опцию `--cors-origin`.
+- Bearer-token authentication включается через
+  `createRegistryServer({ auth: { token } })`, CLI опцию `--auth-token` или
+  переменную окружения `BDUI_REGISTRY_TOKEN`.
 
-## OpenAPI (condensed)
+## OpenAPI
 
 ```yaml
 openapi: 3.0.3
 info:
   title: BDUI Registry
-  version: 0.6.0-alpha.0
+  version: 1.0.0
 servers:
   - url: http://localhost:4000
 
@@ -161,22 +163,23 @@ components:
       required: [meta, navigation]
 ```
 
-## SemVer behaviour
+## Поведение SemVer
 
-- When `version` is omitted, the latest published version is returned.
-- When `compatFrom` is provided, the registry picks the newest version whose
-  major matches `compatFrom.major` and whose SemVer is `>=` `compatFrom`.
-- When no candidate satisfies `compatFrom`, `404` is returned.
+- Если `version` не указан, возвращается последняя опубликованная версия.
+- Если указан `compatFrom`, реестр выбирает самую новую версию с тем же major,
+  что и `compatFrom.major`, и SemVer `>= compatFrom`.
+- Если подходящая версия не найдена, возвращается `404`.
 
-## Storage adapters
+## Адаптеры хранения
 
-- `MemoryStorageAdapter` — keeps contracts in memory; ideal for tests and dev.
-- `FileSystemStorageAdapter` — persists each version to
-  `<rootDir>/<contractId>/<version>.json` with a sidecar `.meta.json`.
-- Custom adapters implement the `StorageAdapter` interface and can be passed
-  into `createRegistryServer({ storage })`.
+- `MemoryStorageAdapter` - хранит контракты в памяти; подходит для тестов и
+  разработки.
+- `FileSystemStorageAdapter` - сохраняет каждую версию в
+  `<rootDir>/<contractId>/<version>.json` и sidecar-файл `.meta.json`.
+- Пользовательские адаптеры реализуют интерфейс `StorageAdapter` и передаются в
+  `createRegistryServer({ storage })`.
 
-## Security configuration
+## Конфигурация безопасности
 
 ```ts
 const { app } = await createRegistryServer({
@@ -187,5 +190,6 @@ const { app } = await createRegistryServer({
 });
 ```
 
-When authentication is enabled, `/v1/health` remains public by default for
-probes. Pass `auth: { token, allowHealth: false }` to protect it as well.
+При включенной авторизации `/v1/health` по умолчанию остается публичным для
+health checks. Для закрытия этого endpoint необходимо передать
+`auth: { token, allowHealth: false }`.

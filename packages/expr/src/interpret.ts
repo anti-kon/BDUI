@@ -2,6 +2,8 @@ import { ExpressionError, type RuntimeStateLike } from '@bdui/core';
 
 import type { ExprNode } from './ast.js';
 import { type BuiltinFn, BUILTINS } from './builtins.js';
+import { applyBinary } from './operators.js';
+import { safeGetProperty } from './property-access.js';
 
 export interface EvalContext {
   readonly flow: Readonly<Record<string, unknown>>;
@@ -110,67 +112,4 @@ export function evaluate(node: ExprNode, ctx: EvalContext): unknown {
   throw new ExpressionError(
     `Unknown AST node "${(node as { kind?: string } | null)?.kind ?? 'unknown'}"`,
   );
-}
-
-const FORBIDDEN_PROPERTIES = new Set(['__proto__', 'prototype', 'constructor']);
-
-function safeGetProperty(obj: unknown, key: string): unknown {
-  if (obj == null) return undefined;
-  if (FORBIDDEN_PROPERTIES.has(key)) {
-    throw new ExpressionError(`Access to property "${key}" is forbidden`);
-  }
-  if (typeof obj === 'string') {
-    if (key === 'length') return obj.length;
-    const idx = Number(key);
-    if (Number.isInteger(idx) && idx >= 0 && idx < obj.length) return obj.charAt(idx);
-    return undefined;
-  }
-  if (Array.isArray(obj)) {
-    if (key === 'length') return obj.length;
-    const idx = Number(key);
-    if (Number.isInteger(idx) && idx >= 0 && idx < obj.length) return obj[idx];
-    return undefined;
-  }
-  if (typeof obj === 'object') {
-    return (obj as Record<string, unknown>)[key];
-  }
-  return undefined;
-}
-
-function applyBinary(op: string, l: unknown, r: unknown): unknown {
-  switch (op) {
-    case '+':
-      if (typeof l === 'string' || typeof r === 'string') return String(l ?? '') + String(r ?? '');
-      return (l as number) + (r as number);
-    case '-':
-      return (l as number) - (r as number);
-    case '*':
-      return (l as number) * (r as number);
-    case '/':
-      return (l as number) / (r as number);
-    case '%':
-      return (l as number) % (r as number);
-    case '==':
-      return looseEquals(l, r);
-    case '!=':
-      return !looseEquals(l, r);
-    case '<':
-      return (l as number) < (r as number);
-    case '<=':
-      return (l as number) <= (r as number);
-    case '>':
-      return (l as number) > (r as number);
-    case '>=':
-      return (l as number) >= (r as number);
-    default:
-      throw new ExpressionError(`Unknown binary operator "${op}"`);
-  }
-}
-
-function looseEquals(l: unknown, r: unknown): boolean {
-  if (l === r) return true;
-  if (l == null && r == null) return true;
-  if (typeof l === 'number' && typeof r === 'string') return l === Number(r);
-  if (typeof l === 'string' && typeof r === 'number') return Number(l) === r;
-  return false;
 }

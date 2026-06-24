@@ -17,6 +17,17 @@ function visit(node, path, ancestors, manifestMap, issues) {
         });
         return;
     }
+    const children = (node.children ?? []);
+    checkNesting(node, path, ancestors, manifest, issues);
+    checkChildrenCount(node, path, manifest, children, issues);
+    checkAllowedChildren(node, path, manifest, children, issues);
+    const nextAncestors = [...ancestors, manifest];
+    children.forEach((child, index) => {
+        visit(child, pathOf(path, index, child.type), nextAncestors, manifestMap, issues);
+    });
+}
+/** Enforce `onlyInside`/`notInside` ancestry rules from the manifest. */
+function checkNesting(node, path, ancestors, manifest, issues) {
     const nesting = manifest.nesting;
     if (nesting?.onlyInside && nesting.onlyInside.length > 0) {
         const parent = ancestors[ancestors.length - 1];
@@ -40,8 +51,10 @@ function visit(node, path, ancestors, manifestMap, issues) {
             }
         }
     }
+}
+/** Validate the child count against the manifest's children model. */
+function checkChildrenCount(node, path, manifest, children, issues) {
     const childrenModel = manifest.children;
-    const children = (node.children ?? []);
     switch (childrenModel.kind) {
         case 'none':
             if (children.length > 0) {
@@ -79,6 +92,10 @@ function visit(node, path, ancestors, manifestMap, issues) {
             // DSL builder.
             break;
     }
+}
+/** Reject direct children whose type is not in the manifest whitelist. */
+function checkAllowedChildren(node, path, manifest, children, issues) {
+    const nesting = manifest.nesting;
     if (nesting?.allowedChildren && nesting.allowedChildren.length > 0) {
         const allowed = new Set(nesting.allowedChildren);
         children.forEach((child, index) => {
@@ -91,10 +108,6 @@ function visit(node, path, ancestors, manifestMap, issues) {
             }
         });
     }
-    const nextAncestors = [...ancestors, manifest];
-    children.forEach((child, index) => {
-        visit(child, pathOf(path, index, child.type), nextAncestors, manifestMap, issues);
-    });
 }
 function inferManifestMap() {
     const map = new Map();

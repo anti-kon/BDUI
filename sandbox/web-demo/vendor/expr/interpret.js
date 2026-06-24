@@ -1,5 +1,7 @@
 import { ExpressionError } from '@bdui/core';
 import { BUILTINS } from './builtins.js';
+import { applyBinary } from './operators.js';
+import { safeGetProperty } from './property-access.js';
 export function buildContext(state, params) {
     return {
         flow: state.flow ?? {},
@@ -84,74 +86,5 @@ export function evaluate(node, ctx) {
         }
     }
     throw new ExpressionError(`Unknown AST node "${node?.kind ?? 'unknown'}"`);
-}
-const FORBIDDEN_PROPERTIES = new Set(['__proto__', 'prototype', 'constructor']);
-function safeGetProperty(obj, key) {
-    if (obj == null)
-        return undefined;
-    if (FORBIDDEN_PROPERTIES.has(key)) {
-        throw new ExpressionError(`Access to property "${key}" is forbidden`);
-    }
-    if (typeof obj === 'string') {
-        if (key === 'length')
-            return obj.length;
-        const idx = Number(key);
-        if (Number.isInteger(idx) && idx >= 0 && idx < obj.length)
-            return obj.charAt(idx);
-        return undefined;
-    }
-    if (Array.isArray(obj)) {
-        if (key === 'length')
-            return obj.length;
-        const idx = Number(key);
-        if (Number.isInteger(idx) && idx >= 0 && idx < obj.length)
-            return obj[idx];
-        return undefined;
-    }
-    if (typeof obj === 'object') {
-        return obj[key];
-    }
-    return undefined;
-}
-function applyBinary(op, l, r) {
-    switch (op) {
-        case '+':
-            if (typeof l === 'string' || typeof r === 'string')
-                return String(l ?? '') + String(r ?? '');
-            return l + r;
-        case '-':
-            return l - r;
-        case '*':
-            return l * r;
-        case '/':
-            return l / r;
-        case '%':
-            return l % r;
-        case '==':
-            return looseEquals(l, r);
-        case '!=':
-            return !looseEquals(l, r);
-        case '<':
-            return l < r;
-        case '<=':
-            return l <= r;
-        case '>':
-            return l > r;
-        case '>=':
-            return l >= r;
-        default:
-            throw new ExpressionError(`Unknown binary operator "${op}"`);
-    }
-}
-function looseEquals(l, r) {
-    if (l === r)
-        return true;
-    if (l == null && r == null)
-        return true;
-    if (typeof l === 'number' && typeof r === 'string')
-        return l === Number(r);
-    if (typeof l === 'string' && typeof r === 'number')
-        return Number(l) === r;
-    return false;
 }
 //# sourceMappingURL=interpret.js.map

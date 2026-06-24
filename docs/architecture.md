@@ -1,11 +1,11 @@
-# BDUI Architecture
+# Архитектура BDUI
 
-The project follows a layered monorepo design. Each layer only depends on
-layers below it; cycles are explicitly forbidden.
+Проект организован как слоистый монорепозиторий. Каждый слой зависит только от
+нижестоящих слоев; циклические зависимости запрещены.
 
 ```text
-+----------------------------+  Web DOM plugin, Android Compose prototype,
-| Renderers                  |  and iOS SwiftUI prototype
++----------------------------+  Web DOM plugin, Android Compose app,
+| Renderers                  |  and iOS SwiftUI app
 +----------------------------+
 | @bdui/runtime              |  State, navigation, flow, actions, HTTP
 +----------------------------+
@@ -19,49 +19,51 @@ layers below it; cycles are explicitly forbidden.
 +----------------------------+
 ```
 
-## Package roles
+## Роли пакетов
 
-- **`@bdui/core`** - pure types and light helpers. No runtime side effects.
-- **`@bdui/expr`** - lexer/parser/interpreter for the `{{...}}` mini-language.
-  Replaces the legacy `new Function(...)` approach.
-- **`@bdui/defs`** - component manifests (`Button`, `Input`, `If`, and others),
-  DOM renderer implementations, renderer extension points, and the tree
-  validator.
-- **`@bdui/schema`** - compile-time JSON Schema generation and Ajv 2020
-  validation.
-- **`@bdui/dsl`** - TSX runtime, builders, action shorthands, and the
-  `StateCollector` pattern for initial state.
-- **`@bdui/transpiler`** - bundles an entry TSX module, validates the resulting
-  object, and emits canonical deterministic JSON.
-- **`@bdui/runtime`** - platform-agnostic runtime: state controller, event bus,
-  navigation, flow resolver, action runner, validators, toast/modal hosts, HTTP
-  client, data-source fetching, and stale-while-revalidate contract loading.
-- **`@bdui/renderer-web`** - DOM plugin on top of `@bdui/runtime`. Owns
-  rendering only; state and action logic stay in the runtime.
-- **`@bdui/registry`** - Fastify-based registry server. Pluggable storage,
-  SemVer-aware resolution, `If-None-Match`/`304`, optional bearer auth,
-  explicit CORS configuration, and uniform JSON errors.
-- **`@bdui/sdk`** - HTTP client plus Fastify/Express adapters for embedding BDUI
-  into server applications.
-- **`@bdui/cli`** - `bdui build`, `watch`, `gen`, `validate`, and `registry`.
+- **`@bdui/core`** - чистые типы и легкие вспомогательные функции без побочных
+  эффектов во время выполнения.
+- **`@bdui/expr`** - lexer/parser/interpreter для мини-языка `{{...}}`.
+  Используется вместо подходов на основе `new Function(...)`.
+- **`@bdui/defs`** - манифесты компонентов (`Button`, `Input`, `If` и другие),
+  DOM-реализации рендеринга, точки расширения рендерера и валидатор дерева.
+- **`@bdui/schema`** - генерация JSON Schema во время сборки и проверка через
+  Ajv 2020.
+- **`@bdui/dsl`** - TSX runtime, билдеры, сокращенные формы действий и паттерн
+  `StateCollector` для начального состояния.
+- **`@bdui/transpiler`** - собирает входной TSX-модуль, проверяет полученный
+  объект и формирует канонический детерминированный JSON.
+- **`@bdui/runtime`** - платформенно-независимый runtime: состояние, event bus,
+  навигация, flow resolver, action runner, валидаторы, toast/modal hosts, HTTP
+  client, data-source fetching и загрузка контрактов stale-while-revalidate.
+- **`@bdui/renderer-web`** - DOM-плагин поверх `@bdui/runtime`. Он отвечает
+  только за отображение; состояние и действия остаются в runtime.
+- **`@bdui/registry`** - Fastify-сервер реестра. Поддерживает подключаемое
+  хранилище, SemVer-резолвинг, `If-None-Match`/`304`, bearer auth, CORS и
+  единый формат JSON-ошибок.
+- **`@bdui/sdk`** - HTTP-клиент и адаптеры Fastify/Express для встраивания BDUI
+  в серверные приложения.
+- **`@bdui/cli`** - команды `bdui build`, `watch`, `gen`, `validate` и
+  `registry`.
 
-## Key invariants
+## Ключевые инварианты
 
-1. **No arbitrary code** in contracts - only typed SAL actions and mini-language
-   expressions.
-2. **Deterministic JSON** - the transpiler sorts object keys and strips
-   `undefined` values so contract hashes are stable.
-3. **Single source of truth** - JSON Schema is generated from TypeScript types.
-   Adding an action or component requires changes in one authoritative place and
-   regenerated artifacts.
-4. **Renderer plugins** - everything except platform drawing lives in
-   `@bdui/runtime`. Native renderers can consume the same contract and implement
-   the required component/action subset with platform widgets.
-5. **Verified artifacts** - generated schema, DSL glue, example contracts,
-   native contract copies, and the vendored web demo are checked by repository
-   scripts and CI.
+1. **В контрактах нет произвольного кода** - используются только типизированные
+   SAL-действия и выражения мини-языка.
+2. **Детерминированный JSON** - транспайлер сортирует ключи объектов и удаляет
+   `undefined`, чтобы хеши контрактов были стабильными.
+3. **Единый источник истины** - JSON Schema генерируется из TypeScript-типов.
+   Добавление действия или компонента выполняется в авторитетном месте и
+   сопровождается пересозданием артефактов.
+4. **Плагинная модель рендереров** - все, кроме платформенного отображения,
+   находится в `@bdui/runtime`. Нативные рендереры используют тот же контракт и
+   реализуют нужное подмножество компонентов и действий через платформенные
+   виджеты.
+5. **Проверяемые артефакты** - сгенерированная схема, DSL-связки, контракты
+   примеров, нативные копии контрактов и vendored web demo проверяются
+   скриптами репозитория и CI.
 
-## Data flow at runtime
+## Поток данных во время выполнения
 
 ```text
 Contract JSON -> ContractLoader -> RuntimeState -> NavigationController
@@ -73,5 +75,6 @@ Contract JSON -> ContractLoader -> RuntimeState -> NavigationController
                                EventBus -> Toast / Modal
 ```
 
-Events flow through the bus. Renderers observe state/navigation changes and
-translate the current route into DOM, Compose, SwiftUI, or another platform UI.
+События проходят через event bus. Рендереры наблюдают за состоянием и навигацией
+и преобразуют текущий маршрут в DOM, Compose, SwiftUI или интерфейс другой
+платформы.

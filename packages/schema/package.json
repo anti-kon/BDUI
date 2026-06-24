@@ -1,6 +1,6 @@
 {
   "name": "@bdui/schema",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI JSON Schema generator and runtime validator",
   "type": "module",
   "exports": {
@@ -18,7 +18,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "0.6.0-alpha.0",
+    "@bdui/core": "1.0.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1"
   },

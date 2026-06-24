@@ -1,95 +1,70 @@
-# BDUI completion status
+# Статус реализации BDUI
 
-Status date: 2026-06-16.
+Дата статуса: 2026-06-23.
 
-This checklist maps the requirements from `НИР Конопелькин АЕ.docx`, chapter 2,
-to repository evidence and verification commands.
+Документ фиксирует состояние реализации платформы, приложений и проверок в
+репозитории.
 
-## Requirement status
+## Реализованные области
 
-| Requirement area                                                    | Status                                            | Evidence                                                                                                                                              |
-| ------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| JSON contract format, metadata, initial state and schema validation | Complete                                          | `@bdui/core`, `@bdui/schema`, generated schema, `npm run verify:contracts`                                                                            |
-| TSX to JSON translation                                             | Complete                                          | `@bdui/dsl`, `@bdui/transpiler`, `bdui build`, sandbox and example contracts                                                                          |
-| Deterministic contract output                                       | Complete                                          | canonical serializer in `@bdui/transpiler`, stable default `generatedAt`, build tests, generated contract checks                                      |
-| Web rendering                                                       | Complete locally and browser CI configured        | `@bdui/runtime`, `@bdui/renderer-web`, renderer integration tests, `sandbox/web-demo`, `npm run verify:browser`, CI Playwright smoke                  |
-| Production showcase application                                     | Complete locally and browser CI configured        | `examples/task-manager`, `npm run verify:examples`, `npm run verify:taskly-browser`, CI Taskly browser smoke                                          |
-| Android/iOS native rendering prototypes                             | Implementation complete, CI acceptance configured | `native/android`, `native/ios`, `docs/native-renderers.md`, `npm run verify:native`, CI Android assemble, CI iOS Swift typecheck                      |
-| Flow scenarios                                                      | Complete                                          | flow types, DSL builders, runtime flow controller, sandbox flow contracts, tests                                                                      |
-| SAL client/server/flow actions                                      | Complete                                          | typed `Action` union, DSL shorthands, runtime action runner, `fetch`, `call`, `validate`, flow actions                                                |
-| Modular layered architecture                                        | Complete                                          | workspace package split, `docs/architecture.md`, `npm run build:full`                                                                                 |
-| Reliability and diagnostics                                         | Complete                                          | schema validation, typed errors, renderer fallback behaviour, registry error bodies                                                                   |
-| Security                                                            | Complete locally                                  | safe expression interpreter, no `eval`/`new Function`, registry bearer auth/CORS controls, `npm run audit:prod`                                       |
-| External APIs and SDK                                               | Complete                                          | `docs/registry-api.md`, `@bdui/sdk`, CLI registry options                                                                                             |
-| Developer interfaces                                                | Complete                                          | TSX DSL, CLI, package READMEs, getting started guide                                                                                                  |
-| Documentation set                                                   | Complete                                          | `README.md`, `docs/spec.md`, `docs/actions.md`, `docs/expr.md`, `docs/registry-api.md`, `docs/native-renderers.md`, `CONTRIBUTING.md`, `CHANGELOG.md` |
-| Open-source maintenance process                                     | Complete                                          | Apache 2.0 license, changeset config, changelog, contribution guide, release CI                                                                       |
-| Automated local verification                                        | Complete                                          | `npm run verify:all`, plus `npm run verify:taskly-browser` for full Taskly runtime smoke                                                              |
+| Область                                                | Статус                                   | Подтверждение                                                                                                                      |
+| ------------------------------------------------------ | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Формат JSON-контракта, метаданные, начальное состояние | Реализовано                              | `@bdui/core`, `@bdui/schema`, сгенерированная схема, `npm run verify:contracts`                                                    |
+| Компиляция TSX в JSON                                  | Реализовано                              | `@bdui/dsl`, `@bdui/transpiler`, `bdui build`, sandbox- и example-контракты                                                        |
+| Детерминированный вывод контрактов                     | Реализовано                              | канонический сериализатор в `@bdui/transpiler`, стабильный `generatedAt`, тесты сборки, проверки сгенерированных контрактов        |
+| Веб-рендеринг                                          | Реализовано локально, настроены CI smoke | `@bdui/runtime`, `@bdui/renderer-web`, интеграционные тесты рендерера, `sandbox/web-demo`, `npm run verify:browser`                |
+| Производственное демонстрационное приложение Taskly    | Реализовано локально, настроены CI smoke | `examples/task-manager`, `npm run verify:examples`, `npm run verify:taskly-browser`                                                |
+| Android- и iOS-рендереры                               | Реализовано                              | `native/android`, `native/ios/Campus.xcodeproj`, `docs/native-renderers.md`, `npm run verify:native`, Android Studio, Xcode        |
+| Flow-сценарии                                          | Реализовано                              | типы flow, DSL-билдеры, runtime flow controller, sandbox flow-контракты, тесты                                                     |
+| SAL-действия для клиента, сервера и flow               | Реализовано                              | типизированный union `Action`, DSL-сокращения, runtime action runner, `fetch`, `call`, `validate`, flow-действия                   |
+| Модульная архитектура                                  | Реализовано                              | разделение workspace-пакетов, `docs/architecture.md`, `npm run build:full`                                                         |
+| Надежность и диагностика                               | Реализовано                              | проверка схемы, типизированные ошибки, fallback-поведение рендерера, унифицированные ошибки реестра                                |
+| Безопасность                                           | Реализовано локально                     | безопасный интерпретатор выражений, отсутствие `eval`/`new Function`, bearer auth и CORS в реестре, `npm run audit:prod`           |
+| Внешние API и SDK                                      | Реализовано                              | `docs/registry-api.md`, `@bdui/sdk`, CLI-параметры реестра                                                                         |
+| Интерфейсы разработчика                                | Реализовано                              | TSX DSL, CLI, README пакетов, getting started guide                                                                                |
+| Набор документации                                     | Реализовано                              | `README.md`, `docs/spec.md`, `docs/actions.md`, `docs/expr.md`, `docs/registry-api.md`, `docs/native-renderers.md`, `CHANGELOG.md` |
+| Процесс сопровождения open-source проекта              | Реализовано                              | лицензия Apache 2.0, changeset config, changelog, contribution guide, release CI                                                   |
+| Автоматизированная локальная проверка                  | Реализовано                              | `npm run verify:all`, отдельный браузерный smoke Taskly через `npm run verify:taskly-browser`                                      |
 
-## Local acceptance command
+## Локальная проверка
+
+Основная команда комплексной проверки:
 
 ```bash
 npm run verify:all
 ```
 
-This command covers generation/build, type checking, linting, formatting, unit
-and integration tests, coverage thresholds, contract synchronization, native
-contract coverage and production dependency audit.
+Она покрывает генерацию и сборку, проверку типов, lint, форматирование, unit- и
+интеграционные тесты, пороги покрытия, синхронизацию контрактов, покрытие
+нативных контрактов и audit production-зависимостей.
 
-The standalone production-style Taskly acceptance smoke is:
+Отдельная проверка Taskly в браузере:
 
 ```bash
 npm run verify:taskly-browser
 ```
 
-It starts the compiled Fastify app on a free local port and verifies contract
-cache state, modal open/close, REST data source refresh, static catalog loading
-and the three-step request flow through a real Chromium page.
+Команда запускает собранное Fastify-приложение на свободном локальном порту и
+проверяет состояние кеша контрактов, открытие и закрытие модального окна,
+обновление REST-источника данных, загрузку статического каталога и прохождение
+трехшагового flow через Chromium.
 
-Diploma screenshots and the defense scenario are prepared with:
+## Проверки среды выполнения
 
-```bash
-npm run capture:defense-screenshots
-```
+Некоторые проверки требуют внешней среды, недоступной в текущем Windows
+workspace. Для них указаны команды или действия, которые выполняются в
+подходящей среде.
 
-The command writes reproducible images to `docs/assets/`. The speaking plan is
-tracked in `docs/defense-demo.md`.
+| Проверка                                    | Статус в репозитории                                                                   | Команда или действие                                                                                                        |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Android build и запуск на устройстве        | Проект Android и варианты сборки присутствуют; локальная сборка зависит от Android SDK | `gradle -p native/android :app:assembleDebug`, запуск в Android Studio или на устройстве                                    |
+| iOS build и запуск на симуляторе/устройстве | Xcode-проект присутствует; локальная сборка требует macOS и Xcode                      | `xcodebuild -project native/ios/Campus.xcodeproj -scheme Campus -destination 'platform=iOS Simulator,name=iPhone 15' build` |
+| Cross-browser smoke                         | Chromium проверен локально; полный набор браузеров выполняется в среде с Playwright    | `npm run verify:browsers`                                                                                                   |
 
-The current diploma DOCX deliverable is:
+## Политика audit
 
-```text
-reports/vkr-part-2-bdui-konopelkin-2026.docx
-```
-
-It is generated from `docs/vkr-part-2.md` by
-`scripts/build-diploma-docx.py`, then updated through Microsoft Word automation
-so the table of contents and page fields are materialized. The latest local
-structural check confirmed 80 pages in Word, 4 embedded figures, 34 listing
-captions, 19 sources, 3 appendices, populated table-of-contents entries with
-page numbers, and no `ХХ`/page-count placeholder text.
-
-## External acceptance gates
-
-These gates require tools that are not fully available in the current Windows
-sandbox. They are now represented as CI jobs, and the local status below records
-what was actually executed in this workspace.
-
-| Gate                                           | Status                                                                                    | Command or action                                                                                                          |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Android native build and emulator/device smoke | CI Android assemble job configured; local Gradle/Android SDK unavailable                  | CI runs `gradle -p native/android :app:assembleDebug`; device/emulator smoke remains a hardware/runtime acceptance         |
-| iOS native build and simulator/device smoke    | CI iOS Swift typecheck job configured; local Xcode unavailable                            | CI runs `xcrun swiftc -typecheck` for iOS simulator; full Xcode app launch remains a macOS simulator/device acceptance     |
-| Cross-browser visual smoke                     | Chromium passed locally; Firefox launch is blocked by this Windows sandbox graphics stack | CI installs Playwright browsers and runs `npm run verify:browsers`                                                         |
-| DOCX visual render QA                          | Structurally verified locally; PNG/PDF render unavailable in this Windows environment     | LibreOffice `soffice` is missing; Word COM updates fields and counts pages, but Word PDF export hangs even on a smoke DOCX |
-
-Until CI is run on GitHub and mobile device/simulator smoke is performed,
-repository-local implementation is complete while hardware/runtime acceptance
-remains environment-bound.
-
-## Dependency audit policy
-
-`npm run verify:all` uses `npm run audit:prod`, because the release toolchain
-currently pulls a known moderate `js-yaml` advisory through `@changesets/cli`.
-That dependency is development-only and is not bundled into BDUI runtime
-packages or the Taskly production application. The broader `npm run audit:dev`
-command is intentionally available for maintainers and should be revisited when
-Changesets/Manypkg publishes a compatible fix.
+`npm run verify:all` использует `npm run audit:prod`, так как release-toolchain
+подтягивает известное dev-only предупреждение через `@changesets/cli`. Эта
+зависимость не попадает в runtime-пакеты BDUI и production-приложение Taskly.
+Команда `npm run audit:dev` оставлена для сопровождающих и должна быть
+пересмотрена после совместимого исправления в Changesets/Manypkg.

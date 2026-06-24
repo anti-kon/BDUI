@@ -1,12 +1,12 @@
 import {
+  bind,
   Button,
   Checkbox,
   Column,
   Contract,
-  Divider,
+  E,
   FlowRoute,
   If,
-  Image,
   Input,
   Navigation,
   Route,
@@ -15,218 +15,54 @@ import {
   Step,
   Text,
   ThemeConfig as Theme,
+  use,
 } from '@bdui/dsl';
-import { bind, E, Flow, Session, use } from '@bdui/dsl';
 
+import {
+  AppShell,
+  AssignmentsSummary,
+  ErrorLine,
+  QrBlock,
+  RequestSummary,
+  ScheduleSummary,
+  StatusLine,
+  StudentCard,
+  TodaySchedule,
+  TomorrowSchedule,
+  WeekSchedule,
+} from './components.js';
 import meta from './meta.json';
+import {
+  appMode,
+  assignmentNotes,
+  assignmentProgress,
+  assignmentUploaded,
+  attendancePercent,
+  campusName,
+  deadlineCount,
+  dormitoryNeed,
+  libraryHoldCount,
+  notificationsEnabled,
+  passActive,
+  passUntil,
+  passZone,
+  qrVersion,
+  qrVisible,
+  requestComment,
+  requestNumber,
+  requestStatus,
+  requestType,
+  requestUrgency,
+  selectedDay,
+  statusMessage,
+  studentGroup,
+  studentName,
+  teacherChecked,
+  validationError,
+} from './state.js';
+import { card, danger, muted, page, sectionTitle, success, title } from './styles.js';
 
-export const studentName = Session<string>('studentName', 'Иван Петров');
-export const studentGroup = Session<string>('studentGroup', 'ПИ-23-01');
-export const campusName = Session<string>(
-  'campusName',
-  'Северо-Волжский технологический университет',
-);
-export const appMode = Session<string>('appMode', 'Учебный день');
-export const notificationsEnabled = Session<boolean>('notificationsEnabled', true);
-
-export const selectedDay = Flow<string>('selectedDay', 'Сегодня');
-export const nextClass = Flow<string>('nextClass', 'Математический анализ');
-export const classRoom = Flow<string>('classRoom', 'Аудитория 204');
-export const nextClassTime = Flow<string>('nextClassTime', '09:00');
-export const attendancePercent = Flow<number>('attendancePercent', 92);
-export const deadlineCount = Flow<number>('deadlineCount', 3);
-export const libraryHoldCount = Flow<number>('libraryHoldCount', 1);
-
-export const assignmentTitle = Flow<string>('assignmentTitle', 'Лабораторная работа N 4');
-export const assignmentCourse = Flow<string>('assignmentCourse', 'Программирование');
-export const assignmentDue = Flow<string>('assignmentDue', 'Пятница, 18:00');
-export const assignmentProgress = Flow<number>('assignmentProgress', 60);
-export const assignmentNotes = Flow<boolean>('assignmentNotes', true);
-export const assignmentUploaded = Flow<boolean>('assignmentUploaded', false);
-export const teacherChecked = Flow<boolean>('teacherChecked', false);
-
-export const requestNumber = Flow<string>('requestNumber', 'DK-2026-018');
-export const requestType = Flow<string>('requestType', 'Справка об обучении');
-export const requestUrgency = Flow<string>('requestUrgency', 'Обычная');
-export const requestComment = Flow<string>(
-  'requestComment',
-  'Нужна справка для участия в олимпиаде',
-);
-export const requestStatus = Flow<string>('requestStatus', 'Черновик');
-export const dormitoryNeed = Flow<boolean>('dormitoryNeed', false);
-
-export const passActive = Flow<boolean>('passActive', true);
-export const passZone = Flow<string>('passZone', 'Учебный корпус и библиотека');
-export const passUntil = Flow<string>('passUntil', 'Сегодня до 21:00');
-export const qrVisible = Flow<boolean>('qrVisible', false);
-export const qrVersion = Flow<number>('qrVersion', 1);
-
-export const statusMessage = Flow<string>('statusMessage', '');
-export const validationError = Flow<string>('validationError', '');
-
-const page = { gap: 16, margin: '0 auto', maxWidth: '960px', padding: 20 };
-const card = {
-  background: '#ffffff',
-  border: '1px solid #e2e8f0',
-  borderRadius: 10,
-  boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)',
-  gap: 10,
-  padding: 16,
-};
-const title = { color: '#0f172a', fontSize: 28, fontWeight: 700 };
-const sectionTitle = { color: '#0f172a', fontSize: 18, fontWeight: 700 };
-const muted = { color: '#64748b' };
-const success = { color: '#047857', fontWeight: 700 };
-const warning = { color: '#b45309', fontWeight: 700 };
-const danger = { color: '#b91c1c', fontWeight: 700 };
-const qrLine = { color: '#0f172a', fontFamily: 'monospace', fontSize: 18, fontWeight: 700 };
-
-const Header = () => (
-  <Row modifiers={{ alignItems: 'center', gap: 12 }}>
-    <Image
-      src="campus-mark.svg"
-      alt="Campus"
-      width={44}
-      height={44}
-      modifiers={{ background: '#e0f2fe', borderRadius: 12 }}
-    />
-    <Column modifiers={{ gap: 6 }}>
-      <Text modifiers={title}>Кампус</Text>
-      <Text modifiers={muted}>Расписание занятий, задания, деканат и цифровой пропуск.</Text>
-    </Column>
-  </Row>
-);
-
-const Nav = () => (
-  <Row modifiers={{ flexWrap: 'wrap', gap: 8, padding: 0 }}>
-    <Button title="Главная" onAction={[{ navigate: ['home', { mode: 'replace' }] }]} />
-    <Button title="Расписание" onAction={[{ navigate: ['schedule', { mode: 'replace' }] }]} />
-    <Button title="Задания" onAction={[{ navigate: ['assignments', { mode: 'replace' }] }]} />
-    <Button title="Деканат" onAction={[{ navigate: ['deanery', { mode: 'replace' }] }]} />
-    <Button title="Пропуск" onAction={[{ navigate: ['pass', { mode: 'replace' }] }]} />
-    <Button title="Настройки" onAction={[{ navigate: ['settings', { mode: 'replace' }] }]} />
-  </Row>
-);
-
-const AppShell = ({ children }: { children: unknown }) => (
-  <Column modifiers={page}>
-    <Header />
-    <Nav />
-    <Divider />
-    {children}
-  </Column>
-);
-
-const StatusLine = () => (
-  <If condition={E<boolean>('len(flow.statusMessage) > 0')}>
-    <Text modifiers={success}>{use(statusMessage)}</Text>
-  </If>
-);
-
-const ErrorLine = () => (
-  <If condition={E<boolean>('len(flow.validationError) > 0')}>
-    <Text modifiers={danger}>{use(validationError)}</Text>
-  </If>
-);
-
-const StudentCard = () => (
-  <Column modifiers={card}>
-    <Text modifiers={sectionTitle}>Студент</Text>
-    <Text>ФИО: {use(studentName)}</Text>
-    <Text>Группа: {use(studentGroup)}</Text>
-    <Text>Вуз: {use(campusName)}</Text>
-    <Text>Режим: {use(appMode)}</Text>
-  </Column>
-);
-
-const ScheduleSummary = () => (
-  <Column modifiers={card}>
-    <Text modifiers={sectionTitle}>Ближайшая пара</Text>
-    <Text>Пара: {use(nextClass)}</Text>
-    <Text>Начало: {use(nextClassTime)}</Text>
-    <Text>Место: {use(classRoom)}</Text>
-    <Text>Посещаемость: {use(attendancePercent)}%</Text>
-    <If condition={E<boolean>('flow.deadlineCount > 0')}>
-      <Text modifiers={warning}>Есть дедлайны на этой неделе: {use(deadlineCount)}</Text>
-    </If>
-  </Column>
-);
-
-const AssignmentsSummary = () => (
-  <Column modifiers={card}>
-    <Text modifiers={sectionTitle}>Ближайшее задание</Text>
-    <Text>{use(assignmentTitle)}</Text>
-    <Text>Дисциплина: {use(assignmentCourse)}</Text>
-    <Text>Срок: {use(assignmentDue)}</Text>
-    <Text>Готовность: {use(assignmentProgress)}%</Text>
-    <If condition={E<boolean>('flow.assignmentUploaded == false || flow.teacherChecked == false')}>
-      <Text modifiers={warning}>Нужно отправить файл и дождаться проверки преподавателя.</Text>
-    </If>
-  </Column>
-);
-
-const RequestSummary = () => (
-  <Column modifiers={card}>
-    <Text modifiers={sectionTitle}>Заявка {use(requestNumber)}</Text>
-    <Text>Тип: {use(requestType)}</Text>
-    <Text>Срочность: {use(requestUrgency)}</Text>
-    <Text>Статус: {use(requestStatus)}</Text>
-    <Text>Комментарий: {use(requestComment)}</Text>
-    <If condition={E<boolean>('flow.dormitoryNeed == true')}>
-      <Text>Нужно приложить данные общежития.</Text>
-    </If>
-  </Column>
-);
-
-const TodaySchedule = () => (
-  <If condition={E<boolean>("flow.selectedDay == 'Сегодня'")}>
-    <Column modifiers={card}>
-      <Text modifiers={sectionTitle}>Сегодня</Text>
-      <Text>09:00 - Математический анализ, аудитория 204</Text>
-      <Text>10:45 - История России, аудитория 118</Text>
-      <Text>13:30 - Английский язык, аудитория 307</Text>
-      <Text>15:10 - Лабораторная работа, компьютерный класс</Text>
-    </Column>
-  </If>
-);
-
-const TomorrowSchedule = () => (
-  <If condition={E<boolean>("flow.selectedDay == 'Завтра'")}>
-    <Column modifiers={card}>
-      <Text modifiers={sectionTitle}>Завтра</Text>
-      <Text>10:00 - Дискретная математика, аудитория 215</Text>
-      <Text>11:45 - Физическая культура, спортзал</Text>
-      <Text>14:20 - Программирование, лаборатория 3</Text>
-      <Text>16:00 - Консультация, аудитория 401</Text>
-    </Column>
-  </If>
-);
-
-const WeekSchedule = () => (
-  <If condition={E<boolean>("flow.selectedDay == 'Неделя'")}>
-    <Column modifiers={card}>
-      <Text modifiers={sectionTitle}>Неделя</Text>
-      <Text>Понедельник - 4 пары, первая в 09:00</Text>
-      <Text>Вторник - 3 пары, первая в 10:00</Text>
-      <Text>Среда - 2 пары и консультация</Text>
-      <Text>Четверг - лабораторный день</Text>
-      <Text>Пятница - семинар и сдача задания</Text>
-    </Column>
-  </If>
-);
-
-const QrBlock = () => (
-  <Column modifiers={{ ...card, alignItems: 'center' }}>
-    <Text modifiers={sectionTitle}>QR-код пропуска</Text>
-    <Text modifiers={qrLine}>███████░█░███████</Text>
-    <Text modifiers={qrLine}>█░░░░░█░█░█░░░░░█</Text>
-    <Text modifiers={qrLine}>█░███░█░░░█░███░█</Text>
-    <Text modifiers={qrLine}>█░███░█░█░█░███░█</Text>
-    <Text modifiers={qrLine}>█░░░░░█░░░█░░░░░█</Text>
-    <Text modifiers={qrLine}>███████░█░███████</Text>
-    <Text>Версия QR: {use(qrVersion)}</Text>
-  </Column>
-);
+export * from './state.js';
 
 export default (
   <Contract meta={meta}>

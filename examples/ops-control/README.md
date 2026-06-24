@@ -1,24 +1,25 @@
-# Кампус
+# Campus
 
-Кампус - русскоязычное mobile-first приложение для студента. Назначение понятно
-с первого экрана: расписание занятий, учебные задания, заявки в деканат и
-цифровой пропуск.
+Campus is a mobile-first student cabinet. It covers timetable access,
+assignments, deanery requests and a digital pass without platform-specific UI
+code in the application scenario.
 
-Приложение реализовано как данные, без платформенного UI-кода внутри сценария:
+The application is implemented as data:
 
-- главная сводка студента, группы, дедлайнов и посещаемости;
-- расписание на сегодня, завтра и неделю;
-- чек-лист учебного задания;
-- заявки в деканат через трехшаговый flow;
-- цифровой пропуск с состоянием доступа и QR-блоком;
-- настройки профиля в `session` scope;
-- условные блоки, toast-уведомления и переходы между маршрутами.
+- home summary for student, group, deadlines and attendance;
+- timetable views for today, tomorrow and the week;
+- assignment checklist;
+- three-step deanery request flow;
+- digital pass with access state and a QR block;
+- profile settings stored in the `session` scope;
+- conditional blocks, toast feedback and route navigation.
 
-Собрать канонический контракт:
+Build the canonical contract:
 
 ```bash
 npm run bdui -- build examples/ops-control/src/app.tsx -o examples/ops-control/contract.json --mode prod
 ```
 
-Сгенерированный `contract.json` копируется в ресурсы нативных приложений, чтобы
-Android, iOS и web-preview рендерили один и тот же продуктовый сценарий.
+The generated `contract.json` is copied into Android, iOS and web-preview
+resources by `npm run build:contracts`, so all three runtimes render the same
+application scenario.

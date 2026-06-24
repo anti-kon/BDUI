@@ -1,6 +1,6 @@
 {
   "name": "taskly",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Операционный пульт — демо-приложение BDUI на базе @bdui/* пакетов.",
   "type": "module",

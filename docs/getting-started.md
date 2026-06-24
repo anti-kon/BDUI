@@ -1,31 +1,32 @@
-# Getting Started with BDUI
+# Быстрый старт BDUI
 
-BDUI is a Backend-Driven UI stack built around three ideas:
+BDUI - стек Backend-Driven UI, построенный вокруг трех идей:
 
-1. Declare the UI in TSX using a strongly-typed DSL.
-2. Compile it into a canonical, schema-validated JSON contract.
-3. Render the same contract on any platform through a small runtime plugin.
+1. Интерфейс описывается в TSX через строго типизированный DSL.
+2. Описание компилируется в канонический JSON-контракт, проверяемый схемой.
+3. Один и тот же контракт отображается на разных платформах через небольшой
+   runtime-плагин.
 
-This guide walks you through setting up the workspace and producing your first
-BDUI-powered screen.
+Этот документ показывает базовую настройку workspace и сборку первого экрана
+на BDUI.
 
-## 1. Prerequisites
+## 1. Требования
 
-- Node.js 24 or newer
-- npm 10 or newer
-- A Unix-like shell (macOS, Linux, WSL) or PowerShell on Windows
+- Node.js 24 или новее
+- npm 10 или новее
+- Unix-подобная оболочка (macOS, Linux, WSL) или PowerShell в Windows
 
-## 2. Install dependencies
+## 2. Установка зависимостей
 
 ```bash
 npm install
 npm run build:full
 ```
 
-`build:full` regenerates JSON schema and DSL glue and then builds every
-package.
+Команда `build:full` пересоздает JSON Schema и DSL-связки, после чего собирает
+все пакеты workspace.
 
-## 3. Author a screen in TSX
+## 3. Описание экрана в TSX
 
 ```tsx
 import { App, Screen, Row, Column, Text, Button } from '@bdui/dsl';
@@ -55,19 +56,19 @@ export default App({
 });
 ```
 
-## 4. Compile it
+## 4. Компиляция
 
 ```bash
 npx bdui build ./path/to/screen.tsx -o ./build/home.json
 ```
 
-The CLI invokes `@bdui/transpiler`, which:
+CLI вызывает `@bdui/transpiler`, который:
 
-- bundles the TSX with esbuild,
-- validates the resulting object against the generated JSON Schema,
-- emits a canonical, deterministic JSON payload.
+- собирает TSX через esbuild;
+- проверяет полученный объект по сгенерированной JSON Schema;
+- записывает канонический и детерминированный JSON.
 
-## 5. Render it in the browser
+## 5. Отображение в браузере
 
 ```ts
 import { mount } from '@bdui/renderer-web';
@@ -77,13 +78,13 @@ const container = document.getElementById('app')!;
 mount(container, contract);
 ```
 
-That's it. State, navigation, flows, toasts and actions are all available
-through the runtime instance returned by `mount`.
+Состояние, навигация, flow, уведомления и действия доступны через runtime,
+возвращаемый функцией `mount`.
 
-## Next steps
+## Следующие шаги
 
-- Read [`architecture.md`](./architecture.md) for how the layers fit together.
-- Study [`spec.md`](./spec.md) for the full on-wire contract shape.
-- Browse [`actions.md`](./actions.md) to see every SAL action at a glance.
-- Run `bdui registry --port 4000` to publish contracts to the BDUI Registry
-  (see [`registry-api.md`](./registry-api.md)).
+- [`architecture.md`](./architecture.md) описывает слои платформы.
+- [`spec.md`](./spec.md) описывает формат контракта.
+- [`actions.md`](./actions.md) содержит справочник SAL-действий.
+- `bdui registry --port 4000` запускает реестр контрактов BDUI; HTTP API
+  описан в [`registry-api.md`](./registry-api.md).

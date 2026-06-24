@@ -1,131 +1,27 @@
 #!/usr/bin/env node
 
+'use strict';
+
 const { copyFileSync, mkdirSync, writeFileSync } = require('node:fs');
 const { dirname, resolve } = require('node:path');
 const { pathToFileURL } = require('node:url');
 
+const {
+  CONTRACT_SOURCES,
+  CAMPUS,
+  RETAIL,
+  CAMPUS_ASSET_COPIES,
+  retailAssetPairs,
+} = require('./lib/contract-artifacts.cjs');
+
 const root = resolve(__dirname, '..');
 
-const contractArtifacts = [
-  ['sandbox/counter/src/entry.tsx', 'sandbox/counter/contract.json'],
-  ['sandbox/state/src/entry.tsx', 'sandbox/state/contract.json'],
-  ['sandbox/flow/src/entry.tsx', 'sandbox/flow/contract.json'],
-  ['sandbox/full-app/src/entry.tsx', 'sandbox/full-app/contract.json'],
-  ['examples/task-manager/src/app.tsx', 'examples/task-manager/public/contract.json'],
-  ['examples/ops-control/src/app.tsx', 'examples/ops-control/contract.json'],
-  ['examples/retail-commerce/src/app.tsx', 'examples/retail-commerce/contract.json'],
-];
-
-const campusSource = 'examples/ops-control/contract.json';
-const campusCopies = [
-  'sandbox/web-demo/contract.json',
-  'native/android/app/src/main/assets/campus.contract.json',
-  'native/ios/OpsControl/Resources/campus.contract.json',
-];
-
-const campusAssetCopies = [
-  ['examples/ops-control/public/campus-mark.svg', 'sandbox/web-demo/campus-mark.svg'],
-];
-
-const retailSource = 'examples/retail-commerce/contract.json';
-const retailCopies = [
-  'sandbox/web-demo/retail.contract.json',
-  'native/android/app/src/main/assets/retail.contract.json',
-  'native/ios/OpsControl/Resources/retail.contract.json',
-];
-
-const retailAssetCopies = [
-  ['examples/retail-commerce/public/market-mark.svg', 'sandbox/web-demo/market-mark.svg'],
-  [
-    'examples/retail-commerce/public/market-mark.svg',
-    'native/android/app/src/main/assets/market-mark.svg',
-  ],
-  [
-    'examples/retail-commerce/public/market-mark.svg',
-    'native/ios/OpsControl/Resources/market-mark.svg',
-  ],
-  ['examples/retail-commerce/public/market-mark.png', 'sandbox/web-demo/market-mark.png'],
-  [
-    'examples/retail-commerce/public/market-mark.png',
-    'native/android/app/src/main/assets/market-mark.png',
-  ],
-  [
-    'examples/retail-commerce/public/market-mark.png',
-    'native/ios/OpsControl/Resources/market-mark.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/espresso-machine.png',
-    'sandbox/web-demo/products/espresso-machine.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/espresso-machine.png',
-    'native/android/app/src/main/assets/products/espresso-machine.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/espresso-machine.png',
-    'native/ios/OpsControl/Resources/products/espresso-machine.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/desk-chair.png',
-    'sandbox/web-demo/products/desk-chair.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/desk-chair.png',
-    'native/android/app/src/main/assets/products/desk-chair.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/desk-chair.png',
-    'native/ios/OpsControl/Resources/products/desk-chair.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/desk-lamp.png',
-    'sandbox/web-demo/products/desk-lamp.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/desk-lamp.png',
-    'native/android/app/src/main/assets/products/desk-lamp.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/desk-lamp.png',
-    'native/ios/OpsControl/Resources/products/desk-lamp.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/robot-vacuum.png',
-    'sandbox/web-demo/products/robot-vacuum.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/robot-vacuum.png',
-    'native/android/app/src/main/assets/products/robot-vacuum.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/robot-vacuum.png',
-    'native/ios/OpsControl/Resources/products/robot-vacuum.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/air-humidifier.png',
-    'sandbox/web-demo/products/air-humidifier.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/air-humidifier.png',
-    'native/android/app/src/main/assets/products/air-humidifier.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/air-humidifier.png',
-    'native/ios/OpsControl/Resources/products/air-humidifier.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/laptop-backpack.png',
-    'sandbox/web-demo/products/laptop-backpack.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/laptop-backpack.png',
-    'native/android/app/src/main/assets/products/laptop-backpack.png',
-  ],
-  [
-    'examples/retail-commerce/public/products/laptop-backpack.png',
-    'native/ios/OpsControl/Resources/products/laptop-backpack.png',
-  ],
-];
+function syncFile(source, copy) {
+  const target = resolve(root, copy);
+  mkdirSync(dirname(target), { recursive: true });
+  copyFileSync(resolve(root, source), target);
+  console.log(`synced ${copy}`);
+}
 
 async function main() {
   const transpilerUrl = pathToFileURL(
@@ -133,7 +29,7 @@ async function main() {
   ).href;
   const { buildContract } = await import(transpilerUrl);
 
-  for (const [entry, outFile] of contractArtifacts) {
+  for (const [entry, outFile] of CONTRACT_SOURCES) {
     const { json } = await buildContract({
       entry: resolve(root, entry),
       mode: 'prod',
@@ -142,29 +38,10 @@ async function main() {
     console.log(`built ${outFile}`);
   }
 
-  for (const copy of campusCopies) {
-    copyFileSync(resolve(root, campusSource), resolve(root, copy));
-    console.log(`synced ${copy}`);
-  }
-
-  for (const copy of retailCopies) {
-    copyFileSync(resolve(root, retailSource), resolve(root, copy));
-    console.log(`synced ${copy}`);
-  }
-
-  for (const [source, copy] of campusAssetCopies) {
-    const target = resolve(root, copy);
-    mkdirSync(dirname(target), { recursive: true });
-    copyFileSync(resolve(root, source), target);
-    console.log(`synced ${copy}`);
-  }
-
-  for (const [source, copy] of retailAssetCopies) {
-    const target = resolve(root, copy);
-    mkdirSync(dirname(target), { recursive: true });
-    copyFileSync(resolve(root, source), target);
-    console.log(`synced ${copy}`);
-  }
+  for (const copy of CAMPUS.copies) syncFile(CAMPUS.source, copy);
+  for (const copy of RETAIL.copies) syncFile(RETAIL.source, copy);
+  for (const [source, copy] of CAMPUS_ASSET_COPIES) syncFile(source, copy);
+  for (const [source, copy] of retailAssetPairs()) syncFile(source, copy);
 }
 
 main().catch((error) => {

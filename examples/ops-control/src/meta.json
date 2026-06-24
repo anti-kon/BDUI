@@ -1,7 +1,7 @@
 {
   "contractId": "campus_mobile",
-  "version": "0.6.0",
-  "compatFrom": "0.6.0",
+  "version": "1.0.0",
+  "compatFrom": "1.0.0",
   "appId": "dev.bdui.campus",
   "features": {
     "nativeRenderers": ["android-compose", "ios-swiftui"],

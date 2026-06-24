@@ -1,6 +1,6 @@
 {
   "name": "@bdui/sdk",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI server integration SDK: programmatic registry client, compile helpers and Fastify/Express adapters",
   "type": "module",
   "main": "./dist/index.js",
@@ -33,11 +33,11 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "0.6.0-alpha.0",
-    "@bdui/registry": "0.6.0-alpha.0",
-    "@bdui/runtime": "0.6.0-alpha.0",
-    "@bdui/schema": "0.6.0-alpha.0",
-    "@bdui/transpiler": "0.6.0-alpha.0"
+    "@bdui/core": "1.0.0",
+    "@bdui/registry": "1.0.0",
+    "@bdui/runtime": "1.0.0",
+    "@bdui/schema": "1.0.0",
+    "@bdui/transpiler": "1.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",

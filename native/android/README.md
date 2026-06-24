@@ -1,30 +1,32 @@
-# Android Compose BDUI Renderer
+# Android Compose BDUI-рендерер
 
-The Android app has two demo flavors:
+Android-приложение содержит два варианта сборки:
 
-- `campusDebug` loads `app/src/main/assets/campus.contract.json` and renders the
-  Russian Campus student mobile cabinet.
-- `retailDebug` loads `app/src/main/assets/retail.contract.json` and renders the
-  Luma Market commerce demo with the same product photos used by the web demo.
+- `campusDebug` загружает `app/src/main/assets/campus.contract.json` и
+  отображает мобильный личный кабинет студента Campus.
+- `retailDebug` загружает `app/src/main/assets/retail.contract.json` и
+  отображает Luma Market с теми же PNG-изображениями товаров, которые
+  используются в web preview.
 
-It is intentionally self-contained: the renderer reads plain JSON, owns runtime
-state and executes a practical subset of SAL actions.
+Рендерер является автономным: он читает JSON-контракт, хранит runtime-состояние
+и выполняет практическое подмножество SAL-действий.
 
-The renderer consumes the shared `modifiers` object for portable spacing,
-padding, wrapping rows, colors, rounded panels, text weights and button styling.
-PNG images referenced by the contract are loaded from bundled assets; SVG marks
-fall back to compact native placeholders.
+Рендерер использует общий объект `modifiers` для переносимых отступов,
+расстояний, переноса строк, цветов, скругленных панелей, начертаний текста и
+оформления кнопок. PNG-изображения из контракта загружаются из assets
+приложения; для SVG-марок используется компактное нативное fallback-отображение.
 
-Open `native/android` in Android Studio and choose the build variant:
+Для запуска необходимо открыть `native/android` в Android Studio как
+Android-проект и выбрать вариант сборки:
 
 ```text
 Build Variants -> app -> retailDebug
 ```
 
-Run the `app` configuration to launch Luma Market. Use `campusDebug` when you
-need the Campus app.
+Конфигурация `app` запускает выбранный вариант приложения. Для Campus
+используется вариант `campusDebug`, для Luma Market - `retailDebug`.
 
-Refresh the shared contracts after editing the TSX apps:
+После изменения TSX-приложений необходимо обновить общие контракты:
 
 ```powershell
 npm.cmd run build:contracts

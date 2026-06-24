@@ -1,10 +1,10 @@
-# Contract Specification
+# Спецификация контракта
 
-This document describes the on-the-wire shape of a BDUI contract. The
-authoritative schema lives in `packages/schema/src/generated/schema.generated.ts`
-and is derived from the TypeScript types in `@bdui/core`.
+Документ описывает wire-формат BDUI-контракта. Авторитетная схема находится в
+`packages/schema/src/generated/schema.generated.ts` и формируется из
+TypeScript-типов пакета `@bdui/core`.
 
-## Top-Level Shape
+## Верхний уровень
 
 ```json
 {
@@ -31,14 +31,14 @@ and is derived from the TypeScript types in `@bdui/core`.
 }
 ```
 
-`additionalProperties: false` is enforced on structured contract objects such
-as `meta` and `navigation`. Component nodes remain extensible through manifest
-props and the open-ended `modifiers` bag.
+Для структурированных объектов контракта, например `meta` и `navigation`,
+действует `additionalProperties: false`. Узлы компонентов остаются расширяемыми
+через props манифеста и открытый объект `modifiers`.
 
-## Nodes
+## Узлы
 
-Every node carries a `type`, optional `modifiers`, optional `children`, and
-component-specific props.
+Каждый узел содержит `type`, необязательные `modifiers`, необязательные
+`children` и свойства конкретного компонента.
 
 ```json
 {
@@ -49,13 +49,13 @@ component-specific props.
 }
 ```
 
-The generator emits one `Node_<Component>` definition per manifest and unites
-them via `oneOf` on the root `Node` type.
+Генератор создает определение `Node_<Component>` для каждого манифеста и
+объединяет их через `oneOf` в корневом типе `Node`.
 
-## Modifiers
+## Модификаторы
 
-`modifiers` is the cross-platform design surface. Renderers should honour the
-platform-neutral subset where possible:
+`modifiers` - кросс-платформенная поверхность дизайна. Рендереры должны
+поддерживать платформенно-нейтральное подмножество, когда это возможно:
 
 - layout: `padding`, `margin`, `gap`, `width`, `minHeight`, `align`,
   `justify`, `flexWrap`;
@@ -65,39 +65,38 @@ platform-neutral subset where possible:
   `textAlign`;
 - semantics: `role`, `variant`, `testId`, `accessibilityLabel`.
 
-Web renderers may additionally pass through camelCase CSS keys and nested
-`modifiers.style`. Native renderers may ignore web-only keys while preserving
-the same contract shape.
+Веб-рендереры могут дополнительно пропускать camelCase CSS-ключи и вложенный
+`modifiers.style`. Нативные рендереры могут игнорировать web-only ключи,
+сохраняя ту же форму контракта.
 
-## Routes
+## Маршруты
 
-Routes come in two flavours:
+Поддерживаются два вида маршрутов:
 
-- **Screen route** - static `node` tree.
-- **Flow route** - `type: "flow"`, `startStep`, `steps[]` with guarded
+- **Screen route** - статическое дерево `node`.
+- **Flow route** - `type: "flow"`, `startStep`, `steps[]` и guarded
   `transitions`.
 
-## Expressions
+## Выражения
 
-Expressions are serialised as `"{{ ... }}"` strings. Values typed as
-`Expression<T>` accept either a literal `T` or such a string. The schema
-validates expression strings against a conservative pattern; actual grammar is
-enforced at parse time by `@bdui/expr`.
+Выражения сериализуются как строки `"{{ ... }}"`. Значения типа
+`Expression<T>` принимают литерал `T` или такую строку. Схема проверяет строки
+выражений по консервативному шаблону; фактическая грамматика применяется во
+время разбора пакетом `@bdui/expr`.
 
-## Actions
+## Действия
 
-Actions are strongly typed via the `Action` union (see
-[`actions.md`](./actions.md)). Event props like `onAction`, `onEnter` and
-`onSubmit` always carry an array of actions - never a string of arbitrary
-JavaScript.
+Действия строго типизированы через union `Action`; см. [`actions.md`](./actions.md).
+Событийные props вроде `onAction`, `onEnter` и `onSubmit` всегда содержат
+массив действий, а не строку произвольного JavaScript.
 
-## Canonicalisation
+## Канонизация
 
-Contracts produced by `@bdui/transpiler` are canonicalised:
+Контракты, созданные `@bdui/transpiler`, канонизируются:
 
-- object keys are sorted alphabetically;
-- `undefined` values are stripped;
-- arrays keep authoring order;
-- no trailing whitespace or BOM.
+- ключи объектов сортируются по алфавиту;
+- значения `undefined` удаляются;
+- порядок массивов сохраняется как у автора;
+- завершающие пробелы и BOM отсутствуют.
 
-This guarantees byte-stable hashes and deterministic ETags in the registry.
+Это гарантирует стабильные хеши и детерминированные ETag в реестре.

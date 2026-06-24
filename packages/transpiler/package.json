@@ -1,6 +1,6 @@
 {
   "name": "@bdui/transpiler",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI TSX → JSON transpiler (esbuild-based) with sourcemap-aware diagnostics",
   "type": "module",
   "exports": {
@@ -17,8 +17,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "0.6.0-alpha.0",
-    "@bdui/schema": "0.6.0-alpha.0",
+    "@bdui/core": "1.0.0",
+    "@bdui/schema": "1.0.0",
     "esbuild": "^0.28.1"
   },
   "devDependencies": {

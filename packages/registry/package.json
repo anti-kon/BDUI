@@ -1,6 +1,6 @@
 {
   "name": "@bdui/registry",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI contract registry (HTTP API, pluggable storage, SemVer-aware resolve)",
   "type": "module",
   "main": "./dist/index.js",
@@ -39,9 +39,9 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "0.6.0-alpha.0",
-    "@bdui/runtime": "0.6.0-alpha.0",
-    "@bdui/schema": "0.6.0-alpha.0",
+    "@bdui/core": "1.0.0",
+    "@bdui/runtime": "1.0.0",
+    "@bdui/schema": "1.0.0",
     "@fastify/cors": "^10.0.2",
     "@fastify/etag": "^6.0.3",
     "fastify": "^5.2.1",

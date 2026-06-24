@@ -18,6 +18,7 @@ import {
 import { evaluate } from '@bdui/runtime';
 
 import { cssForModifiers, formatValue, renderUnsupported } from './dom-utils.js';
+import { captureFocus, type FocusSnapshot, restoreFocus } from './focus.js';
 import { mountModalHost } from './modal-host.js';
 import { ensureDefaultStyles } from './styles.js';
 import { mountToastHost } from './toast-host.js';
@@ -34,14 +35,6 @@ interface WebPluginState {
   rendererContext: WebRendererContext | null;
   disposers: Array<() => void>;
 }
-
-interface FocusSnapshot {
-  readonly index: number;
-  readonly selectionStart?: number | null;
-  readonly selectionEnd?: number | null;
-}
-
-const FOCUSABLE_SELECTOR = 'input, textarea, select, button, [tabindex]:not([tabindex="-1"])';
 
 function getCurrentRoute(ctx: RendererPluginContext): AppRoute | undefined {
   return ctx.navigation.resolve(ctx.navigation.currentRoute);
@@ -98,58 +91,6 @@ export function createWebPlugin(options: WebPluginOptions = {}): RendererPlugin<
     return children.map((child) => renderNode(child));
   }
 
-  function focusableElements(): HTMLElement[] {
-    return Array.from(internal.container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-      (element) => !element.hasAttribute('disabled'),
-    );
-  }
-
-  function captureFocus(): FocusSnapshot | null {
-    const active = internal.doc.activeElement;
-    if (!(active instanceof internal.doc.defaultView!.HTMLElement)) return null;
-    if (!internal.container.contains(active)) return null;
-    const elements = focusableElements();
-    const index = elements.indexOf(active);
-    if (index < 0) return null;
-
-    const control = active as HTMLInputElement | HTMLTextAreaElement;
-    let selectionStart: number | null | undefined;
-    let selectionEnd: number | null | undefined;
-    try {
-      selectionStart = control.selectionStart;
-      selectionEnd = control.selectionEnd;
-    } catch {
-      selectionStart = undefined;
-      selectionEnd = undefined;
-    }
-    return { index, selectionStart, selectionEnd };
-  }
-
-  function restoreFocus(snapshot: FocusSnapshot | null): void {
-    if (!snapshot) return;
-    const target = focusableElements()[snapshot.index];
-    if (!target) return;
-    try {
-      target.focus({ preventScroll: true });
-    } catch {
-      target.focus();
-    }
-    if (
-      snapshot.selectionStart != null &&
-      snapshot.selectionEnd != null &&
-      'setSelectionRange' in target
-    ) {
-      try {
-        (target as HTMLInputElement | HTMLTextAreaElement).setSelectionRange(
-          snapshot.selectionStart,
-          snapshot.selectionEnd,
-        );
-      } catch {
-        /* ignore controls that do not support text selections */
-      }
-    }
-  }
-
   function createRendererContext(ctx: RendererPluginContext): WebRendererContext {
     return {
       document: internal.doc,
@@ -173,7 +114,9 @@ export function createWebPlugin(options: WebPluginOptions = {}): RendererPlugin<
 
   function renderRoute(options: { preserveFocus?: boolean } = {}): void {
     if (!internal.context) return;
-    const focus = options.preserveFocus ? captureFocus() : null;
+    const focus: FocusSnapshot | null = options.preserveFocus
+      ? captureFocus(internal.doc, internal.container)
+      : null;
     while (internal.container.firstChild) {
       internal.container.removeChild(internal.container.firstChild);
     }
@@ -189,7 +132,7 @@ export function createWebPlugin(options: WebPluginOptions = {}): RendererPlugin<
     } else {
       renderScreenRoute(route as RouteScreen);
     }
-    restoreFocus(focus);
+    restoreFocus(internal.container, focus);
   }
 
   function renderScreenRoute(route: RouteScreen): void {

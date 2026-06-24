@@ -1,27 +1,28 @@
-# Native BDUI renderers
+# Нативные BDUI-рендереры
 
-This directory contains native renderer prototypes that consume the same
-canonical BDUI JSON contract:
+Каталог содержит нативные рендереры, которые используют единый канонический
+JSON-контракт BDUI.
 
-- `android/` - Jetpack Compose renderer with Campus and Luma Market flavors.
-- `ios/` - SwiftUI renderer and Campus app shell.
+- `android/` - Jetpack Compose приложение с вариантами сборки Campus и Luma
+  Market.
+- `ios/` - SwiftUI приложение и Xcode-проект для Campus.
 
-Both implementations target the practical minimum needed for a real mobile
-BDUI application:
+Обе реализации покрывают набор возможностей, необходимый для мобильных
+BDUI-приложений:
 
-- route selection from `navigation.routes`;
-- `flow`, `session` and `local` state scopes;
-- interpolation of `{{scope.path}}` expressions;
-- conditional rendering through `If`;
-- portable `Image` fallback rendering for contract-provided marks and bundled
-  PNG product assets in the Android renderer;
-- two-way bindings for `Input`, `Checkbox` and `Select`;
-- portable `modifiers` for spacing, padding, wrapping rows, text roles, colors
-  and button variants;
-- core SAL actions: `navigate`, `back`, `set`, `reset`, `update.inc`,
+- выбор маршрута из `navigation.routes`;
+- области состояния `flow`, `session` и `local`;
+- интерполяция выражений `{{scope.path}}`;
+- условное отображение через `If`;
+- отображение `Image` для контрактных изображений и локальных PNG-ресурсов;
+- двусторонние привязки для `Input`, `Checkbox` и `Select`;
+- переносимые `modifiers` для отступов, расстояний, переноса строк, цветов,
+  текстовых параметров и вариантов кнопок;
+- основные SAL-действия: `navigate`, `back`, `set`, `reset`, `update.inc`,
   `update.toggle`, `batch`, `when`, `toast`, `flow.start`, `flow.goTo`,
-  `flow.complete` and `flow.abort`.
+  `flow.complete` и `flow.abort`.
 
-The shared Campus and Luma Market contracts are generated from
-`examples/ops-control/src/app.tsx` and `examples/retail-commerce/src/app.tsx`,
-then copied into native app resource folders by `npm.cmd run build:contracts`.
+Контракты Campus и Luma Market формируются из
+`examples/ops-control/src/app.tsx` и `examples/retail-commerce/src/app.tsx`.
+Команда `npm.cmd run build:contracts` обновляет JSON-контракты и копирует их в
+ресурсные каталоги нативных приложений.

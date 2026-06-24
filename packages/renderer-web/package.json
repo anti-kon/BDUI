@@ -1,6 +1,6 @@
 {
   "name": "@bdui/renderer-web",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI DOM renderer plugin on top of @bdui/runtime",
   "type": "module",
   "main": "./dist/index.js",
@@ -17,10 +17,10 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "0.6.0-alpha.0",
-    "@bdui/defs": "0.6.0-alpha.0",
-    "@bdui/expr": "0.6.0-alpha.0",
-    "@bdui/runtime": "0.6.0-alpha.0"
+    "@bdui/core": "1.0.0",
+    "@bdui/defs": "1.0.0",
+    "@bdui/expr": "1.0.0",
+    "@bdui/runtime": "1.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",

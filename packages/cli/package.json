@@ -1,6 +1,6 @@
 {
   "name": "@bdui/cli",
-  "version": "0.6.0-alpha.0",
+  "version": "1.0.0",
   "description": "BDUI command-line interface",
   "type": "module",
   "bin": {
@@ -15,11 +15,11 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@bdui/core": "0.6.0-alpha.0",
-    "@bdui/dsl": "0.6.0-alpha.0",
-    "@bdui/registry": "0.6.0-alpha.0",
-    "@bdui/schema": "0.6.0-alpha.0",
-    "@bdui/transpiler": "0.6.0-alpha.0",
+    "@bdui/core": "1.0.0",
+    "@bdui/dsl": "1.0.0",
+    "@bdui/registry": "1.0.0",
+    "@bdui/schema": "1.0.0",
+    "@bdui/transpiler": "1.0.0",
     "commander": "^12.1.0"
   },
   "devDependencies": {

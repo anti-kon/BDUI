@@ -7,24 +7,35 @@ and adheres to [SemVer](https://semver.org/).
 
 ## Unreleased
 
+No unreleased changes.
+
+## [1.0.0] - 2026-06-23
+
 ### Added
 
 - Runtime-backed `fetch` and `validate` SAL actions with data-source resolution,
   explicit `saveTo` support, validator hooks, and unit coverage.
 - Optional bearer authentication and explicit CORS configuration for the
   registry server and CLI.
-- Native Android Compose and iOS SwiftUI renderer prototypes backed by the
-  shared `examples/ops-control` contract.
+- Native Android Compose and iOS SwiftUI renderers backed by the shared Campus
+  and Luma Market contracts.
+- `native/ios/Campus.xcodeproj` with a shared `Campus` scheme.
 - Contract artifact and vendored web-demo verification scripts for CI.
 - Coverage and dependency-audit gates for the main workspace and standalone
   Taskly example.
 
 ### Changed
 
-- Generated schema/DSL TypeScript files are now formatted through local
-  Prettier during generation.
+- Generated schema/DSL TypeScript files are formatted through local Prettier
+  during generation.
 - Dependency versions and lockfiles were refreshed to clear moderate-or-higher
   audit findings.
+- Monorepo packages, standalone Taskly and native app versions are aligned at
+  `1.0.0`.
+
+### Removed
+
+- Accidental zero-byte command artifacts from the repository root.
 
 ## [0.6.0-alpha.0] - 2026-04-24
 

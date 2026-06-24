@@ -1,6 +1,7 @@
 node_modules
 dist
 coverage
+outputs/
 *.log
 .DS_Store
 sandbox/**/.bdui-build.*
@@ -8,4 +9,10 @@ native/android/.gradle/
 native/android/.idea/
 native/android/**/build/
 native/android/local.properties
+native/ios/DerivedData/
+native/ios/**/*.xcuserdata/
+native/ios/**/*.xcuserstate
+reports/~$*
+reports/*_render*/
+reports/vkr_render*/
 .tmp-screens/
